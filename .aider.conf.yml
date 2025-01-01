@@ -115,7 +115,7 @@ upgrade: false
 
 ## Specify multiple values like this:
 file:
-  - .prompts/tasks.md
+  - tasks.md
 #  - yyy
 #  - zzz
 
@@ -130,7 +130,7 @@ read:
   - .prompts/engineer-tasks.md
 
 ## Always say yes to every confirmation
-yes-always: false
+yes-always: true
 
 ## Enable verbose output
 #verbose: false
