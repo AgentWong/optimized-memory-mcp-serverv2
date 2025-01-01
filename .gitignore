@@ -25,3 +25,12 @@ coverage.xml
 # Environment variables
 .env
 .env.local
+
+# Project specific
+*.db
+*.sqlite3
+*.log
+
+.aider*
+!.aider.conf.yml
+!.aiderignore
