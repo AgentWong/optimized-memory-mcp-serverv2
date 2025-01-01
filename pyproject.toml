@@ -1,0 +1,18 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "your-mcp-server"
+version = "0.1.0"
+description = "A custom MCP server implementation"
+requires-python = ">=3.13.1"
+dependencies = [
+    "mcp-sdk>=1.0.0"
+]
+
+[project.scripts]
+your-mcp-server = "src.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]

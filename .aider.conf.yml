@@ -1,0 +1,149 @@
+##########################################################
+# Sample .aider.conf.yml
+# This file lists *all* the valid configuration entries.
+# Place in your home dir, or at the root of your git repo.
+##########################################################
+
+# Note: You can only put OpenAI and Anthropic API keys in the yaml
+# config file. Keys for all APIs can be stored in a .env file
+# https://aider.chat/docs/config/dotenv.html
+
+#############
+# Main model:
+
+## Use claude-3-5-sonnet-20241022 model for the main chat
+sonnet: true
+
+########################
+# API Keys and settings:
+
+## Specify what edit format the LLM should use (default depends on model)
+#edit-format: xxx
+
+## Use architect edit format for the main chat
+architect: true
+
+## Specify the model to use for commit messages and chat history summarization (default depends on --model)
+#weak-model: xxx
+
+## Specify the model to use for editor tasks (default depends on --model)
+#editor-model: xxx
+
+#################
+# Cache settings:
+
+## Enable caching of prompts (default: False)
+cache-prompts: true
+
+## Number of times to ping at 5min intervals to keep prompt cache warm (default: 0)
+cache-keepalive-pings: 1
+
+###################
+# Repomap settings:
+
+## Suggested number of tokens to use for repo map, use 0 to disable (default: 1024)
+map-tokens: 2048
+
+## Control how often the repo map is refreshed. Options: auto, always, files, manual (default: auto)
+#map-refresh: auto
+
+## Multiplier for map tokens when no files are specified (default: 2)
+#map-multiplier-no-files: true
+
+##################
+# Output settings:
+
+## Enable/disable streaming responses (default: True)
+stream: false
+
+###############
+# Git settings:
+
+## Enable/disable auto commit of LLM changes (default: True)
+auto-commits: false
+
+## Enable/disable watching files for ai coding comments (default: False)
+#watch-files: false
+
+########################
+# Fixing and committing:
+
+## Lint and fix provided files, or dirty files if none provided
+#lint: true
+
+## Specify lint commands to run for different languages, eg: "python: flake8 --select=..." (can be used multiple times)
+lint-cmd:
+  - "python: flake8 ."
+## Specify multiple values like this:
+#lint-cmd:
+#  - xxx
+#  - yyy
+#  - zzz
+
+## Enable/disable automatic linting after changes (default: True)
+auto-lint: false
+
+## Specify command to run tests
+test-cmd: .venv/bin/python -m pytest -v
+
+## Enable/disable automatic testing after changes (default: False)
+auto-test: false
+
+## Run tests, fix problems found and then exit
+test: false
+
+############
+# Analytics:
+
+## Permanently disable analytics
+analytics-disable: true
+
+############
+# Upgrading:
+
+## Check for new aider versions on launch
+check-update: true
+
+## Upgrade aider to the latest version from PyPI
+upgrade: false
+
+#################
+# Other settings:
+
+## specify a file to edit (can be used multiple times)
+#file: xxx
+
+## Specify multiple values like this:
+file:
+  - .prompts/tasks.md
+#  - yyy
+#  - zzz
+
+## specify a read-only file (can be used multiple times)
+#read: xxx
+## Specify multiple values like this:
+read:
+  - .prompts/code-generation-guidelines.md
+  - .prompts/file-size-guidelines.md
+  - .prompts/performance-optimization-template.md
+
+## Always say yes to every confirmation
+yes-always: true
+
+## Enable verbose output
+#verbose: false
+
+## Load and execute /commands from a file on launch
+#load: xxx
+
+## Enable/disable suggesting shell commands (default: True)
+suggest-shell-commands: false
+
+## Enable/disable multi-line input mode with Meta-Enter to submit (default: False)
+#multiline: false
+
+## Enable/disable detection and offering to add URLs to chat (default: True)
+detect-urls: false
+
+## Specify which editor to use for the /editor command
+#editor: vim
