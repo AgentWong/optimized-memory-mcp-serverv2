@@ -115,7 +115,7 @@ upgrade: false
 
 ## Specify multiple values like this:
 file:
-  - .prompts/tasks.md
+  - .prompts/enhanced-mcp-server-tasks.md
 #  - yyy
 #  - zzz
 
@@ -125,10 +125,11 @@ file:
 read:
   - .prompts/code-generation-guidelines.md
   - .prompts/file-size-guidelines.md
-  - .prompts/performance-optimization-template.md
+  - .prompts/mcp-server-conventions.md
+  - .prompts/repo-exploration-template.md
 
 ## Always say yes to every confirmation
-yes-always: true
+yes-always: false
 
 ## Enable verbose output
 #verbose: false
