@@ -67,7 +67,7 @@ async def create_observation(
     """Create a new observation for an entity."""
     try:
         # Verify entity exists
-        entity = db.query(Entity).filter(Entity.id == entity_id).first()
+        entity = db.query(Entity).filter(Entity.id == observation.entity_id).first()
         if not entity:
             raise HTTPException(
                 status_code=404,
@@ -94,7 +94,7 @@ async def create_observation(
     except Exception as e:
         raise DatabaseError("Failed to create observation due to database error")
 
-@router.get("/{observation_id}")
+@router.get("/{observation_id}", dependencies=[Depends(default_limiter)])
 async def get_observation(
     observation_id: int,
     db: Session = Depends(get_db)
@@ -117,7 +117,7 @@ async def get_observation(
         "updated_at": observation.updated_at
     }
 
-@router.get("/")
+@router.get("/", dependencies=[Depends(default_limiter)])
 async def list_observations(
     entity_id: Optional[int] = None,
     observation_type: Optional[str] = None,
@@ -152,7 +152,7 @@ async def list_observations(
         for o in observations
     ]
 
-@router.put("/{observation_id}")
+@router.put("/{observation_id}", dependencies=[Depends(default_limiter)])
 async def update_observation(
     observation_id: int,
     observation_update: ObservationUpdate,
@@ -186,7 +186,7 @@ async def update_observation(
     except Exception as e:
         raise DatabaseError("Failed to update observation due to database error")
 
-@router.delete("/{observation_id}")
+@router.delete("/{observation_id}", dependencies=[Depends(default_limiter)])
 async def delete_observation(
     observation_id: int,
     db: Session = Depends(get_db)

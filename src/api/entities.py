@@ -76,7 +76,7 @@ async def create_entity(
     except Exception as e:
         raise DatabaseError("Failed to create entity due to database error")
 
-@router.get("/{entity_id}")
+@router.get("/{entity_id}", dependencies=[Depends(default_limiter)])
 async def get_entity(entity_id: int, db: Session = Depends(get_db)) -> dict:
     """Get an entity by ID."""
     entity = db.query(Entity).filter(Entity.id == entity_id).first()
@@ -89,7 +89,7 @@ async def get_entity(entity_id: int, db: Session = Depends(get_db)) -> dict:
         "description": entity.description
     }
 
-@router.get("/")
+@router.get("/", dependencies=[Depends(default_limiter)])
 async def list_entities(
     entity_type: Optional[str] = None,
     db: Session = Depends(get_db)
@@ -115,7 +115,7 @@ async def list_entities(
         for e in entities
     ]
 
-@router.put("/{entity_id}")
+@router.put("/{entity_id}", dependencies=[Depends(default_limiter)])
 async def update_entity(
     entity_id: int,
     entity_update: EntityUpdate,
@@ -143,7 +143,7 @@ async def update_entity(
     except Exception as e:
         raise DatabaseError("Failed to update entity due to database error")
 
-@router.delete("/{entity_id}")
+@router.delete("/{entity_id}", dependencies=[Depends(default_limiter)])
 async def delete_entity(entity_id: int, db: Session = Depends(get_db)) -> dict:
     """Delete an entity."""
     entity = db.query(Entity).filter(Entity.id == entity_id).first()

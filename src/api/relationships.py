@@ -105,7 +105,7 @@ async def create_relationship(
     except Exception as e:
         raise DatabaseError("Failed to create relationship due to database error")
 
-@router.get("/{relationship_id}")
+@router.get("/{relationship_id}", dependencies=[Depends(default_limiter)])
 async def get_relationship(
     relationship_id: int,
     db: Session = Depends(get_db)
@@ -126,7 +126,7 @@ async def get_relationship(
         "description": relationship.description
     }
 
-@router.get("/")
+@router.get("/", dependencies=[Depends(default_limiter)])
 async def list_relationships(
     source_id: Optional[int] = None,
     target_id: Optional[int] = None,
@@ -163,7 +163,7 @@ async def list_relationships(
         for r in relationships
     ]
 
-@router.put("/{relationship_id}")
+@router.put("/{relationship_id}", dependencies=[Depends(default_limiter)])
 async def update_relationship(
     relationship_id: int,
     relationship_update: RelationshipUpdate,
@@ -195,7 +195,7 @@ async def update_relationship(
     except Exception as e:
         raise DatabaseError("Failed to update relationship due to database error")
 
-@router.delete("/{relationship_id}")
+@router.delete("/{relationship_id}", dependencies=[Depends(default_limiter)])
 async def delete_relationship(
     relationship_id: int,
     db: Session = Depends(get_db)
