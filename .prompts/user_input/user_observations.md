@@ -3,5 +3,3 @@
 - "mcp_python_sdk_readme.md" is the original README.md document for the MCP SDK.  Use it as the source of truth for how to utilize the "mcp" Python package.
 - I believe at a bare minimum, the Core Concepts "Tools" and "Resources" MUST be used in order to comply with the MCP SDK spec.  Other core concepts may be utilized where applicable.
 - API functions and use of "fastapi" should be removed from the code because the core "Tools" and "Resources" cover the same function.
-- "enhanced-mcp-server-tasks-old.md" is the original tasks that created all the code from an earlier AI task.
-- "enhanced-mcp-server-tasksv2.md" is the CURRENT task list that you should review the code for in order to generate "tasks.md".
