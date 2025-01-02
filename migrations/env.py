@@ -1,5 +1,17 @@
 """
 Alembic migration environment configuration.
+
+This module configures the Alembic migration environment for the MCP Server database.
+It handles both online and offline migration modes, loads configuration from alembic.ini,
+and sets up the SQLAlchemy connection and metadata.
+
+Environment Variables:
+    DATABASE_URL: Optional database connection URL that overrides alembic.ini settings
+
+Dependencies:
+    - SQLAlchemy for database operations
+    - Alembic for migration management
+    - All models from src.db.models
 """
 import os
 from logging.config import fileConfig

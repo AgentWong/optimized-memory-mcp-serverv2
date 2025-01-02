@@ -1,4 +1,16 @@
-"""Initial schema
+"""Initial schema for MCP Server database.
+
+This migration creates the core database schema including tables for:
+- Entities: Base objects in the system
+- Relationships: Connections between entities
+- Observations: Data points about entities
+- Providers: Infrastructure providers
+- Resource Arguments: Provider resource parameters
+- Ansible Collections: Ansible Galaxy collections
+- Module Parameters: Ansible module parameters
+
+Each table includes created_at/updated_at timestamps and appropriate indexes
+for optimal query performance.
 
 Revision ID: initial_schema
 Create Date: 2025-01-01
