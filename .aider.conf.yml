@@ -21,7 +21,7 @@ sonnet: true
 #edit-format: xxx
 
 ## Use architect edit format for the main chat
-architect: false
+architect: true
 
 ## Specify the model to use for commit messages and chat history summarization (default depends on --model)
 #weak-model: xxx
@@ -115,7 +115,7 @@ upgrade: false
 
 ## Specify multiple values like this:
 file:
-  - tasks.md
+  - .prompts/tasks/architect-tasks.md
 #  - yyy
 #  - zzz
 
@@ -123,11 +123,12 @@ file:
 #read: xxx
 ## Specify multiple values like this:
 read:
-  - .prompts/code-generation-guidelines.md
-  - .prompts/file-size-guidelines.md
-  - .prompts/mcp-server-conventions.md
-  - .prompts/repo-exploration-template.md
-  - .prompts/engineer-tasks.md
+  - .prompts/docs
+  - .prompts/done/enhanced-mcp-server-tasks-old.md
+  - .prompts/rules
+  - .prompts/user_input
+  - .prompts/tasks/architect-tasks.md
+  - .prompts/tasks/enhanced-mcp-server-tasksv2.md
 
 ## Always say yes to every confirmation
 yes-always: true
