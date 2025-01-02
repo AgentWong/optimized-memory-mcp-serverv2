@@ -5,7 +5,7 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 
-from ..db.connection import get_db
+from ..db.connection import get_db, cache_query
 from ..db.models.observations import Observation
 from ..db.models.entities import Entity
 from ..utils.errors import DatabaseError
@@ -80,14 +80,21 @@ async def list_observations(
     db: Session = Depends(get_db)
 ) -> List[dict]:
     """List observations, optionally filtered by entity and type."""
-    query = db.query(Observation)
-    
-    if entity_id:
-        query = query.filter(Observation.entity_id == entity_id)
-    if observation_type:
-        query = query.filter(Observation.observation_type == observation_type)
+    @cache_query(ttl_seconds=300)
+    def get_observations(db_session, entity_id, observation_type):
+        query = db_session.query(Observation).select_from(Observation)
         
-    observations = query.all()
+        if entity_id:
+            query = query.filter(Observation.entity_id == entity_id)\
+                        .with_hint(Observation, 'USE INDEX (ix_observations_entity_id)')
+        if observation_type:
+            query = query.filter(Observation.observation_type == observation_type)\
+                        .with_hint(Observation, 'USE INDEX (ix_observations_type)')
+            
+        # Use yield_per for memory efficient iteration of large result sets
+        return [o for o in query.yield_per(100)]
+    
+    observations = get_observations(db, entity_id, observation_type)
     return [
         {
             "id": o.id,

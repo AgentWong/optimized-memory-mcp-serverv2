@@ -5,7 +5,7 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 
-from ..db.connection import get_db
+from ..db.connection import get_db, cache_query
 from ..db.models.relationships import Relationship
 from ..db.models.entities import Entity
 from ..utils.errors import DatabaseError
@@ -81,16 +81,24 @@ async def list_relationships(
     db: Session = Depends(get_db)
 ) -> List[dict]:
     """List relationships, optionally filtered."""
-    query = db.query(Relationship)
-    
-    if source_id:
-        query = query.filter(Relationship.source_id == source_id)
-    if target_id:
-        query = query.filter(Relationship.target_id == target_id)
-    if relationship_type:
-        query = query.filter(Relationship.relationship_type == relationship_type)
+    @cache_query(ttl_seconds=300)
+    def get_relationships(db_session, source_id, target_id, relationship_type):
+        query = db_session.query(Relationship).select_from(Relationship)
         
-    relationships = query.all()
+        if source_id:
+            query = query.filter(Relationship.source_id == source_id)\
+                        .with_hint(Relationship, 'USE INDEX (ix_relationships_source)')
+        if target_id:
+            query = query.filter(Relationship.target_id == target_id)\
+                        .with_hint(Relationship, 'USE INDEX (ix_relationships_target)')
+        if relationship_type:
+            query = query.filter(Relationship.relationship_type == relationship_type)\
+                        .with_hint(Relationship, 'USE INDEX (ix_relationships_type)')
+            
+        # Use yield_per for memory efficient iteration of large result sets  
+        return [r for r in query.yield_per(100)]
+    
+    relationships = get_relationships(db, source_id, target_id, relationship_type)
     return [
         {
             "id": r.id,

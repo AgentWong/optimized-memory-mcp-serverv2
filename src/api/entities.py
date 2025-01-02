@@ -5,7 +5,7 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 
-from ..db.connection import get_db
+from ..db.connection import get_db, cache_query
 from ..db.models.entities import Entity
 from ..utils.errors import DatabaseError
 
@@ -51,10 +51,16 @@ async def list_entities(
     db: Session = Depends(get_db)
 ) -> List[dict]:
     """List all entities, optionally filtered by type."""
-    query = db.query(Entity)
-    if entity_type:
-        query = query.filter(Entity.entity_type == entity_type)
-    entities = query.all()
+    @cache_query(ttl_seconds=300)
+    def get_entities(db_session, entity_type):
+        query = db_session.query(Entity).select_from(Entity)
+        if entity_type:
+            query = query.filter(Entity.entity_type == entity_type)\
+                        .with_hint(Entity, 'USE INDEX (ix_entities_type)')
+        # Use yield_per for memory efficient iteration of large result sets
+        return [e for e in query.yield_per(100)]
+    
+    entities = get_entities(db, entity_type)
     return [
         {
             "id": e.id,
