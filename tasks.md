@@ -43,10 +43,10 @@
 - [x] Implement context retrieval endpoints (src/api/context.py)
 
 ### IaC-Specific API [⬜]
-- [ ] Create provider resource endpoints (src/api/providers.py)
-- [ ] Create ansible module endpoints (src/api/ansible.py)
-- [ ] Implement version tracking endpoints (src/api/versions.py)
-- [ ] Create schema validation endpoints (src/api/validation.py)
+- [x] Create provider resource endpoints (src/api/providers.py)
+- [x] Create ansible module endpoints (src/api/ansible.py)
+- [x] Implement version tracking endpoints (src/api/versions.py)
+- [x] Create schema validation endpoints (src/api/validation.py)
 
 ### Query API [⬜]
 - [ ] Implement search functionality (src/api/search.py)
