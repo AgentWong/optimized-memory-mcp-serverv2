@@ -37,10 +37,10 @@
 ## Phase 3: API Implementation [Priority: Medium]
 
 ### Core Memory API [⬜]
-- [ ] Create entity management endpoints (src/api/entities.py)
-- [ ] Create relationship management endpoints (src/api/relationships.py)
-- [ ] Create observation management endpoints (src/api/observations.py)
-- [ ] Implement context retrieval endpoints (src/api/context.py)
+- [x] Create entity management endpoints (src/api/entities.py)
+- [x] Create relationship management endpoints (src/api/relationships.py)
+- [x] Create observation management endpoints (src/api/observations.py)
+- [x] Implement context retrieval endpoints (src/api/context.py)
 
 ### IaC-Specific API [⬜]
 - [ ] Create provider resource endpoints (src/api/providers.py)
