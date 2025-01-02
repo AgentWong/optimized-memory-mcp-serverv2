@@ -1,8 +1,11 @@
 """
 Observation management endpoints for the MCP server.
 """
-from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Depends
+from typing import List, Optional, Dict, Any
+from fastapi import APIRouter, HTTPException, Depends, Request
+from ..utils.rate_limit import default_limiter
+from fastapi.exceptions import RequestValidationError
+from pydantic import BaseModel, constr, validator
 from sqlalchemy.orm import Session
 
 from ..db.connection import get_db, cache_query
@@ -10,14 +13,55 @@ from ..db.models.observations import Observation
 from ..db.models.entities import Entity
 from ..utils.errors import DatabaseError
 
-router = APIRouter(prefix="/observations", tags=["observations"])
+router = APIRouter(
+    prefix="/observations",
+    tags=["observations"],
+    # Secure defaults for API endpoints
+    responses={
+        400: {"description": "Bad Request"},
+        401: {"description": "Unauthorized"},
+        403: {"description": "Forbidden"},
+        404: {"description": "Not Found"},
+        429: {"description": "Too Many Requests"},
+        500: {"description": "Internal Server Error"}
+    }
+)
 
-@router.post("/")
+class ObservationCreate(BaseModel):
+    entity_id: int
+    observation_type: constr(min_length=1, max_length=50)
+    content: constr(min_length=1, max_length=10000)
+    metadata: Optional[Dict[str, Any]] = None
+    
+    @validator('observation_type')
+    def validate_type(cls, v):
+        if not v.strip():
+            raise ValueError('type cannot be empty or whitespace')
+        allowed_types = {'change', 'deprecation', 'security', 'compatibility'}
+        if v.lower() not in allowed_types:
+            raise ValueError(f'type must be one of: {allowed_types}')
+        return v.lower()
+    
+    @validator('content')
+    def validate_content(cls, v):
+        if not v.strip():
+            raise ValueError('content cannot be empty or whitespace')
+        return v.strip()
+
+class ObservationUpdate(BaseModel):
+    content: Optional[constr(min_length=1, max_length=10000)] = None
+    metadata: Optional[Dict[str, Any]] = None
+    
+    @validator('content')
+    def validate_content(cls, v):
+        if v is not None and not v.strip():
+            raise ValueError('content cannot be empty or whitespace')
+        return v.strip() if v else None
+
+@router.post("/", dependencies=[Depends(default_limiter)])
 async def create_observation(
-    entity_id: int,
-    observation_type: str,
-    content: str,
-    metadata: Optional[dict] = None,
+    request: Request,
+    observation: ObservationCreate,
     db: Session = Depends(get_db)
 ) -> dict:
     """Create a new observation for an entity."""
@@ -31,10 +75,10 @@ async def create_observation(
             )
         
         observation = Observation(
-            entity_id=entity_id,
-            observation_type=observation_type,
-            content=content,
-            metadata=metadata
+            entity_id=observation.entity_id,
+            observation_type=observation.observation_type,
+            content=observation.content,
+            metadata=observation.metadata
         )
         db.add(observation)
         db.commit()
@@ -48,7 +92,7 @@ async def create_observation(
     except HTTPException:
         raise
     except Exception as e:
-        raise DatabaseError(f"Failed to create observation: {str(e)}")
+        raise DatabaseError("Failed to create observation due to database error")
 
 @router.get("/{observation_id}")
 async def get_observation(
@@ -111,8 +155,7 @@ async def list_observations(
 @router.put("/{observation_id}")
 async def update_observation(
     observation_id: int,
-    content: Optional[str] = None,
-    metadata: Optional[dict] = None,
+    observation_update: ObservationUpdate,
     db: Session = Depends(get_db)
 ) -> dict:
     """Update an observation."""
@@ -123,10 +166,10 @@ async def update_observation(
     if not observation:
         raise HTTPException(status_code=404, detail="Observation not found")
     
-    if content:
-        observation.content = content
-    if metadata:
-        observation.metadata = metadata
+    if observation_update.content:
+        observation.content = observation_update.content
+    if observation_update.metadata:
+        observation.metadata = observation_update.metadata
         
     try:
         db.commit()
@@ -141,7 +184,7 @@ async def update_observation(
             "updated_at": observation.updated_at
         }
     except Exception as e:
-        raise DatabaseError(f"Failed to update observation: {str(e)}")
+        raise DatabaseError("Failed to update observation due to database error")
 
 @router.delete("/{observation_id}")
 async def delete_observation(
@@ -161,4 +204,4 @@ async def delete_observation(
         db.commit()
         return {"message": f"Observation {observation_id} deleted"}
     except Exception as e:
-        raise DatabaseError(f"Failed to delete observation: {str(e)}")
+        raise DatabaseError("Failed to delete observation due to database error")

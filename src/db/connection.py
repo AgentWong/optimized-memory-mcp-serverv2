@@ -15,6 +15,12 @@ from cachetools.keys import hashkey
 
 from .init_db import SessionLocal
 
+# Secure defaults for database and caching
+DEFAULT_TIMEOUT = 30  # 30 second query timeout
+MAX_CONNECTIONS = 20  # Maximum concurrent connections
+STATEMENT_TIMEOUT = 10000  # 10 second statement timeout
+IDLE_IN_TRANSACTION_TIMEOUT = 60000  # 1 minute idle timeout
+
 # Cache configuration - limit memory usage
 QUERY_CACHE = TTLCache(
     maxsize=100,  # Maximum number of cached queries
@@ -55,6 +61,10 @@ def get_db_connection() -> Generator[Session, None, None]:
     Ensures proper cleanup of database resources.
     """
     db = SessionLocal()
+    # Set secure timeouts
+    db.execute("SET statement_timeout = %s", (STATEMENT_TIMEOUT,))
+    db.execute("SET idle_in_transaction_session_timeout = %s", 
+               (IDLE_IN_TRANSACTION_TIMEOUT,))
     try:
         yield db
         db.commit()
