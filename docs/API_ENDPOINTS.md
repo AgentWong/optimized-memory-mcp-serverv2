@@ -79,6 +79,19 @@
     - `version` (optional): Specific version to check
   - Returns: List of deprecation notices
 
+## Database Connection Pool Configuration
+
+The API uses SQLite connection pooling with these default settings:
+- Pool Size: 20 connections
+- Max Overflow: 30 connections 
+- Pool Timeout: 30 seconds
+- Pool Recycle: 3600 seconds
+
+To modify these settings, update the DATABASE_URL environment variable:
+```
+sqlite:///mcp_server.db?pool_size=20&max_overflow=30&pool_timeout=30&pool_recycle=3600
+```
+
 ## Error Responses
 All endpoints may return the following error responses:
 
