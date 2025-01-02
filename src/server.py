@@ -13,22 +13,14 @@ from .db.init_db import init_db
 
 logger = logging.getLogger(__name__)
 
-def create_server() -> FastMCP:
-    """Create and configure the MCP server."""
+def configure_server(server: FastMCP) -> None:
+    """Configure the MCP server with error handlers and middleware."""
     try:
         # Configure logging
         configure_logging()
         
         # Initialize database
         init_db()
-        
-        # Create FastMCP instance
-        server = FastMCP(
-            "Optimized Memory MCP Server",
-            host=Config.HOST,
-            port=Config.PORT,
-            debug=Config.DEBUG
-        )
         
         # Register error handlers
         @server.exception_handler(MCPError)
@@ -39,7 +31,20 @@ def create_server() -> FastMCP:
                 "message": error.message,
                 "details": error.details
             }
-        
+            
+    except Exception as e:
+        raise ConfigurationError(f"Failed to configure server: {str(e)}")
+
+def create_server() -> FastMCP:
+    """Create a new MCP server instance."""
+    try:
+        server = FastMCP(
+            "Optimized Memory MCP Server",
+            host=Config.HOST,
+            port=Config.PORT,
+            debug=Config.DEBUG
+        )
+        configure_server(server)
         return server
         
     except Exception as e:

@@ -28,10 +28,45 @@ mcp_server/
 
 ## Getting Started
 
-1. Ensure Python 3.13.1 is installed
-2. Install uvx if not already installed
-3. Clone this repository
-4. Install dependencies: `uvx run --from git+https://github.com/AgentWong/<repo_name>.git python -m <module_name>`
+1. Ensure Python 3.13.1 is installed:
+   ```bash
+   python --version  # Should show 3.13.1
+   ```
+
+2. Install uvx if not already installed:
+   ```bash
+   pip install uvx
+   ```
+
+3. Clone this repository:
+   ```bash
+   git clone https://github.com/AgentWong/optimized-memory-mcp-serverv2.git
+   cd optimized-memory-mcp-serverv2
+   ```
+
+4. Create and activate a virtual environment:
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # On Unix/macOS
+   # or
+   .venv\Scripts\activate  # On Windows
+   ```
+
+5. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   pip install -r requirements-dev.txt  # For development
+   ```
+
+6. Initialize the database:
+   ```bash
+   alembic upgrade head
+   ```
+
+7. Run the server:
+   ```bash
+   uvx run python -m src.main
+   ```
 
 ## Development
 

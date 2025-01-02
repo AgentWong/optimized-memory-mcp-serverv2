@@ -19,14 +19,18 @@ def parse_arguments():
 def create_server():
     """Create and configure the MCP server instance."""
     server = FastMCP(
-        "Your Server Name",
+        "Optimized Memory MCP Server",
         dependencies=[
-            # List your dependencies here
+            "SQLAlchemy>=2.0.0",
+            "alembic>=1.13.0",
+            "fastapi>=0.109.0",
+            "pydantic>=2.5.0"
         ]
     )
     
     # Configure server here
-    # Add resources and tools
+    from .server import configure_server
+    configure_server(server)
     
     return server
 
