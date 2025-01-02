@@ -1,0 +1,4 @@
+- MCP_PORT, MCP_DEBUG, LOG_LEVEL, LOG_FORMAT, and MCP_HOST should be unnecessary.
+- The ONLY user provided environment variable should be "DATABASE_URL".
+- I believe at a bare minimum, the Core Concepts "Tools" and "Resources" MUST be used in order to comply with the MCP spec.  Other core concepts may be utilized where applicable.
+- Given the explanation of "Resources" and "Tools", is "fastapi" actually required in this project?
