@@ -1,107 +1,106 @@
-# Enhanced MCP Server Implementation Tasks
+# MCP Server Implementation Tasks
 
-## Phase 1: Project Setup [Priority: High]
+## Phase 1: Code Cleanup [⬜]
 
-### Environment Setup [✓]
-- [x] Create initial project structure following README.md layout
-- [x] Set up Python virtual environment with Python 3.13.1
-- [x] Install and configure development dependencies
-- [x] Configure linting and formatting tools (pylint, black, mypy)
+### Remove REST API Code [⬜]
+- [ ] Remove FastAPI dependencies and imports
+- [ ] Delete API endpoint definitions
+- [ ] Remove API-specific error handlers
+- [ ] Clean up API documentation files
 
-### Database Setup [✓]
-- [x] Create database initialization script (src/db/init_db.py)
-- [x] Implement database connection handling (src/db/connection.py)
-- [x] Define SQLAlchemy models for core tables (src/db/models/)
-- [x] Create database migration system
+### Restructure Project [⬜]
+- [ ] Update project structure to MCP patterns
+- [ ] Move database code to utils module
+- [ ] Create resources package
+- [ ] Create tools package
 
-## Phase 2: Core Implementation [Priority: High]
+## Phase 2: MCP Server Implementation [⬜]
 
-### Base Server Implementation [✓]
-- [x] Create FastMCP server initialization (src/server.py)
-- [x] Implement environment configuration (src/config.py)
-- [x] Set up logging configuration (src/utils/logging.py)
-- [x] Create basic error handling (src/utils/errors.py)
+### Core Setup [⬜]
+- [ ] Create FastMCP server instance
+- [ ] Configure DATABASE_URL handling
+- [ ] Set up SQLite connection management
+- [ ] Implement error handling
 
-### Database Models [✓]
-- [x] Implement Entities model (src/db/models/entities.py)
-- [x] Implement Relationships model (src/db/models/relationships.py)
-- [x] Implement Observations model (src/db/models/observations.py)
-- [x] Create base model utilities (src/db/models/base.py)
+### Resource Implementation [⬜]
 
-### IaC Models [✓]
-- [x] Implement Provider Resources model (src/db/models/providers.py)
-- [x] Implement Resource Arguments model (src/db/models/arguments.py)
-- [x] Implement Ansible Collections model (src/db/models/ansible.py)
-- [x] Implement Module Parameters model (src/db/models/parameters.py)
+#### Entity Resources [⬜]
+- [ ] Convert GET /entities to entities://list resource
+- [ ] Convert GET /entities/{id} to entities://{id} resource
+- [ ] Convert GET /relationships to relationships://{id} resource
+- [ ] Convert GET /observations to observations://{id} resource
 
-## Phase 3: API Implementation [Priority: Medium]
+#### IaC Resources [⬜]
+- [ ] Convert GET /providers to providers://{provider}/resources resource
+- [ ] Convert GET /ansible/collections to ansible://collections resource
+- [ ] Convert GET /versions/collections to collections://{name}/versions resource
+- [ ] Convert GET /search/entities to search://{query} resource
 
-### Core Memory API [✓]
-- [x] Create entity management endpoints (src/api/entities.py)
-- [x] Create relationship management endpoints (src/api/relationships.py)
-- [x] Create observation management endpoints (src/api/observations.py)
-- [x] Implement context retrieval endpoints (src/api/context.py)
+### Tool Implementation [⬜]
 
-### IaC-Specific API [✓]
-- [x] Create provider resource endpoints (src/api/providers.py)
-- [x] Create ansible module endpoints (src/api/ansible.py)
-- [x] Implement version tracking endpoints (src/api/versions.py)
-- [x] Create schema validation endpoints (src/api/validation.py)
+#### Entity Management Tools [⬜]
+- [ ] Convert POST /entities to create_entity() tool
+- [ ] Convert PUT /entities/{id} to update_entity() tool
+- [ ] Convert DELETE /entities/{id} to delete_entity() tool
+- [ ] Convert POST /observations to add_observation() tool
 
-### Query API [✓]
-- [x] Implement search functionality (src/api/search.py)
-- [x] Create compatibility checking endpoints (src/api/compatibility.py)
-- [x] Implement version analysis endpoints (src/api/analysis.py)
-- [x] Create deprecation warning system (src/api/deprecation.py)
+#### IaC Management Tools [⬜]
+- [ ] Convert POST /providers to register_provider() tool
+- [ ] Convert POST /ansible/collections to register_collection() tool
+- [ ] Convert POST /versions/collections to add_version() tool
+- [ ] Convert GET /analysis/providers to analyze_provider() tool
 
-## Phase 4: Testing [Priority: High]
+## Phase 3: Database Integration [⬜]
 
-### Unit Tests [✓]
-- [x] Create database operation tests (tests/db/)
-- [x] Create API endpoint tests (tests/api/)
-- [x] Create model validation tests (tests/models/)
-- [x] Implement utility function tests (tests/utils/)
+### Core Database [⬜]
+- [ ] Verify SQLite schema compatibility
+- [ ] Update database utility functions
+- [ ] Implement connection pooling
+- [ ] Add error handling
 
-### Integration Tests [✓]
-- [x] Create end-to-end API tests (tests/integration/)
-- [x] Implement Claude Desktop compatibility tests (tests/claude/)
-- [x] Create database integration tests (tests/db_integration/)
-- [x] Implement error scenario tests (tests/error_scenarios/)
+### Query Optimization [⬜]
+- [ ] Optimize entity queries
+- [ ] Improve relationship lookups
+- [ ] Enhance observation retrieval
+- [ ] Add proper indexing
 
-## Phase 5: Documentation [Priority: Medium]
+## Phase 4: Testing [⬜]
 
-### Code Documentation [✓]
-- [x] Add docstrings to all modules
-- [x] Create API documentation
-- [x] Document database schema
-- [x] Create usage examples
+### Unit Tests [⬜]
+- [ ] Test MCP resources
+- [ ] Test MCP tools
+- [ ] Test database operations
+- [ ] Test error handling
 
-### User Documentation [✓]
-- [x] Update installation instructions
-- [x] Create configuration guide
-- [x] Write troubleshooting guide
-- [x] Document API endpoints
+### Integration Tests [⬜]
+- [ ] Test Claude Desktop compatibility
+- [ ] Verify database operations
+- [ ] Test resource patterns
+- [ ] Validate tool execution
 
-## Phase 6: Optimization [Priority: Low]
+## Phase 5: Documentation [⬜]
 
-### Performance [✓]
-- [x] Optimize database queries
-- [x] Implement connection pooling
-- [x] Add query result caching
-- [x] Optimize memory usage
+### Code Documentation [⬜]
+- [ ] Update docstrings for MCP patterns
+- [ ] Document resource implementations
+- [ ] Document tool implementations
+- [ ] Add usage examples
 
-### Security [✓]
-- [x] Implement input validation
-- [x] Add error sanitization
-- [x] Create secure defaults
-- [x] Add rate limiting
+### User Documentation [⬜]
+- [ ] Update README.md
+- [ ] Create MCP usage guide
+- [ ] Document environment setup
+- [ ] Add troubleshooting guide
 
 Dependencies:
-- Phase 1 must be completed before starting Phase 2
-- Database models must be completed before API implementation
-- Core API must be completed before IaC-specific API
-- All implementation must be completed before final testing
-- Documentation should be updated alongside implementation
-- Optimization should only begin after core functionality is stable
+- REST API removal must be completed first
+- Database compatibility must be verified before MCP implementation
+- Resources must be implemented before tools
+- All features must be tested with Claude Desktop
 
-Note: Each implementation file must stay under 250 lines of code. Split functionality into multiple files if needed.
+Notes:
+- Follow MCP SDK patterns exactly
+- Keep files under 250 lines
+- Use only DATABASE_URL environment variable
+- Focus on proper MCP Tools and Resources implementation
+- Ensure backward compatibility with existing database
