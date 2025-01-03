@@ -16,11 +16,11 @@
 
 ## Phase 2: MCP Server Implementation [⬜]
 
-### Core Setup [⬜]
-- [ ] Create FastMCP server instance
-- [ ] Configure DATABASE_URL handling
-- [ ] Set up SQLite connection management
-- [ ] Implement error handling
+### Core Setup [x]
+- [x] Create FastMCP server instance
+- [x] Configure DATABASE_URL handling
+- [x] Set up SQLite connection management
+- [x] Implement error handling
 
 ### Resource Implementation [⬜]
 
