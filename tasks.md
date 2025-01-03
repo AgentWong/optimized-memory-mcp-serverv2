@@ -31,10 +31,10 @@
 - [x] Convert GET /observations to observations://{id} resource
 
 #### IaC Resources [⬜]
-- [ ] Convert GET /providers to providers://{provider}/resources resource
-- [ ] Convert GET /ansible/collections to ansible://collections resource
-- [ ] Convert GET /versions/collections to collections://{name}/versions resource
-- [ ] Convert GET /search/entities to search://{query} resource
+- [x] Convert GET /providers to providers://{provider}/resources resource
+- [x] Convert GET /ansible/collections to ansible://collections resource
+- [x] Convert GET /versions/collections to collections://{name}/versions resource
+- [x] Convert GET /search/entities to search://{query} resource
 
 ### Tool Implementation [⬜]
 

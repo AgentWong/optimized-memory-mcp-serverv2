@@ -35,6 +35,10 @@ def configure_server(server: FastMCP) -> None:
         from .resources.entities import register_resources as register_entity_resources
         from .resources.relationships import register_resources as register_relationship_resources
         from .resources.observations import register_resources as register_observation_resources
+        from .resources.providers import register_resources as register_provider_resources
+        from .resources.ansible import register_resources as register_ansible_resources
+        from .resources.versions import register_resources as register_version_resources
+        from .resources.search import register_resources as register_search_resources
         from .tools.entities import register_tools as register_entity_tools
         from .tools.relationships import register_tools as register_relationship_tools
         from .tools.observations import register_tools as register_observation_tools
@@ -42,6 +46,10 @@ def configure_server(server: FastMCP) -> None:
         register_entity_resources(server)
         register_relationship_resources(server)
         register_observation_resources(server)
+        register_provider_resources(server)
+        register_ansible_resources(server)
+        register_version_resources(server)
+        register_search_resources(server)
         register_entity_tools(server)
         register_relationship_tools(server)
         register_observation_tools(server)
