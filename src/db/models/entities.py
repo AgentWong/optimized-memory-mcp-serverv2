@@ -16,9 +16,11 @@ class Entity(BaseModel, TimestampMixin):
     
     name = Column(String, nullable=False, index=True)
     type = Column(String, nullable=False, index=True)
-    # Composite index for name+type lookups
+    # Composite indexes for common lookups
     __table_args__ = (
         sa.Index('ix_entity_name_type', 'name', 'type'),
+        sa.Index('ix_entity_created_type', 'created_at', 'type'),
+        sa.Index('ix_entity_updated_type', 'updated_at', 'type')
     )
     metadata = Column(JSON, nullable=False, default=dict)
     
