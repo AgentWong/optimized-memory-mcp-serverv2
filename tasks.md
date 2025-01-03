@@ -89,7 +89,7 @@
 ### User Documentation [⬜]
 - [ ] Update README.md
 - [x] Create MCP usage guide
-- [ ] Document environment setup
+- [x] Document environment setup
 - [ ] Add troubleshooting guide
 
 Dependencies:
