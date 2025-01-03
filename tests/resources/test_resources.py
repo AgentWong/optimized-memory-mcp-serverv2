@@ -1,5 +1,13 @@
 """
-Unit tests for MCP resources
+Unit tests for MCP resources.
+
+Tests the core MCP resource patterns:
+- entities://list - Lists all entities in the system
+- entities://{id} - Gets details for a specific entity
+- providers://{provider}/resources - Lists resources for a provider
+- ansible://collections - Lists registered Ansible collections
+
+Each resource follows the MCP protocol for read-only data access.
 """
 import pytest
 from fastapi.testclient import TestClient

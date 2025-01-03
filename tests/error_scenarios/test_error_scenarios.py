@@ -1,5 +1,21 @@
 """
-Integration tests for error scenarios across the MCP server
+Integration tests for error scenarios across the MCP server.
+
+Tests error handling patterns required by the MCP specification:
+- Database constraint violations (unique constraints, foreign keys)
+- Invalid relationship creation (self-referential, missing entities)
+- Invalid observation data (schema validation, data type checks)
+- Concurrent modification conflicts (optimistic locking)
+- Invalid API requests (malformed JSON, missing fields)
+- Resource not found scenarios (404 handling)
+- Validation error responses (400 handling)
+- Transaction rollback behavior
+
+Each test verifies proper error response format per MCP protocol requirements:
+- Error code standardization
+- Detailed error messages
+- Proper status code mapping
+- Error context/details inclusion
 """
 import pytest
 from fastapi.testclient import TestClient

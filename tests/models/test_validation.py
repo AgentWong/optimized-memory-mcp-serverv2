@@ -1,5 +1,15 @@
 """
-Unit tests for model validation
+Unit tests for model validation.
+
+Tests the core validation patterns required by the MCP specification:
+- Required field validation for all model types
+- Foreign key constraint enforcement
+- Relationship integrity rules
+- Data type validation
+- Schema validation for JSON fields
+
+Each test verifies that the database models properly enforce
+data integrity requirements for the MCP server implementation.
 """
 import pytest
 from sqlalchemy.exc import IntegrityError

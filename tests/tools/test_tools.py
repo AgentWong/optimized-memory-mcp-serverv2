@@ -1,5 +1,13 @@
 """
-Unit tests for MCP tools
+Unit tests for MCP tools.
+
+Tests the core MCP tool patterns:
+- create_entity - Creates new entities with initial observations
+- add_observation - Adds observations to existing entities
+- register_provider_resource - Registers new provider resource types
+- register_ansible_module - Registers new Ansible modules
+
+Each tool follows the MCP protocol for performing actions and side effects.
 """
 import pytest
 from fastapi.testclient import TestClient

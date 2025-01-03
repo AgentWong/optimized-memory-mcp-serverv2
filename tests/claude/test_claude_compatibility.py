@@ -1,5 +1,16 @@
 """
-Integration tests for Claude Desktop MCP client compatibility
+Integration tests for Claude Desktop MCP client compatibility.
+
+Verifies compliance with Claude Desktop's MCP client requirements:
+- Server info endpoint provides required metadata
+- Resource URL protocol handling matches specification
+- Tool execution follows required patterns
+- Error responses match expected format
+- Async operation protocol compliance
+- Session management implementation
+
+These tests ensure the server can be used as a context provider
+for Claude Desktop's AI assistant features.
 """
 import pytest
 from fastapi.testclient import TestClient

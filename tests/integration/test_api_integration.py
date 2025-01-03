@@ -1,5 +1,15 @@
 """
-End-to-end integration tests for API endpoints
+End-to-end integration tests for API endpoints.
+
+Tests complete workflow patterns required by MCP:
+- Full entity lifecycle management
+- Relationship creation and validation
+- Observation handling and storage
+- Search and analysis operations
+- Error handling scenarios
+
+Each test verifies end-to-end functionality across multiple
+MCP components working together.
 """
 import pytest
 from fastapi.testclient import TestClient

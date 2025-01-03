@@ -1,5 +1,15 @@
 """
-Unit tests for error handling utilities
+Unit tests for error handling utilities.
+
+Tests the core error handling patterns required by MCP:
+- Base MCPError functionality and inheritance
+- Configuration error handling
+- Database error handling 
+- Validation error handling
+- Error message formatting and details
+
+Each test verifies proper error construction and handling
+per MCP protocol requirements.
 """
 import pytest
 from src.utils.errors import MCPError, ConfigurationError, DatabaseError, ValidationError

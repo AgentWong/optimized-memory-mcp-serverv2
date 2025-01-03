@@ -1,5 +1,15 @@
 """
-Integration tests for database operations
+Integration tests for database operations.
+
+Tests the core database integration patterns required by MCP:
+- Entity relationship cascade behavior
+- Observation foreign key constraints
+- Provider version management
+- Ansible collection relationships
+- Concurrent transaction handling
+
+Each test verifies proper database integration and data integrity
+across the MCP server implementation.
 """
 import pytest
 from sqlalchemy.orm import Session

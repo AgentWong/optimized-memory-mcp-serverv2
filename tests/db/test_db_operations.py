@@ -1,5 +1,14 @@
 """
-Unit tests for database operations
+Unit tests for database operations.
+
+Tests the core database operations required by MCP:
+- Entity CRUD operations with proper validation
+- Relationship management between entities
+- Observation storage and retrieval
+- Base model functionality including serialization
+
+Each operation follows MCP protocol requirements for data persistence
+and ensures proper database state management.
 """
 import pytest
 from sqlalchemy.orm import Session

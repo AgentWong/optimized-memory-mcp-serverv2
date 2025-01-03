@@ -1,5 +1,14 @@
 """
-Unit tests for API endpoints
+Unit tests for API endpoints.
+
+Tests the core API endpoints required by MCP:
+- Entity management (CRUD operations)
+- Relationship handling
+- Observation creation and retrieval
+- Context and related entity queries
+
+Each endpoint test verifies proper request handling and
+response formatting per MCP protocol requirements.
 """
 import pytest
 from fastapi.testclient import TestClient
