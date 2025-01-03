@@ -22,7 +22,7 @@
 - [x] Set up SQLite connection management
 - [x] Implement error handling
 
-### Resource Implementation [⬜]
+### Resource Implementation [x]
 
 #### Entity Resources [x]
 - [x] Convert GET /entities to entities://list resource
@@ -30,7 +30,7 @@
 - [x] Convert GET /relationships to relationships://{id} resource
 - [x] Convert GET /observations to observations://{id} resource
 
-#### IaC Resources [⬜]
+#### IaC Resources [x]
 - [x] Convert GET /providers to providers://{provider}/resources resource
 - [x] Convert GET /ansible/collections to ansible://collections resource
 - [x] Convert GET /versions/collections to collections://{name}/versions resource
