@@ -11,9 +11,7 @@ dependencies = [
     "mcp-sdk>=1.0.0",
     "SQLAlchemy>=2.0.0",
     "alembic>=1.13.0",
-    "uvx>=0.1.0",
-    "fastapi>=0.109.0",
-    "pydantic>=2.5.0"
+    "uvx>=0.1.0"
 ]
 
 [project.scripts]
