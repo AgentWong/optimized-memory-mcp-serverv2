@@ -88,7 +88,7 @@
 
 ### User Documentation [⬜]
 - [ ] Update README.md
-- [ ] Create MCP usage guide
+- [x] Create MCP usage guide
 - [ ] Document environment setup
 - [ ] Add troubleshooting guide
 
