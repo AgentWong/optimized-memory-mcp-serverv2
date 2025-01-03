@@ -1,5 +1,18 @@
 """
 Observation management tools for the MCP server.
+
+This module implements MCP tools for managing entity observations and their metadata.
+Tools provide capabilities for:
+- Recording new observations about infrastructure entities
+- Updating observation data and metadata
+- Managing observation lifecycle
+- Tracking observation history
+
+Each tool follows standard patterns:
+- Database integration through SQLAlchemy sessions
+- Proper error handling with ValidationError and DatabaseError
+- Consistent return structures with typed dictionaries
+- Clean transaction management with commits and rollbacks
 """
 from typing import Dict, Any, Optional
 from sqlalchemy.orm import Session

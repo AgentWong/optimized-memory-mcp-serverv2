@@ -1,5 +1,17 @@
 """
 Ansible management tools for the MCP server.
+
+This module implements MCP tools for managing Ansible collections and their versions.
+Tools provide capabilities for:
+- Registering new Ansible collections with namespace and version
+- Adding new versions to existing collections
+- Managing collection metadata
+
+Each tool follows standard patterns:
+- Database integration through SQLAlchemy sessions
+- Proper error handling with ValidationError and DatabaseError
+- Consistent return structures with typed dictionaries
+- Clean transaction management with commits and rollbacks
 """
 from typing import Dict, Any, Optional
 from sqlalchemy.orm import Session

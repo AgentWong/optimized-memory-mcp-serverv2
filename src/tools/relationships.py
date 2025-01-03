@@ -1,5 +1,18 @@
 """
 Relationship management tools for the MCP server.
+
+This module implements MCP tools for managing relationships between infrastructure entities.
+Tools provide capabilities for:
+- Creating new relationships between entities with typed connections
+- Updating relationship metadata and properties
+- Removing relationships between entities
+- Managing relationship lifecycle
+
+Each tool follows standard patterns:
+- Database integration through SQLAlchemy sessions
+- Proper error handling with ValidationError and DatabaseError
+- Consistent return structures with typed dictionaries
+- Clean transaction management with commits and rollbacks
 """
 from typing import Dict, Any, Optional
 from sqlalchemy.orm import Session

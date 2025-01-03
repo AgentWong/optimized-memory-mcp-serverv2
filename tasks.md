@@ -83,7 +83,7 @@
 ### Code Documentation [⬜]
 - [x] Update docstrings for MCP patterns
 - [x] Document resource implementations
-- [ ] Document tool implementations
+- [x] Document tool implementations
 - [ ] Add usage examples
 
 ### User Documentation [⬜]

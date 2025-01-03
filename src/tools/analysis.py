@@ -1,5 +1,19 @@
 """
 Analysis tools for the MCP server.
+
+This module provides MCP tools for analyzing infrastructure components.
+Tools support:
+- Version comparison between provider releases
+- Breaking change detection
+- New feature identification
+- Security update tracking
+- Deprecation analysis
+
+Tools follow MCP patterns for:
+- Structured analysis results
+- Proper error handling
+- Database integration
+- Version comparison logic
 """
 from typing import Dict, Any, List
 from sqlalchemy.orm import Session

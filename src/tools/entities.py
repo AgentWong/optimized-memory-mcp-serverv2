@@ -1,5 +1,18 @@
 """
 Entity management tools for the MCP server.
+
+This module implements MCP tools for managing infrastructure entities.
+Tools provide capabilities for:
+- Creating new infrastructure entities with typed classification
+- Updating entity metadata and properties
+- Managing entity lifecycle and state
+- Handling entity deletion and cleanup
+
+Each tool follows standard patterns:
+- Database integration through SQLAlchemy sessions
+- Proper error handling with ValidationError and DatabaseError
+- Consistent return structures with typed dictionaries
+- Clean transaction management with commits and rollbacks
 """
 from typing import Dict, Any, List
 from sqlalchemy.orm import Session
