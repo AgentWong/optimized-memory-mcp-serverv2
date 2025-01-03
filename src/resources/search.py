@@ -1,5 +1,19 @@
 """
 Search-related resources for the MCP server.
+
+Implements core MCP resource patterns for entity search:
+
+search://{query}
+- Searches entities by name, type, or metadata
+- Optional filtering by entity_type
+- Configurable result limit
+- Returns matching entity objects
+
+Each resource follows MCP protocol for:
+- URL pattern matching with query parameter
+- Query parameter handling for filters
+- Response formatting with pagination
+- Error handling with proper MCP error types
 """
 from typing import List, Dict, Any
 from sqlalchemy import or_

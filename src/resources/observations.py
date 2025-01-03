@@ -1,5 +1,25 @@
 """
 Observation-related resources for the MCP server.
+
+Implements core MCP resource patterns for observation access:
+
+observations://list
+- Lists all observations in the system
+- Optional filtering by entity_id and observation_type
+- Returns list of observation objects with core fields
+- Read-only access to observation data
+
+observations://{observation_id}
+- Gets detailed information for a specific observation
+- Includes metadata, timestamps and full observation value
+- Returns single observation object with complete details
+- Read-only access to observation details
+
+Each resource follows MCP protocol for:
+- URL pattern matching
+- Query parameter handling 
+- Response formatting
+- Error handling with proper MCP error types
 """
 from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session

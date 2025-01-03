@@ -1,5 +1,19 @@
 """
 Provider-related resources for the MCP server.
+
+Implements core MCP resource patterns for provider resource access:
+
+providers://{provider}/resources
+- Lists all resources for a specific IaC provider
+- Returns resource objects with schema and metadata
+- Includes resource type information
+- Read-only access to provider resource definitions
+
+Each resource follows MCP protocol for:
+- URL pattern matching with provider parameter
+- Response formatting with consistent schema
+- Error handling with proper MCP error types
+- Database integration with proper connection management
 """
 from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session

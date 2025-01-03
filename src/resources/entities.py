@@ -1,5 +1,25 @@
 """
 Entity-related resources for the MCP server.
+
+Implements core MCP resource patterns for entity management:
+
+entities://list
+- Lists all entities in the system
+- Optional filtering by entity_type
+- Returns list of entity objects with core fields
+- Read-only access to entity data
+
+entities://{entity_id} 
+- Gets detailed information for a specific entity
+- Includes metadata and timestamps
+- Returns single entity object with full details
+- Read-only access to entity details
+
+Each resource follows MCP protocol for:
+- URL pattern matching
+- Query parameter handling
+- Response formatting
+- Error handling with proper MCP error types
 """
 from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session

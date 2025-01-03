@@ -1,5 +1,19 @@
 """
 Ansible-related resources for the MCP server.
+
+Implements core MCP resource patterns for Ansible collection access:
+
+ansible://collections
+- Lists all registered Ansible collections
+- Returns collection objects with version info
+- Includes namespace and metadata
+- Read-only access to collection definitions
+
+Each resource follows MCP protocol for:
+- URL pattern matching
+- Response formatting with version information
+- Error handling with proper MCP error types
+- Database integration with proper connection management
 """
 from typing import List, Dict, Any
 from sqlalchemy.orm import Session

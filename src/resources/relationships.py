@@ -1,5 +1,25 @@
 """
 Relationship-related resources for the MCP server.
+
+Implements core MCP resource patterns for relationship management:
+
+relationships://list
+- Lists all relationships in the system
+- Optional filtering by source_id, target_id, and type
+- Returns relationship objects with core metadata
+- Read-only access to relationship definitions
+
+relationships://{relationship_id}
+- Gets detailed information for a specific relationship
+- Includes full metadata and timestamps
+- Returns complete relationship object
+- Read-only access to relationship details
+
+Each resource follows MCP protocol for:
+- URL pattern matching
+- Query parameter handling
+- Response formatting
+- Error handling with proper MCP error types
 """
 from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session

@@ -1,5 +1,19 @@
 """
 Version-related resources for the MCP server.
+
+Implements core MCP resource patterns for version management:
+
+collections://{collection_name}/versions
+- Lists all versions for a specific collection
+- Returns version objects in descending order
+- Includes full metadata for each version
+- Read-only access to version history
+
+Each resource follows MCP protocol for:
+- URL pattern matching with collection parameter
+- Response formatting with version ordering
+- Error handling with proper MCP error types
+- Database integration with proper connection management
 """
 from typing import List, Dict, Any
 from sqlalchemy.orm import Session
