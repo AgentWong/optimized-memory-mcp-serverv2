@@ -87,10 +87,10 @@
 - [x] Add usage examples
 
 ### User Documentation [⬜]
-- [ ] Update README.md
+- [x] Update README.md
 - [x] Create MCP usage guide
 - [x] Document environment setup
-- [ ] Add troubleshooting guide
+- [x] Add troubleshooting guide
 
 Dependencies:
 - REST API removal must be completed first

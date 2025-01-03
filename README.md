@@ -59,32 +59,16 @@ This MCP server implementation focuses on:
 - SQLite 3.x
 - uvx server
 
-## Installation
+## Quick Start
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/AgentWong/optimized-memory-mcp-serverv2.git
-   cd optimized-memory-mcp-serverv2
-   ```
+See our [Environment Setup Guide](docs/ENVIRONMENT_SETUP.md) for detailed installation instructions.
 
-2. Create and activate a virtual environment:
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # Unix/macOS
-   # or
-   .venv\Scripts\activate     # Windows
-   ```
-
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   pip install -r requirements-dev.txt  # For development
-   ```
-
-4. Initialize the database:
-   ```bash
-   alembic upgrade head
-   ```
+Key steps:
+1. Clone and setup Python environment
+2. Install dependencies: `pip install -r requirements.txt`
+3. Configure database: `export DATABASE_URL=sqlite:///path/to/db.db`
+4. Initialize database: `alembic upgrade head`
+5. Start server: `uvx run python -m src.main`
 
 ## Usage
 
@@ -135,11 +119,13 @@ This MCP server implementation focuses on:
 
 ## Documentation
 
-- [API Documentation](docs/API.md)
-- [Configuration Guide](docs/CONFIGURATION.md)
-- [Development Guide](docs/DEVELOPMENT.md)
-- [Database Schema](docs/DATABASE_SCHEMA.md)
-- [Troubleshooting](docs/TROUBLESHOOTING.md)
+- [Environment Setup Guide](docs/ENVIRONMENT_SETUP.md) - Installation and configuration
+- [MCP Usage Guide](docs/MCP_USAGE.md) - Using MCP resources and tools
+- [API Documentation](docs/API.md) - API reference
+- [Configuration Guide](docs/CONFIGURATION.md) - Server configuration
+- [Development Guide](docs/DEVELOPMENT.md) - Contributing guidelines
+- [Database Schema](docs/DATABASE_SCHEMA.md) - Data model reference
+- [Troubleshooting Guide](docs/TROUBLESHOOTING.md) - Common issues and solutions
 
 ## License
 
