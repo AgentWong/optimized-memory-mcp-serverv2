@@ -24,11 +24,11 @@
 
 ### Resource Implementation [⬜]
 
-#### Entity Resources [⬜]
-- [ ] Convert GET /entities to entities://list resource
-- [ ] Convert GET /entities/{id} to entities://{id} resource
-- [ ] Convert GET /relationships to relationships://{id} resource
-- [ ] Convert GET /observations to observations://{id} resource
+#### Entity Resources [x]
+- [x] Convert GET /entities to entities://list resource
+- [x] Convert GET /entities/{id} to entities://{id} resource
+- [x] Convert GET /relationships to relationships://{id} resource
+- [x] Convert GET /observations to observations://{id} resource
 
 #### IaC Resources [⬜]
 - [ ] Convert GET /providers to providers://{provider}/resources resource
@@ -38,11 +38,11 @@
 
 ### Tool Implementation [⬜]
 
-#### Entity Management Tools [⬜]
-- [ ] Convert POST /entities to create_entity() tool
-- [ ] Convert PUT /entities/{id} to update_entity() tool
-- [ ] Convert DELETE /entities/{id} to delete_entity() tool
-- [ ] Convert POST /observations to add_observation() tool
+#### Entity Management Tools [x]
+- [x] Convert POST /entities to create_entity() tool
+- [x] Convert PUT /entities/{id} to update_entity() tool
+- [x] Convert DELETE /entities/{id} to delete_entity() tool
+- [x] Convert POST /observations to add_observation() tool
 
 #### IaC Management Tools [⬜]
 - [ ] Convert POST /providers to register_provider() tool
