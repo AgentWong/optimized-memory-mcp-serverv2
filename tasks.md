@@ -1,18 +1,18 @@
 # MCP Server Implementation Tasks
 
-## Phase 1: Code Cleanup [⬜]
+## Phase 1: Code Cleanup [x]
 
-### Remove REST API Code [⬜]
-- [ ] Remove FastAPI dependencies and imports
-- [ ] Delete API endpoint definitions
-- [ ] Remove API-specific error handlers
-- [ ] Clean up API documentation files
+### Remove REST API Code [x]
+- [x] Remove FastAPI dependencies and imports
+- [x] Delete API endpoint definitions
+- [x] Remove API-specific error handlers
+- [x] Clean up API documentation files
 
-### Restructure Project [⬜]
-- [ ] Update project structure to MCP patterns
-- [ ] Move database code to utils module
-- [ ] Create resources package
-- [ ] Create tools package
+### Restructure Project [x]
+- [x] Update project structure to MCP patterns
+- [x] Keep database code in db/ module
+- [x] Create resources package
+- [x] Create tools package
 
 ## Phase 2: MCP Server Implementation [⬜]
 
