@@ -42,6 +42,9 @@ def configure_server(server: FastMCP) -> None:
         from .tools.entities import register_tools as register_entity_tools
         from .tools.relationships import register_tools as register_relationship_tools
         from .tools.observations import register_tools as register_observation_tools
+        from .tools.providers import register_tools as register_provider_tools
+        from .tools.ansible import register_tools as register_ansible_tools
+        from .tools.analysis import register_tools as register_analysis_tools
         
         register_entity_resources(server)
         register_relationship_resources(server)
@@ -53,6 +56,9 @@ def configure_server(server: FastMCP) -> None:
         register_entity_tools(server)
         register_relationship_tools(server)
         register_observation_tools(server)
+        register_provider_tools(server)
+        register_ansible_tools(server)
+        register_analysis_tools(server)
         
         # Register error handler
         @server.error_handler()

@@ -45,10 +45,10 @@
 - [x] Convert POST /observations to add_observation() tool
 
 #### IaC Management Tools [⬜]
-- [ ] Convert POST /providers to register_provider() tool
-- [ ] Convert POST /ansible/collections to register_collection() tool
-- [ ] Convert POST /versions/collections to add_version() tool
-- [ ] Convert GET /analysis/providers to analyze_provider() tool
+- [x] Convert POST /providers to register_provider() tool
+- [x] Convert POST /ansible/collections to register_collection() tool
+- [x] Convert POST /versions/collections to add_version() tool
+- [x] Convert GET /analysis/providers to analyze_provider() tool
 
 ## Phase 3: Database Integration [⬜]
 
