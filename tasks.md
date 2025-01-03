@@ -80,11 +80,11 @@
 
 ## Phase 5: Documentation [⬜]
 
-### Code Documentation [⬜]
+### Code Documentation [x]
 - [x] Update docstrings for MCP patterns
 - [x] Document resource implementations
 - [x] Document tool implementations
-- [ ] Add usage examples
+- [x] Add usage examples
 
 ### User Documentation [⬜]
 - [ ] Update README.md

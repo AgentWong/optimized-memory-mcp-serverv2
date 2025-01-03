@@ -24,7 +24,31 @@ from ..db.models.entities import Entity
 from ..utils.errors import DatabaseError, ValidationError
 
 def register_tools(mcp: FastMCP) -> None:
-    """Register observation management tools with the MCP server."""
+    """Register observation management tools with the MCP server.
+    
+    This function registers all observation-related tools with the MCP server instance.
+    Tools include:
+    - create_observation: Record new observations about entities
+    - update_observation: Modify existing observation data
+    - delete_observation: Remove observations from the system
+    
+    Each tool is registered with proper type hints, error handling, and database integration.
+    Tools follow MCP protocol patterns for consistent behavior and error reporting.
+    
+    Observation tools handle:
+    - Status updates and health checks
+    - Performance metrics and statistics
+    - Configuration changes and updates
+    - Security events and alerts
+    - Compliance validation results
+    
+    Tool capabilities include:
+    - Structured observation recording
+    - Historical data tracking
+    - Metadata management
+    - Observation categorization
+    - Data validation rules
+    """
 
     @mcp.tool()
     def create_observation(
@@ -34,7 +58,40 @@ def register_tools(mcp: FastMCP) -> None:
         metadata: Dict[str, Any] = None,
         db: Session = next(get_db())
     ) -> Dict[str, Any]:
-        """Create a new observation for an entity."""
+        """Create a new observation for an entity.
+        
+        Args:
+            entity_id: ID of the entity to observe
+            observation_type: Type of observation (e.g. 'status', 'metric', 'event')
+            value: Dictionary containing observation data
+            metadata: Optional metadata dictionary
+            db: Database session
+            
+        Returns:
+            Dict containing observation id and details
+            
+        Raises:
+            ValidationError: If entity not found
+            DatabaseError: If database operation fails
+            
+        Example:
+            >>> result = create_observation(
+            ...     entity_id=1,
+            ...     observation_type="status",
+            ...     value={"state": "running", "uptime": "24h"},
+            ...     metadata={"source": "monitoring"}
+            ... )
+            >>> print(result)
+            {
+                "id": 1,
+                "entity_id": 1,
+                "type": "status",
+                "value": {
+                    "state": "running",
+                    "uptime": "24h"
+                }
+            }
+        """
         try:
             # Verify entity exists
             entity = db.query(Entity).filter(Entity.id == entity_id).first()
@@ -68,7 +125,42 @@ def register_tools(mcp: FastMCP) -> None:
         metadata: Optional[Dict[str, Any]] = None,
         db: Session = next(get_db())
     ) -> Dict[str, Any]:
-        """Update an existing observation."""
+        """Update an existing observation.
+        
+        Args:
+            observation_id: ID of observation to update
+            value: Optional new observation value dictionary
+            metadata: Optional metadata to merge with existing
+            db: Database session
+            
+        Returns:
+            Dict containing updated observation details
+            
+        Raises:
+            ValidationError: If observation not found
+            DatabaseError: If update fails
+            
+        Example:
+            >>> result = update_observation(
+            ...     observation_id=1,
+            ...     value={"state": "stopped", "downtime": "10m"},
+            ...     metadata={"updated_by": "system"}
+            ... )
+            >>> print(result)
+            {
+                "id": 1,
+                "entity_id": 1,
+                "type": "status",
+                "value": {
+                    "state": "stopped",
+                    "downtime": "10m"
+                },
+                "metadata": {
+                    "source": "monitoring",
+                    "updated_by": "system"
+                }
+            }
+        """
         try:
             observation = db.query(Observation).filter(
                 Observation.id == observation_id
@@ -101,7 +193,26 @@ def register_tools(mcp: FastMCP) -> None:
         observation_id: int,
         db: Session = next(get_db())
     ) -> Dict[str, str]:
-        """Delete an observation."""
+        """Delete an observation.
+        
+        Args:
+            observation_id: ID of observation to delete
+            db: Database session
+            
+        Returns:
+            Dict containing success message
+            
+        Raises:
+            ValidationError: If observation not found
+            DatabaseError: If deletion fails
+            
+        Example:
+            >>> result = delete_observation(observation_id=1)
+            >>> print(result)
+            {
+                "message": "Observation 1 deleted successfully"
+            }
+        """
         try:
             observation = db.query(Observation).filter(
                 Observation.id == observation_id
