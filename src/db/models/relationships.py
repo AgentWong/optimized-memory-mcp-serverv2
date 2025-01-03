@@ -14,9 +14,14 @@ class Relationship(BaseModel, TimestampMixin):
     optional metadata and relationship type.
     """
     
-    entity_id = Column(Integer, ForeignKey('entity.id'), nullable=False)
-    target_id = Column(Integer, ForeignKey('entity.id'), nullable=False)
+    entity_id = Column(Integer, ForeignKey('entity.id'), nullable=False, index=True)
+    target_id = Column(Integer, ForeignKey('entity.id'), nullable=False, index=True)
     type = Column(String, nullable=False, index=True)
+    # Composite indexes for common lookups
+    __table_args__ = (
+        sa.Index('ix_relationship_entity_type', 'entity_id', 'type'),
+        sa.Index('ix_relationship_target_type', 'target_id', 'type'),
+    )
     metadata = Column(JSON, nullable=False, default=dict)
     
     # Relationships

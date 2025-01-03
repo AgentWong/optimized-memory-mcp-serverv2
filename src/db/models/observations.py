@@ -14,8 +14,12 @@ class Observation(BaseModel, TimestampMixin):
     about entities with timestamps and metadata.
     """
     
-    entity_id = Column(Integer, ForeignKey('entity.id'), nullable=False)
+    entity_id = Column(Integer, ForeignKey('entity.id'), nullable=False, index=True)
     type = Column(String, nullable=False, index=True)
+    # Composite index for entity+type lookups
+    __table_args__ = (
+        sa.Index('ix_observation_entity_type', 'entity_id', 'type'),
+    )
     value = Column(JSON, nullable=False)
     metadata = Column(JSON, nullable=False, default=dict)
     
