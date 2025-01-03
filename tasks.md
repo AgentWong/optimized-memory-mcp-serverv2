@@ -36,7 +36,7 @@
 - [x] Convert GET /versions/collections to collections://{name}/versions resource
 - [x] Convert GET /search/entities to search://{query} resource
 
-### Tool Implementation [⬜]
+### Tool Implementation [x]
 
 #### Entity Management Tools [x]
 - [x] Convert POST /entities to create_entity() tool
@@ -44,15 +44,15 @@
 - [x] Convert DELETE /entities/{id} to delete_entity() tool
 - [x] Convert POST /observations to add_observation() tool
 
-#### IaC Management Tools [⬜]
+#### IaC Management Tools [x]
 - [x] Convert POST /providers to register_provider() tool
 - [x] Convert POST /ansible/collections to register_collection() tool
 - [x] Convert POST /versions/collections to add_version() tool
 - [x] Convert GET /analysis/providers to analyze_provider() tool
 
-## Phase 3: Database Integration [⬜]
+## Phase 3: Database Integration [x]
 
-### Core Database [⬜]
+### Core Database [x]
 - [x] Verify SQLite schema compatibility
 - [x] Update database utility functions
 - [x] Implement connection pooling
