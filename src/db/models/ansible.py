@@ -21,5 +21,5 @@ class AnsibleCollection(BaseModel, TimestampMixin):
     
     # Relationships
     modules = relationship("ModuleParameter",
-                         back_populates="collection",
-                         cascade="all, delete-orphan")
+                        back_populates="collection",
+                        cascade="all, delete-orphan")

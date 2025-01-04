@@ -1,9 +1,11 @@
-"""
-Database initialization and setup utilities.
-"""
+"""Database initialization and setup utilities."""
+
 import os
+
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import declarative_base, sessionmaker
+
+from .utils.errors import DatabaseError
 
 # Base class for SQLAlchemy models
 Base = declarative_base()

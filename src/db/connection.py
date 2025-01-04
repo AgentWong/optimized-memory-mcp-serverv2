@@ -1,17 +1,16 @@
-"""
-Database connection management.
+"""Database connection management.
 
 Provides secure database connection handling with proper resource cleanup,
-connection pooling, and query result caching.
-"""
-from contextlib import contextmanager
-from typing import Generator, Optional, Any, Callable
-from functools import wraps
+connection pooling, and query result caching."""
+
+import gc
 import hashlib
 import json
-import gc
 import logging
-from datetime import datetime, timedelta
+from contextlib import contextmanager
+from datetime import datetime
+from functools import wraps
+from typing import Any, Callable, Generator
 
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError, TimeoutError

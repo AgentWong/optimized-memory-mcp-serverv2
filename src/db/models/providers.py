@@ -20,6 +20,6 @@ class Provider(BaseModel, TimestampMixin):
     metadata = Column(JSON, nullable=False, default=dict)
     
     # Relationships
-    resources = relationship("ResourceArgument", 
-                           back_populates="provider",
-                           cascade="all, delete-orphan")
+    resources = relationship("ResourceArgument",
+                        back_populates="provider",
+                        cascade="all, delete-orphan")
