@@ -18,6 +18,7 @@ from sqlalchemy.exc import IntegrityError
 from src.db.models.entities import Entity
 from src.db.models.relationships import Relationship
 from src.db.models.observations import Observation
+from src.main import create_server
 
 
 def test_entity_required_fields(db_session, mcp_server):

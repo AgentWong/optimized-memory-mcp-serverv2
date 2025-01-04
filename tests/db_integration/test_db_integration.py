@@ -21,6 +21,7 @@ from src.db.models.relationships import Relationship
 from src.db.models.observations import Observation
 from src.db.models.providers import Provider
 from src.db.models.ansible import AnsibleCollection
+from src.main import create_server
 
 
 @pytest.fixture
