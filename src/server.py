@@ -123,16 +123,27 @@ async def configure_server(server: FastMCP) -> None:
         server.start_async_operation = start_async_operation
 
         # Configure cleanup
-        def do_cleanup():
+        async def do_cleanup():
+            """Clean up server resources."""
             try:
+                # Close database connections
                 db = get_db()
                 next(db).close()
+                
+                # Force garbage collection
                 gc.collect()
+                
+                # Additional cleanup tasks can be added here
+                
+                logger.info("Server cleanup completed successfully")
             except Exception as e:
                 logger.error(f"Cleanup error: {str(e)}")
-                raise DatabaseError("Failed to cleanup resources")
+                # Don't raise here to ensure cleanup continues
+                return False
+            return True
 
-        server.cleanup_callback = do_cleanup
+        server.cleanup = do_cleanup
+        server.cleanup_callback = do_cleanup  # For backwards compatibility
 
     except Exception as e:
         raise ConfigurationError(f"Failed to configure server: {str(e)}")

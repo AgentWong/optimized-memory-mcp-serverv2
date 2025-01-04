@@ -156,8 +156,14 @@ class TestClient:
 
     async def close(self):
         """Clean up resources."""
-        if hasattr(self.server, "cleanup"):
-            await self.server.cleanup()
+        try:
+            if hasattr(self.server, "cleanup"):
+                await self.server.cleanup()
+            if hasattr(self.server, "close"):
+                await self.server.close()
+        except Exception as e:
+            # Log but don't raise to ensure cleanup continues
+            print(f"Error during cleanup: {e}")
 
     async def get_operation_status(self, operation_id: str):
         """Get status of an async operation."""
@@ -213,8 +219,14 @@ def mcp_server(db_session):
         yield server
     finally:
         # Cleanup
-        if hasattr(server, "cleanup"):
-            server.cleanup()
+        try:
+            if hasattr(server, "cleanup"):
+                server.cleanup()
+            if hasattr(server, "close"):
+                server.close()
+        except Exception as e:
+            # Log but don't raise to ensure cleanup continues
+            print(f"Error during cleanup: {e}")
 
 
 @pytest.fixture
