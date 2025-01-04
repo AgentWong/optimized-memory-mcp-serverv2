@@ -11,13 +11,13 @@ from ..utils.cache import generate_cache_key, get_cached, set_cached
 def register_resources(mcp: FastMCP) -> None:
     """Register entity-related MCP resources."""
 
-    @mcp.resource("entities://list")
+    @mcp.resource("entities://list/{page}/{per_page}/{type}/{created_after}")
     async def list_entities(
         ctx: Context,
-        page: int = 1,
-        per_page: int = 50,
-        type: str = None,
-        created_after: str = None,
+        page: str,
+        per_page: str,
+        type: str,
+        created_after: str,
     ) -> Dict[str, Any]:
         """List entities with pagination and filtering.
 
@@ -42,19 +42,23 @@ def register_resources(mcp: FastMCP) -> None:
         from ..utils.errors import ValidationError
         from datetime import datetime
 
-        # Validate pagination params
+        # Convert and validate pagination params
         try:
-            page = int(page)
-            per_page = int(per_page)
-            if per_page < 1 or per_page > 100:
+            page_num = int(page) if page != "null" else 1
+            items_per_page = int(per_page) if per_page != "null" else 50
+            if items_per_page < 1 or items_per_page > 100:
                 raise ValueError("per_page must be between 1 and 100")
-            if page < 1:
+            if page_num < 1:
                 raise ValueError("page must be positive")
         except ValueError as e:
             raise ValidationError(f"Invalid pagination parameters: {str(e)}")
 
-        # Parse created_after if provided
-        if created_after:
+        # Handle optional parameters
+        entity_type = None if type == "null" else type
+        created_after_date = None
+
+        # Parse created_after if provided and not null
+        if created_after and created_after != "null":
             try:
                 created_after_date = datetime.fromisoformat(created_after)
             except ValueError:
@@ -83,15 +87,15 @@ def register_resources(mcp: FastMCP) -> None:
             # Build query with filters
             query = db.query(Entity)
 
-            if type:
+            if entity_type:
                 # Validate entity type
                 valid_types = {"provider", "module", "resource"}
-                if type not in valid_types:
+                if entity_type not in valid_types:
                     raise ValidationError(
-                        f"Invalid entity type: {type}",
+                        f"Invalid entity type: {entity_type}",
                         details={"valid_types": list(valid_types)},
                     )
-                query = query.filter(Entity.type == type)
+                query = query.filter(Entity.entity_type == entity_type)
             if created_after:
                 query = query.filter(Entity.created_at >= created_after_date)
 
@@ -99,11 +103,11 @@ def register_resources(mcp: FastMCP) -> None:
             total = query.count()
 
             # Apply pagination
-            offset = (page - 1) * per_page
-            entities = query.offset(offset).limit(per_page).all()
+            offset = (page_num - 1) * items_per_page
+            entities = query.offset(offset).limit(items_per_page).all()
 
             # Calculate total pages
-            total_pages = (total + per_page - 1) // per_page
+            total_pages = (total + items_per_page - 1) // items_per_page
 
             # Log via MCP context with query details
             await ctx.info(
