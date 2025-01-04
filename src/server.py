@@ -68,34 +68,23 @@ def configure_server(server: FastMCP) -> None:
         register_ansible_tools(server)
         register_analysis_tools(server)
 
-        # Register error handler
-        @server.error_handler()
-        def handle_error(error: Exception, ctx: Optional[Context] = None) -> str:
-            if isinstance(error, MCPError):
-                logger.error(
-                    f"MCP error: {error.message}",
-                    extra={"code": error.code, "details": error.details},
-                )
-                return f"Error: {error.message}"
+        # Configure error handling
+        server.error_callback = lambda error, ctx=None: (
+            f"Error: {error.message}" if isinstance(error, MCPError)
+            else "Internal server error occurred"
+        )
 
-            logger.error(f"Unexpected error: {str(error)}")
-            return "Internal server error occurred"
-
-        # Register cleanup handler
-        @server.cleanup_handler()
-        def cleanup(ctx: Optional[Context] = None) -> None:
-            """Cleanup resources after request processing."""
+        # Configure cleanup
+        def do_cleanup():
             try:
-                # Close any open database connections
                 db = get_db()
                 next(db).close()
-
-                # Force garbage collection
                 gc.collect()
-
             except Exception as e:
                 logger.error(f"Cleanup error: {str(e)}")
                 raise DatabaseError("Failed to cleanup resources")
+            
+        server.cleanup_callback = do_cleanup
 
     except Exception as e:
         raise ConfigurationError(f"Failed to configure server: {str(e)}")
