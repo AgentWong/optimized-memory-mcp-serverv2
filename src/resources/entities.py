@@ -35,16 +35,11 @@ def register_resources(mcp: FastMCP) -> None:
     """Register entity-related resources with the MCP server."""
 
     @mcp.resource("entities://list")
-    def list_entities(
-        entity_type: Optional[str] = None,
-        db: Session = next(get_db())
-    ) -> List[Dict[str, Any]]:
-        """List all entities, optionally filtered by type."""
+    def list_entities() -> List[Dict[str, Any]]:
+        """List all entities."""
+        db = next(get_db())
         try:
             query = db.query(Entity)
-            if entity_type is not None:
-                query = query.filter(Entity.type == entity_type)
-
             entities = query.all()
             return [
                 {"id": e.id, "name": e.name, "type": e.type, "metadata": e.entity_metadata}

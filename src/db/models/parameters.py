@@ -3,10 +3,10 @@
 from sqlalchemy import Column, String, Integer, ForeignKey, JSON
 from sqlalchemy.orm import relationship
 
-from .base import BaseModel, TimestampMixin
+from .base import Base, BaseModel, TimestampMixin
 
 
-class ModuleParameter(BaseModel, TimestampMixin):
+class ModuleParameter(Base, BaseModel, TimestampMixin):
     """Represents parameters for Ansible modules.
 
     Stores configuration parameters and validation rules
@@ -17,7 +17,7 @@ class ModuleParameter(BaseModel, TimestampMixin):
     module_name = Column(String, nullable=False, index=True)
     name = Column(String, nullable=False, index=True)
     schema = Column(JSON, nullable=False)  # JSON Schema for validation
-    metadata = Column(JSON, nullable=False, default=dict)
+    module_metadata = Column(JSON, nullable=False, default=dict)
 
     # Relationships
     collection = relationship("AnsibleCollection", back_populates="modules")

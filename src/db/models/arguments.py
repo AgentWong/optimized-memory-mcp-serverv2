@@ -3,10 +3,10 @@
 from sqlalchemy import Column, ForeignKey, Integer, JSON, String
 from sqlalchemy.orm import relationship
 
-from .base import BaseModel, TimestampMixin
+from .base import Base, BaseModel, TimestampMixin
 
 
-class ResourceArgument(BaseModel, TimestampMixin):
+class ResourceArgument(Base, BaseModel, TimestampMixin):
     """Represents arguments/parameters for provider resources.
 
     Stores configuration parameters and validation rules
@@ -17,6 +17,6 @@ class ResourceArgument(BaseModel, TimestampMixin):
     name = Column(String, nullable=False, index=True)
     resource_type = Column(String, nullable=False, index=True)
     schema = Column(JSON, nullable=False)  # JSON Schema for validation
-    metadata = Column(JSON, nullable=False, default=dict)
+    resource_metadata = Column(JSON, nullable=False, default=dict)
     # Relationships
     provider = relationship("Provider", back_populates="resources")

@@ -4,6 +4,7 @@ from sqlalchemy import Column, JSON, String
 from sqlalchemy.orm import relationship
 
 from .base import Base, BaseModel, TimestampMixin
+from .arguments import ResourceArgument
 
 
 class Provider(Base, BaseModel, TimestampMixin):
@@ -19,5 +20,5 @@ class Provider(Base, BaseModel, TimestampMixin):
     meta_data = Column(JSON, nullable=False, default=dict)
     # Relationships
     resources = relationship(
-        "ResourceArgument", back_populates="provider", cascade="all, delete-orphan"
+        ResourceArgument, back_populates="provider", cascade="all, delete-orphan"
     )
