@@ -42,8 +42,7 @@ def register_tools(mcp: FastMCP) -> None:
     def analyze_provider(
         provider_id: int,
         from_version: str,
-        to_version: str,
-        db: Session = next(get_db()),
+        to_version: str
     ) -> Dict[str, Any]:
         """Analyze changes between provider versions.
 
@@ -140,11 +139,12 @@ def register_tools(mcp: FastMCP) -> None:
         """
 
         try:
-            provider = db.query(Provider).filter(Provider.id == provider_id).first()
-            if not provider:
-                raise ValidationError(
-                    "Provider not found", {"provider_id": provider_id}
-                )
+            with next(get_db()) as db:
+                provider = db.query(Provider).filter(Provider.id == provider_id).first()
+                if not provider:
+                    raise ValidationError(
+                        "Provider not found", {"provider_id": provider_id}
+                    )
 
             analysis = {
                 "breaking_changes": [],
