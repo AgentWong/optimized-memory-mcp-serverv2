@@ -27,6 +27,17 @@ def db_session():
         expire_on_commit=False,  # Prevent detached instance errors
     )
 
+    # Import all models to ensure they're registered
+    from src.db.models import (
+        entities,
+        relationships,
+        observations,
+        providers,
+        arguments,
+        ansible,
+        parameters
+    )
+    
     # Create all tables
     Base.metadata.create_all(engine)
 

@@ -78,7 +78,7 @@ def test_model_validation(db_session: Session):
 def test_entity_crud_operations(db_session: Session):
     """Test CRUD operations for Entity model"""
     # Create
-    entity = Entity(name="test_entity", entity_type="test_type")
+    entity = Entity(name="test_entity", entity_type="test_type", meta_data={})
     db_session.add(entity)
     db_session.commit()
 
@@ -136,7 +136,11 @@ def test_observation_creation(db_session: Session):
 
     # Create observation
     obs = Observation(
-        entity_id=entity.id, observation_type="test_observation", data={"test": "data"}
+        entity_id=entity.id,
+        type="test_observation",
+        observation_type="test",
+        value={"test": "data"},
+        meta_data={}
     )
     db_session.add(obs)
     db_session.commit()
