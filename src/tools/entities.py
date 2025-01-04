@@ -47,9 +47,11 @@ async def register_tools(mcp: FastMCP) -> list:
     - Entity lifecycle management
     - Metadata and property updates
     - State tracking and validation
-    - Relationship management
-    - Resource allocation tracking
+
+    Returns:
+        List of registered tool objects
     """
+    tools = []
 
     @mcp.tool()
     async def create_entity(
@@ -251,3 +253,7 @@ async def register_tools(mcp: FastMCP) -> list:
             raise DatabaseError(f"Failed to delete entity {str(entity_id)}: {str(e)}")
         finally:
             db.close()
+            
+    # Return list of registered tools
+    tools.extend([create_entity, update_entity, delete_entity])
+    return tools

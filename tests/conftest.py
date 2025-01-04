@@ -229,7 +229,7 @@ class TestClient:
 
 
 @pytest.fixture(scope="function")
-def mcp_server(db_session):
+async def mcp_server(db_session):
     """Create MCP server instance for testing."""
     from src.main import create_server
 
@@ -242,9 +242,8 @@ def mcp_server(db_session):
     db_session.execute(text("PRAGMA foreign_keys=ON"))
     db_session.commit()
 
-    import asyncio
     # Create and configure server
-    server = asyncio.run(create_server())
+    server = await create_server()
 
     try:
         yield server
@@ -252,9 +251,9 @@ def mcp_server(db_session):
         # Cleanup
         try:
             if hasattr(server, "cleanup"):
-                asyncio.run(server.cleanup())
+                await server.cleanup()
             if hasattr(server, "close"):
-                asyncio.run(server.close())
+                await server.close()
         except Exception as e:
             # Log but don't raise to ensure cleanup continues
             print(f"Error during cleanup: {e}")

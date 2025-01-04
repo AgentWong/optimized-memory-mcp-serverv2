@@ -71,18 +71,30 @@ async def configure_server(server: FastMCP) -> FastMCP:
 
         # Register all tools with error handling
         try:
-            # Register tools and store results
+            # Register tools and store results with error handling
+            tool_registrations = [
+                ("entity", register_entity_tools),
+                ("relationship", register_relationship_tools), 
+                ("observation", register_observation_tools),
+                ("provider", register_provider_tools),
+                ("ansible", register_ansible_tools),
+                ("analysis", register_analysis_tools)
+            ]
+            
             tools = []
-            tools.extend(await register_entity_tools(server))
-            tools.extend(await register_relationship_tools(server))
-            tools.extend(await register_observation_tools(server))
-            tools.extend(await register_provider_tools(server))
-            tools.extend(await register_ansible_tools(server))
-            tools.extend(await register_analysis_tools(server))
+            for tool_type, register_fn in tool_registrations:
+                try:
+                    new_tools = await register_fn(server)
+                    tools.extend(new_tools)
+                    logger.info(f"Registered {len(new_tools)} {tool_type} tools")
+                except Exception as e:
+                    logger.error(f"Failed to register {tool_type} tools: {str(e)}")
+                    raise ConfigurationError(f"Failed to register {tool_type} tools: {str(e)}")
             
             # Store registered tools
             for tool in tools:
                 server._tools[tool.name] = tool
+                logger.debug(f"Stored tool: {tool.name}")
         except Exception as e:
             logger.error(f"Failed to register tools: {str(e)}")
             raise ConfigurationError(f"Tool registration failed: {str(e)}")
