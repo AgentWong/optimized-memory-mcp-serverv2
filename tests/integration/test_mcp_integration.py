@@ -42,22 +42,14 @@ def test_full_entity_workflow(mcp_server, db_session: Session):
     """Test complete entity lifecycle including relationships and observations"""
     # Create initial entity
     entity1_result = mcp_server.call_tool(
-        "create_entity",
-        arguments={
-            "name": "test_entity_1",
-            "entity_type": "test_type"
-        }
+        "create_entity", arguments={"name": "test_entity_1", "entity_type": "test_type"}
     )
     assert entity1_result is not None
     entity1_id = entity1_result["id"]
 
     # Create related entity
     entity2_result = mcp_server.call_tool(
-        "create_entity",
-        arguments={
-            "name": "test_entity_2",
-            "entity_type": "test_type"
-        }
+        "create_entity", arguments={"name": "test_entity_2", "entity_type": "test_type"}
     )
     assert entity2_result is not None
     entity2_id = entity2_result["id"]
@@ -68,8 +60,8 @@ def test_full_entity_workflow(mcp_server, db_session: Session):
         arguments={
             "source_id": entity1_id,
             "target_id": entity2_id,
-            "relationship_type": "test_relationship"
-        }
+            "relationship_type": "test_relationship",
+        },
     )
     assert rel_result is not None
 
@@ -79,8 +71,8 @@ def test_full_entity_workflow(mcp_server, db_session: Session):
         arguments={
             "entity_id": entity1_id,
             "observation_type": "test_observation",
-            "data": {"test": "data"}
-        }
+            "data": {"test": "data"},
+        },
     )
     assert obs_result is not None
 
@@ -97,17 +89,13 @@ def test_search_and_analysis_workflow(mcp_server, db_session: Session):
     # Create test entity
     entity_result = mcp_server.call_tool(
         "create_entity",
-        arguments={
-            "name": "searchable_entity",
-            "entity_type": "test_type"
-        }
+        arguments={"name": "searchable_entity", "entity_type": "test_type"},
     )
     assert entity_result is not None
 
     # Search for entity
     search_result = mcp_server.call_tool(
-        "search_entities",
-        arguments={"query": "searchable"}
+        "search_entities", arguments={"query": "searchable"}
     )
     assert search_result is not None
     assert len(search_result) > 0
@@ -127,17 +115,13 @@ def test_error_handling(mcp_server):
             arguments={
                 "source_id": 99999,
                 "target_id": 99999,
-                "relationship_type": "test"
-            }
+                "relationship_type": "test",
+            },
         )
 
     # Test invalid observation creation
     with pytest.raises(Exception):
         mcp_server.call_tool(
             "add_observation",
-            arguments={
-                "entity_id": 99999,
-                "observation_type": "test",
-                "data": {}
-            }
+            arguments={"entity_id": 99999, "observation_type": "test", "data": {}},
         )

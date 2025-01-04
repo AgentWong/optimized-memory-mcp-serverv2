@@ -42,7 +42,12 @@ def register_resources(mcp: FastMCP) -> None:
             query = db.query(Entity)
             entities = query.all()
             return [
-                {"id": e.id, "name": e.name, "type": e.type, "metadata": e.entity_metadata}
+                {
+                    "id": e.id,
+                    "name": e.name,
+                    "type": e.type,
+                    "metadata": e.entity_metadata,
+                }
                 for e in entities
             ]
         except Exception as e:

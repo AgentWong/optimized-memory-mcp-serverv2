@@ -101,14 +101,13 @@ def get_db_connection() -> Generator[Session, None, None]:
 
     try:
         # Set secure timeouts if not SQLite
-        if not db.bind.dialect.name == 'sqlite':
+        if not db.bind.dialect.name == "sqlite":
             db.execute(
-                text("SET statement_timeout = :timeout"),
-                {"timeout": STATEMENT_TIMEOUT}
+                text("SET statement_timeout = :timeout"), {"timeout": STATEMENT_TIMEOUT}
             )
             db.execute(
                 text("SET idle_in_transaction_session_timeout = :timeout"),
-                {"timeout": IDLE_IN_TRANSACTION_TIMEOUT}
+                {"timeout": IDLE_IN_TRANSACTION_TIMEOUT},
             )
         logger.debug("Database connection established")
 
