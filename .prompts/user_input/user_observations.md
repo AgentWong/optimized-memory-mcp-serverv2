@@ -1,3 +1,4 @@
 - "mcp.testing" is not a valid module of the MCP SDK and no attempts should be made to add it to any testing.
 - The AI keeps trying to add FastAPI, API, and HTTP related code despite "no-fastapi.xml" rules directing it not to, ensure nothing you create adds any references to these.
-- We've gone through at least 6 cycles of "I log pytest errors to pytest_short_error_summary.txt" => "AI tries to fix errors" with no improvement in the number of failed tests or the number of errors (appears to be consistently at 35).  I believe a comprehensive review of the entire codebase is necessary.  There appears to be a major inconsistency between what the module does and the tests that are written for it.
+- In the past 10+ iterations you appear to be going in a continual loop of 1) Adding query parameters and then 2) Remov
+ing the query parameters because it is not needed for the MCP resources.
