@@ -15,11 +15,18 @@ class Observation(Base, BaseModel, TimestampMixin):
 
     entity_id = Column(Integer, ForeignKey("entity.id"), nullable=False, index=True)
     type = Column(String, nullable=False, index=True)  # Category of observation
-    observation_type = Column(String, nullable=False, index=True)  # Specific observation kind
-    
+    observation_type = Column(
+        String, nullable=False, index=True
+    )  # Specific observation kind
+
     VALID_TYPES = {
-        'state', 'metric', 'event', 'configuration', 
-        'dependency', 'security', 'performance'
+        "state",
+        "metric",
+        "event",
+        "configuration",
+        "dependency",
+        "security",
+        "performance",
     }
 
     def __init__(self, **kwargs):
@@ -31,6 +38,7 @@ class Observation(Base, BaseModel, TimestampMixin):
             raise ValueError("Observation type cannot be empty")
         if not isinstance(self.value, (dict, list)):
             raise ValueError("Value must be a JSON-serializable object")
+
     # Composite indexes for common lookups
     __table_args__ = (
         Index("ix_observation_entity_type", "entity_id", "type"),

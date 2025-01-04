@@ -37,7 +37,7 @@ def test_base_model_to_dict(db_session: Session):
         name="test_entity",
         entity_type="test_type",
         meta_data={"key": "value"},
-        tags=["tag1", "tag2"]
+        tags=["tag1", "tag2"],
     )
     db_session.add(entity)
     db_session.commit()
@@ -51,6 +51,7 @@ def test_base_model_to_dict(db_session: Session):
     assert "created_at" in entity_dict
     assert "updated_at" in entity_dict
 
+
 def test_model_validation(db_session: Session):
     """Test model field validation"""
     # Test required fields
@@ -61,19 +62,14 @@ def test_model_validation(db_session: Session):
 
     # Test field length limits
     with pytest.raises(Exception):
-        entity = Entity(
-            name="x" * 256,  # Exceeds max length
-            entity_type="test_type"
-        )
+        entity = Entity(name="x" * 256, entity_type="test_type")  # Exceeds max length
         db_session.add(entity)
         db_session.commit()
 
     # Test JSON field validation
     with pytest.raises(Exception):
         entity = Entity(
-            name="test",
-            entity_type="test_type",
-            meta_data="invalid"  # Should be dict
+            name="test", entity_type="test_type", meta_data="invalid"  # Should be dict
         )
         db_session.add(entity)
         db_session.commit()

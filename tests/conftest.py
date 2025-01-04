@@ -16,7 +16,7 @@ def db_session():
         "sqlite:///:memory:",
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
-        echo=True  # Enable SQL logging for tests
+        echo=True,  # Enable SQL logging for tests
     )
 
     # Create session factory
@@ -24,12 +24,12 @@ def db_session():
         bind=engine,
         autocommit=False,
         autoflush=False,
-        expire_on_commit=False  # Prevent detached instance errors
+        expire_on_commit=False,  # Prevent detached instance errors
     )
 
     # Create all tables
     Base.metadata.create_all(engine)
-    
+
     # Create session
     session = TestingSessionLocal()
 
@@ -48,69 +48,67 @@ def db_session():
 def test_entity(db_session):
     """Create a test entity."""
     from src.db.models.entities import Entity
-    
-    entity = Entity(
-        name="test-entity",
-        type="test",
-        meta_data={"test": True}
-    )
+
+    entity = Entity(name="test-entity", type="test", meta_data={"test": True})
     db_session.add(entity)
     db_session.commit()
     return entity
+
 
 @pytest.fixture
 def test_provider(db_session):
     """Create a test provider."""
     from src.db.models.providers import Provider
-    
+
     provider = Provider(
-        name="test-provider",
-        type="aws",
-        version="1.0",
-        meta_data={"test": True}
+        name="test-provider", type="aws", version="1.0", meta_data={"test": True}
     )
     db_session.add(provider)
     db_session.commit()
     return provider
 
+
 @pytest.fixture
 def test_relationship(db_session, test_entity):
     """Create a test relationship between entities."""
     from src.db.models.relationships import Relationship
-    
+
     # Create second entity for relationship
     from src.db.models.entities import Entity
+
     target = Entity(name="target", type="test")
     db_session.add(target)
     db_session.commit()
-    
+
     rel = Relationship(
         entity_id=test_entity.id,
         source_id=test_entity.id,
         target_id=target.id,
         type="depends_on",
         relationship_type="test",
-        meta_data={"test": True}
+        meta_data={"test": True},
     )
     db_session.add(rel)
     db_session.commit()
     return rel
 
+
 @pytest.fixture
 def test_observation(db_session, test_entity):
     """Create a test observation."""
     from src.db.models.observations import Observation
-    
+
     obs = Observation(
         entity_id=test_entity.id,
         type="state",
         observation_type="test",
         value={"status": "test"},
-        meta_data={"test": True}
+        meta_data={"test": True},
     )
     db_session.add(obs)
     db_session.commit()
     return obs
+
 
 @pytest.fixture(scope="function")
 def client(db_session):
@@ -124,7 +122,7 @@ def client(db_session):
 
     # Create MCP server with test config
     server = create_server()
-    
+
     # Create and return MCP test client
     client = TestClient(server)
     try:

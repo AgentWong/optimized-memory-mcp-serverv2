@@ -13,17 +13,16 @@ Base = declarative_base()
 # Get database URL from environment or use default SQLite
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///mcp_server.db")
 
+
 # Create engine with appropriate configuration for environment
 def create_db_engine():
     """Create database engine with environment-appropriate settings."""
     is_test = os.getenv("TESTING", "").lower() == "true"
-    
+
     if is_test or DATABASE_URL.startswith("sqlite"):
         # SQLite configuration (including tests)
         return create_engine(
-            DATABASE_URL,
-            echo=True,
-            connect_args={"check_same_thread": False}
+            DATABASE_URL, echo=True, connect_args={"check_same_thread": False}
         )
     else:
         # Production PostgreSQL configuration
@@ -36,6 +35,7 @@ def create_db_engine():
             pool_recycle=3600,
         )
 
+
 engine = create_db_engine()
 
 # Create session factory
@@ -44,7 +44,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def init_db(force: bool = False):
     """Initialize the database, creating all tables.
-    
+
     Args:
         force: If True, drop existing tables before creation.
               Only use in development/testing!
@@ -66,8 +66,10 @@ def init_db(force: bool = False):
             if os.getenv("TESTING", "").lower() == "true":
                 Base.metadata.drop_all(bind=engine)
             else:
-                raise DatabaseError("Cannot force drop tables outside of testing environment")
-        
+                raise DatabaseError(
+                    "Cannot force drop tables outside of testing environment"
+                )
+
         # Create any missing tables
         Base.metadata.create_all(bind=engine)
     except Exception as e:

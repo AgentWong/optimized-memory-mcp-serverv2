@@ -17,11 +17,18 @@ class Relationship(Base, BaseModel, TimestampMixin):
     source_id = Column(Integer, ForeignKey("entity.id"), nullable=False, index=True)
     target_id = Column(Integer, ForeignKey("entity.id"), nullable=False, index=True)
     type = Column(String, nullable=False, index=True)  # Entity relationship category
-    relationship_type = Column(String, nullable=False, index=True)  # Specific relationship kind
-    
+    relationship_type = Column(
+        String, nullable=False, index=True
+    )  # Specific relationship kind
+
     VALID_TYPES = {
-        'depends_on', 'contains', 'references', 'manages', 
-        'configures', 'monitors', 'deploys'
+        "depends_on",
+        "contains",
+        "references",
+        "manages",
+        "configures",
+        "monitors",
+        "deploys",
     }
 
     def __init__(self, **kwargs):
@@ -33,6 +40,7 @@ class Relationship(Base, BaseModel, TimestampMixin):
             raise ValueError("Relationship type cannot be empty")
         if self.source_id == self.target_id:
             raise ValueError("Source and target cannot be the same entity")
+
     # Composite indexes for common lookups and traversals
     __table_args__ = (
         Index("ix_relationship_entity_type", "entity_id", "type"),

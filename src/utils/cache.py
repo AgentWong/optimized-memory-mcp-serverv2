@@ -1,4 +1,5 @@
 """Caching utilities for MCP resources."""
+
 import json
 from typing import Optional, Any
 from redis import Redis
@@ -9,13 +10,15 @@ redis_client = Redis(
     host=Config.REDIS_HOST,
     port=Config.REDIS_PORT,
     db=Config.REDIS_DB,
-    decode_responses=True
+    decode_responses=True,
 )
+
 
 def generate_cache_key(resource_type: str, identifier: str, **params) -> str:
     """Generate a cache key for a resource."""
-    param_str = '_'.join(f"{k}={v}" for k, v in sorted(params.items()) if v)
+    param_str = "_".join(f"{k}={v}" for k, v in sorted(params.items()) if v)
     return f"mcp:{resource_type}:{identifier}:{param_str}"
+
 
 def get_cached(key: str) -> Optional[dict]:
     """Get cached data if available."""
@@ -25,12 +28,14 @@ def get_cached(key: str) -> Optional[dict]:
     except Exception:
         return None
 
+
 def set_cached(key: str, data: Any, expire: int = 300) -> None:
     """Cache data with expiration."""
     try:
         redis_client.setex(key, expire, json.dumps(data))
     except Exception:
         pass
+
 
 def invalidate_entity_cache(entity_id: str) -> None:
     """Invalidate all cached data for an entity."""
@@ -41,6 +46,7 @@ def invalidate_entity_cache(entity_id: str) -> None:
             redis_client.delete(*keys)
     except Exception:
         pass
+
 
 def invalidate_entity_list_cache() -> None:
     """Invalidate all cached entity lists."""
