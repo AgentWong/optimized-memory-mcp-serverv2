@@ -11,15 +11,17 @@ from ..config import Config
 
 def configure_logging() -> None:
     """Configure logging for the application."""
+    is_test = os.getenv("TESTING", "").lower() == "true"
+    
     logging_config: Dict[str, Any] = {
         "version": 1,
-        "disable_existing_loggers": False,
+        "disable_existing_loggers": True if is_test else False,
         "formatters": {
             "standard": {"format": Config.LOG_FORMAT},
         },
         "handlers": {
             "default": {
-                "level": Config.LOG_LEVEL,
+                "level": "ERROR" if is_test else Config.LOG_LEVEL,
                 "formatter": "standard",
                 "class": "logging.StreamHandler",
                 "stream": "ext://sys.stdout",
@@ -28,12 +30,17 @@ def configure_logging() -> None:
         "loggers": {
             "": {  # root logger
                 "handlers": ["default"],
-                "level": Config.LOG_LEVEL,
+                "level": "ERROR" if is_test else Config.LOG_LEVEL,
                 "propagate": True,
             },
             "mcp_server": {
                 "handlers": ["default"],
-                "level": Config.LOG_LEVEL,
+                "level": "ERROR" if is_test else Config.LOG_LEVEL,
+                "propagate": False,
+            },
+            "sqlalchemy": {
+                "handlers": ["default"],
+                "level": "ERROR" if is_test else Config.LOG_LEVEL,
                 "propagate": False,
             },
         },

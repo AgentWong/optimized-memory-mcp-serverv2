@@ -8,6 +8,15 @@ from src.db.models.base import Base
 from src.config import Config
 
 
+@pytest.fixture(autouse=True)
+def setup_test_env():
+    """Configure test environment."""
+    os.environ["TESTING"] = "true"
+    os.environ["LOG_LEVEL"] = "ERROR"
+    yield
+    os.environ.pop("TESTING", None)
+    os.environ.pop("LOG_LEVEL", None)
+
 @pytest.fixture(scope="function")
 def db_session():
     """Create a new database session for each test function."""

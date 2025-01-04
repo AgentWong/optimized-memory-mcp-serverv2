@@ -21,7 +21,7 @@ def create_db_engine():
     if is_test or DATABASE_URL.startswith("sqlite"):
         # SQLite configuration (including tests)
         return create_engine(
-            DATABASE_URL, echo=True, connect_args={"check_same_thread": False}
+            DATABASE_URL, echo=False, connect_args={"check_same_thread": False}
         )
     else:
         # Production PostgreSQL configuration
