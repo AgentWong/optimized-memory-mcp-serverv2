@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repositoryExplorationGuide>
+    <overview>
+        <description>This guide focuses on systematic exploration of Python repositories using aider's repomap function. It emphasizes incremental analysis to avoid context window limitations while maintaining comprehensive understanding.</description>
+    </overview>
+
+    <modeSelection>
+        <command>aider --architect /path/to/repo</command>
+        <alternativeCommand>chat-mode architect</alternativeCommand>
+        <note>Use within an active session</note>
+    </modeSelection>
+
+    <repositoryStructureAnalysis status="pending">
+        <basicInformation status="pending">
+            <items>
+                <item>Repository name and URL</item>
+                <item>Main purpose and scope</item>
+                <item>License type</item>
+                <item>Python version requirements</item>
+                <item>Key dependencies (from setup.py/requirements.txt)</item>
+            </items>
+        </basicInformation>
+
+        <incrementalDirectoryExploration status="pending">
+            <phases>
+                <phase name="rootLevelAnalysis" status="pending">
+                    <tasks>
+                        <task>Use repomap to list root directory contents</task>
+                        <task>Identify key configuration files</task>
+                        <task>Note special files (setup.py, requirements.txt, etc.)</task>
+                        <task>Document repository structure overview</task>
+                    </tasks>
+                </phase>
+
+                <phase name="moduleExploration" status="pending">
+                    <tasks>
+                        <task>List all top-level modules</task>
+                        <task>For each module:</task>
+                        <subtasks>
+                            <task>Use repomap to explore structure</task>
+                            <task>Document purpose and responsibilities</task>
+                            <task>Note key files and their roles</task>
+                            <task>Identify internal dependencies</task>
+                        </subtasks>
+                    </tasks>
+                </phase>
+
+                <phase name="testDirectoryAnalysis" status="pending">
+                    <tasks>
+                        <task>Map test directory structure</task>
+                        <task>Identify test categories</task>
+                        <task>Document test file organization</task>
+                        <task>Note testing utilities and helpers</task>
+                    </tasks>
+                </phase>
+            </phases>
+        </incrementalDirectoryExploration>
+    </repositoryStructureAnalysis>
+
+    <codeAnalysisPlan status="pending">
+        <incrementalModuleAnalysis status="pending">
+            <sections>
+                <section name="coreModules" status="pending">
+                    <tasks>
+                        <task>Identify entry points</task>
+                        <task>Map primary interfaces</task>
+                        <task>Document key classes</task>
+                        <task>Note important algorithms</task>
+                    </tasks>
+                </section>
+
+                <section name="supportingUtilities" status="pending">
+                    <tasks>
+                        <task>List utility modules</task>
+                        <task>Document helper functions</task>
+                        <task>Note shared resources</task>
+                    </tasks>
+                </section>
+
+                <section name="externalInterfaces" status="pending">
+                    <tasks>
+                        <task>Identify API endpoints</task>
+                        <task>Document integration points</task>
+                        <task>Note configuration options</task>
+                    </tasks>
+                </section>
+            </sections>
+        </incrementalModuleAnalysis>
+
+        <dependencyMapping status="pending">
+            <sections>
+                <section name="externalDependencies" status="pending">
+                    <tasks>
+                        <task>List required packages</task>
+                        <task>Document version constraints</task>
+                        <task>Note optional dependencies</task>
+                    </tasks>
+                </section>
+
+                <section name="internalDependencies" status="pending">
+                    <tasks>
+                        <task>Map import relationships</task>
+                        <task>Document module dependencies</task>
+                        <task>Note circular dependencies</task>
+                    </tasks>
+                </section>
+            </sections>
+        </dependencyMapping>
+    </codeAnalysisPlan>
+
+    <progressTracking>
+        <sessionManagement>
+            <fields>
+                <field name="currentSession">Session number</field>
+                <field name="date">Current date</field>
+                <field name="currentFocus">Module/component being analyzed</field>
+                <field name="completedItems">List of completed checkboxes</field>
+                <field name="nextSteps">Next modules/components to analyze</field>
+            </fields>
+        </sessionManagement>
+
+        <explorationNotes>
+            <requirements>
+                <item>Document key findings for each module</item>
+                <item>Note areas needing deeper investigation</item>
+                <item>Record potential issues or concerns</item>
+                <item>Track questions for follow-up</item>
+            </requirements>
+        </explorationNotes>
+    </progressTracking>
+
+    <bestPractices>
+        <repomapUsage>
+            <steps>
+                <step>Start with high-level directory structure</step>
+                <step>Explore one module at a time</step>
+                <step>Document findings immediately</step>
+                <step>Note relationships between components</step>
+                <step>Track progress systematically</step>
+            </steps>
+        </repomapUsage>
+
+        <contextManagement>
+            <guidelines>
+                <guideline>Focus on one component at a time</guideline>
+                <guideline>Use incremental exploration</guideline>
+                <guideline>Document relationships without loading full content</guideline>
+                <guideline>Reference file paths instead of content</guideline>
+                <guideline>Save detailed analysis for task generation phase</guideline>
+            </guidelines>
+        </contextManagement>
+    </bestPractices>
+
+    <reminder>
+        The goal is to understand the repository structure and relationships without exceeding context limitations. 
+        Detailed implementation analysis should be deferred to the task generation phase.
+    </reminder>
+</repositoryExplorationGuide>

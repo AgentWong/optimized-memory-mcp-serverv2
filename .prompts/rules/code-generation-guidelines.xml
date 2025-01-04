@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pythonCodeGuidelinesDoc>
+    <coreRequirements>
+        <requirement>
+            <rule>All Python script files must be less than 250 lines of code</rule>
+            <description>This is a strict requirement that promotes maintainability and forces proper separation of concerns. When a file approaches this limit, it should be split into logical components with clear responsibilities and interfaces.</description>
+        </requirement>
+    </coreRequirements>
+
+    <codeOrganization>
+        <principles>
+            <description>Code should be organized to maximize readability, maintainability, and reusability. Each module should have a single, well-defined purpose that is clearly expressed through its organization and documentation.</description>
+        </principles>
+
+        <fileStructure>
+            <topSection>
+                <item>Module docstring describing purpose and usage</item>
+                <item>Future imports if needed</item>
+                <item>Standard library imports</item>
+                <item>Third-party package imports</item>
+                <item>Local application imports</item>
+                <item>Module-level constants and configurations</item>
+            </topSection>
+            <mainBody>
+                <item>Class definitions</item>
+                <item>Function definitions</item>
+                <item>Main execution code (if applicable)</item>
+            </mainBody>
+        </fileStructure>
+
+        <codeModularity>
+            <principle>Functions and classes should be designed with clear boundaries and single responsibilities. Complex operations should be broken down into smaller, manageable components that can be understood, tested, and maintained independently.</principle>
+        </codeModularity>
+
+        <interfaceDesign>
+            <principle>Public interfaces should be clearly defined and documented. Implementation details should be appropriately encapsulated using Python's naming conventions (_single_underscore for internal use, __double_underscore for name mangling).</principle>
+        </interfaceDesign>
+    </codeOrganization>
+
+    <documentationStandards>
+        <overview>Documentation is an integral part of code design and should be written alongside the code, not as an afterthought.</overview>
+        
+        <moduleDocumentation>
+            <requirements>
+                <item>The module's purpose</item>
+                <item>Key classes and functions</item>
+                <item>Usage examples</item>
+                <item>Any important notes or caveats</item>
+            </requirements>
+        </moduleDocumentation>
+
+        <functionClassDocumentation>
+            <requirements>
+                <item>Purpose and behavior</item>
+                <item>Parameters and their types</item>
+                <item>Return values and types</item>
+                <item>Exceptions that may be raised</item>
+                <item>Usage examples for complex interfaces</item>
+            </requirements>
+        </functionClassDocumentation>
+    </documentationStandards>
+
+    <errorHandling>
+        <principles>
+            <item>Use specific exception types rather than catching Exception</item>
+            <item>Provide meaningful error messages</item>
+            <item>Maintain appropriate exception hierarchy</item>
+            <item>Document error conditions and handling</item>
+        </principles>
+    </errorHandling>
+
+    <testingConsiderations>
+        <principles>
+            <item>Functions should have clear inputs and outputs</item>
+            <item>Side effects should be minimized and well-documented</item>
+            <item>Complex conditions should be separated into testable components</item>
+            <item>Test hooks should be provided where appropriate</item>
+        </principles>
+    </testingConsiderations>
+
+    <performanceGuidelines>
+        <principles>
+            <item>Optimize for readability first</item>
+            <item>Document performance characteristics</item>
+            <item>Use appropriate data structures</item>
+            <item>Consider memory usage</item>
+            <item>Profile before optimizing</item>
+        </principles>
+    </performanceGuidelines>
+
+    <securityGuidelines>
+        <principles>
+            <item>Input validation for all external data</item>
+            <item>Proper handling of sensitive information</item>
+            <item>Secure defaults for all configurable options</item>
+            <item>Regular security updates for dependencies</item>
+        </principles>
+    </securityGuidelines>
+
+    <maintenanceConsiderations>
+        <principles>
+            <item>Clear and consistent naming conventions</item>
+            <item>Regular refactoring to maintain code quality</item>
+            <item>Comprehensive documentation updates</item>
+            <item>Version control best practices</item>
+        </principles>
+    </maintenanceConsiderations>
+
+    <versionControlIntegration>
+        <principles>
+            <item>Logical commit boundaries</item>
+            <item>Clear commit messages</item>
+            <item>Appropriate use of branching</item>
+            <item>Effective merge conflict resolution</item>
+        </principles>
+    </versionControlIntegration>
+
+    <dependencyManagement>
+        <principles>
+            <item>Clear documentation of requirements</item>
+            <item>Version pinning for stability</item>
+            <item>Regular updates and security patches</item>
+            <item>Minimal dependency principle</item>
+        </principles>
+    </dependencyManagement>
+
+    <codeReviewGuidelines>
+        <principles>
+            <item>Clear and logical organization</item>
+            <item>Self-documenting where possible</item>
+            <item>Complex sections explained in comments</item>
+            <item>Consistent style and formatting</item>
+        </principles>
+    </codeReviewGuidelines>
+
+    <deploymentConsiderations>
+        <principles>
+            <item>Environment independence</item>
+            <item>Configuration management</item>
+            <item>Logging and monitoring hooks</item>
+            <item>Graceful error handling</item>
+        </principles>
+    </deploymentConsiderations>
+
+    <backwardCompatibility>
+        <principles>
+            <item>Clear deprecation warnings</item>
+            <item>Migration guides for breaking changes</item>
+            <item>Version numbering adherence</item>
+            <item>Compatibility testing</item>
+        </principles>
+    </backwardCompatibility>
+</pythonCodeGuidelinesDoc>
