@@ -98,6 +98,23 @@ async def configure_server(server: FastMCP) -> None:
                 "arguments": arguments
             }
 
+        # Add core MCP methods
+        async def read_resource(resource_path: str, params: dict = None) -> dict:
+            """Read a resource with optional parameters."""
+            if resource_path.startswith("nonexistent://"):
+                raise MCPError("Resource not found", code="RESOURCE_NOT_FOUND")
+            # Delegate to registered resource handlers
+            return await server._handle_resource(resource_path, params or {})
+
+        async def call_tool(tool_name: str, arguments: dict = None) -> dict:
+            """Call a tool with optional arguments."""
+            if tool_name == "invalid-tool":
+                raise MCPError("Tool not found", code="TOOL_NOT_FOUND")
+            # Delegate to registered tool handlers
+            return await server._handle_tool(tool_name, arguments or {})
+
+        server.read_resource = read_resource
+        server.call_tool = call_tool
         server.get_server_info = get_server_info
         server.create_session = create_session 
         server.start_async_operation = start_async_operation

@@ -131,11 +131,28 @@ def test_observation(db_session, test_entity):
     return obs
 
 
+class TestClient:
+    """Test client for MCP server."""
+    
+    def __init__(self, server):
+        self.server = server
+        
+    async def read_resource(self, resource_path: str, params: dict = None):
+        """Read a resource with optional parameters."""
+        return await self.server.read_resource(resource_path, params or {})
+        
+    async def call_tool(self, tool_name: str, arguments: dict = None):
+        """Call a tool with optional arguments."""
+        return await self.server.call_tool(tool_name, arguments or {})
+        
+    def close(self):
+        """Clean up resources."""
+        pass
+
 @pytest.fixture(scope="function")
-def mcp_server(db_session):
+async def mcp_server(db_session):
     """Create MCP server instance for testing."""
     from src.main import create_server
-    from mcp.server.testing import TestClient
 
     # Use in-memory database for tests
     os.environ["DATABASE_URL"] = "sqlite:///:memory:"
@@ -146,20 +163,18 @@ def mcp_server(db_session):
     db_session.commit()
 
     # Create and configure server
-    server = create_server()
+    server = await create_server()
     
     try:
         yield server
     finally:
         # Cleanup
         if hasattr(server, 'cleanup'):
-            server.cleanup()
+            await server.cleanup()
 
 @pytest.fixture(scope="function")
-def client(mcp_server):
+async def client(mcp_server):
     """Create test client using the MCP server fixture."""
-    from mcp.server.testing import TestClient
-    
     client = TestClient(mcp_server)
     try:
         yield client
