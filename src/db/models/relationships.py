@@ -16,8 +16,23 @@ class Relationship(Base, BaseModel, TimestampMixin):
     entity_id = Column(Integer, ForeignKey("entity.id"), nullable=False, index=True)
     source_id = Column(Integer, ForeignKey("entity.id"), nullable=False, index=True)
     target_id = Column(Integer, ForeignKey("entity.id"), nullable=False, index=True)
-    type = Column(String, nullable=False, index=True)
-    relationship_type = Column(String, nullable=False, index=True)
+    type = Column(String, nullable=False, index=True)  # Entity relationship category
+    relationship_type = Column(String, nullable=False, index=True)  # Specific relationship kind
+    
+    VALID_TYPES = {
+        'depends_on', 'contains', 'references', 'manages', 
+        'configures', 'monitors', 'deploys'
+    }
+
+    def __init__(self, **kwargs):
+        """Initialize a Relationship with validation."""
+        super().__init__(**kwargs)
+        if self.type not in self.VALID_TYPES:
+            raise ValueError(f"Invalid relationship type: {self.type}")
+        if not self.relationship_type or not self.relationship_type.strip():
+            raise ValueError("Relationship type cannot be empty")
+        if self.source_id == self.target_id:
+            raise ValueError("Source and target cannot be the same entity")
     # Composite indexes for common lookups and traversals
     __table_args__ = (
         Index("ix_relationship_entity_type", "entity_id", "type"),

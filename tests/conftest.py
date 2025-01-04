@@ -39,14 +39,19 @@ def db_session():
 
 @pytest.fixture(scope="function")
 def client(db_session):
-    """Create test client with database session."""
+    """Create MCP test client with database session."""
     from src.main import create_server
-    from fastapi.testclient import TestClient
+    from mcp.testing import TestClient
 
     # Set static test database URL
     os.environ["DATABASE_URL"] = "sqlite:////home/herman/test.db"
 
-    # Create server
+    # Create MCP server
     server = create_server()
-
-    return TestClient(server)
+    
+    # Create and return MCP test client
+    client = TestClient(server)
+    try:
+        yield client
+    finally:
+        client.close()
