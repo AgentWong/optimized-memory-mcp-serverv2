@@ -45,12 +45,13 @@ async def test_server_info_endpoint(mcp_server):
     assert isinstance(info["capabilities"], list)
 
 
-def test_resource_protocol(mcp_server):
+@pytest.mark.asyncio
+async def test_resource_protocol(mcp_server):
     """Test resource URL protocol handling"""
     # Test valid resource with parameters
-    result = mcp_server.read_resource(
+    result = await mcp_server.read_resource(
         "test://valid",
-        params={
+        {
             "type": "test",
             "page": 1,
             "per_page": 10,
@@ -75,10 +76,11 @@ def test_resource_protocol(mcp_server):
     assert "invalid resource" in str(exc.value).lower()
 
 
-def test_tool_execution(mcp_server):
+@pytest.mark.asyncio
+async def test_tool_execution(mcp_server):
     """Test tool execution protocol"""
     # Test tool invocation
-    result = mcp_server.call_tool("test-tool", arguments={"param": "test"})
+    result = await mcp_server.call_tool("test-tool", {"param": "test"})
     assert result is not None
 
     # Test invalid tool

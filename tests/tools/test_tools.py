@@ -33,6 +33,7 @@ def db_session():
         session.close()
 
 
+@pytest.mark.asyncio
 async def test_create_entity_tool(mcp_server):
     """Test create_entity tool"""
     result = await mcp_server.call_tool(

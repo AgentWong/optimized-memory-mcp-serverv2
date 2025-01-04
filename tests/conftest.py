@@ -137,12 +137,20 @@ class TestClient:
     def __init__(self, server):
         self.server = server
 
+    async def post(self, path: str, **kwargs):
+        """Simulate HTTP POST."""
+        return await self.server.call_tool("create_entity", kwargs.get("json", {}))
+    
+    async def get(self, path: str):
+        """Simulate HTTP GET."""
+        return await self.server.read_resource(f"entities://{path.split('/')[-1]}")
+
     async def read_resource(self, resource_path: str, params: dict = None):
-        """Read a resource with optional parameters."""
-        return await self.server.read_resource(resource_path, params or {})
+        """Read a resource."""
+        return await self.server.read_resource(resource_path)
 
     async def call_tool(self, tool_name: str, arguments: dict = None):
-        """Call a tool with optional arguments."""
+        """Call a tool."""
         return await self.server.call_tool(tool_name, arguments or {})
 
     def close(self):
@@ -160,7 +168,8 @@ def mcp_server(db_session):
     os.environ["TESTING"] = "true"
 
     # Enable SQLite foreign key enforcement
-    db_session.execute("PRAGMA foreign_keys=ON")
+    from sqlalchemy import text
+    db_session.execute(text("PRAGMA foreign_keys=ON"))
     db_session.commit()
 
     # Create and configure server
@@ -174,11 +183,7 @@ def mcp_server(db_session):
             server.cleanup()
 
 
-@pytest.fixture(scope="function")
-async def client(mcp_server):
+@pytest.fixture
+def client(mcp_server):
     """Create test client using the MCP server fixture."""
-    client = TestClient(mcp_server)
-    try:
-        yield client
-    finally:
-        client.close()
+    return TestClient(mcp_server)
