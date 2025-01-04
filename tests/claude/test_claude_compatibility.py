@@ -34,9 +34,9 @@ def db_session():
         session.close()
 
 
-def test_server_info_endpoint(mcp_server):
+async def test_server_info_endpoint(mcp_server):
     """Test server info matches Claude Desktop requirements"""
-    info = mcp_server.get_server_info()
+    info = await mcp_server.get_server_info()
 
     # Verify required fields
     assert "name" in info
@@ -100,10 +100,10 @@ def test_error_response_format(mcp_server):
     assert isinstance(error, MCPError)  # Proper error type
 
 
-def test_async_operation_handling(mcp_server):
+async def test_async_operation_handling(mcp_server):
     """Test async operation protocol"""
     # Start async operation
-    operation = mcp_server.start_async_operation("test-async-tool", {"param": "test"})
+    operation = await mcp_server.start_async_operation("test-async-tool", {"param": "test"})
     assert operation is not None
 
     # Verify operation properties
@@ -115,10 +115,10 @@ def test_async_operation_handling(mcp_server):
     assert status in ["pending", "running", "completed", "failed"]
 
 
-def test_session_management(mcp_server):
+async def test_session_management(mcp_server):
     """Test session handling protocol"""
     # Create session
-    session = mcp_server.create_session()
+    session = await mcp_server.create_session()
     assert session is not None
     assert hasattr(session, "id")
 

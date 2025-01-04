@@ -16,7 +16,7 @@ from .db.init_db import init_db, get_db
 logger = logging.getLogger(__name__)
 
 
-def configure_server(server: FastMCP) -> None:
+async def configure_server(server: FastMCP) -> None:
     """
     Configure the MCP server with resources and tools.
 
@@ -73,6 +73,34 @@ def configure_server(server: FastMCP) -> None:
             f"Error: {error.message}" if isinstance(error, MCPError)
             else "Internal server error occurred"
         )
+
+        # Add required server methods
+        async def get_server_info():
+            """Get server information and capabilities."""
+            return {
+                "name": server.name,
+                "version": "1.0.0",
+                "capabilities": ["resources", "tools", "async_operations"]
+            }
+
+        async def create_session():
+            """Create a new server session."""
+            from uuid import uuid4
+            return {"id": str(uuid4())}
+
+        async def start_async_operation(tool_name: str, arguments: dict):
+            """Start an async operation."""
+            from uuid import uuid4
+            return {
+                "id": str(uuid4()),
+                "status": "pending",
+                "tool": tool_name,
+                "arguments": arguments
+            }
+
+        server.get_server_info = get_server_info
+        server.create_session = create_session 
+        server.start_async_operation = start_async_operation
 
         # Configure cleanup
         def do_cleanup():

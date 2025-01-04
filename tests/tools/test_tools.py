@@ -33,9 +33,9 @@ def db_session():
         session.close()
 
 
-def test_create_entity_tool(mcp_server):
+async def test_create_entity_tool(mcp_server):
     """Test create_entity tool"""
-    result = mcp_server.call_tool(
+    result = await mcp_server.call_tool(
         "create_entity",
         arguments={
             "name": "test_entity",

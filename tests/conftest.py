@@ -132,7 +132,7 @@ def test_observation(db_session, test_entity):
 
 
 @pytest.fixture(scope="function")
-def mcp_server(db_session):
+async def mcp_server(db_session):
     """Create MCP server instance for testing."""
     from src.main import create_server
 
@@ -148,7 +148,7 @@ def mcp_server(db_session):
     finally:
         # Cleanup
         if hasattr(server, 'cleanup'):
-            server.cleanup()
+            await server.cleanup()
 
 @pytest.fixture(scope="function")
 def client(mcp_server):
