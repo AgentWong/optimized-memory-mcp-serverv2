@@ -36,7 +36,8 @@ def db_session():
 
 async def test_server_info_endpoint(mcp_server):
     """Test server info matches Claude Desktop requirements"""
-    info = await mcp_server.get_server_info()
+    client = TestClient(mcp_server)
+    info = await mcp_server.get_server_info()  # Keep this direct as it's a server method
 
     # Verify required fields
     assert "name" in info
@@ -64,9 +65,9 @@ async def test_resource_protocol(mcp_server):
 
     # Test invalid resource
     with pytest.raises(Exception) as exc:
-        mcp_server.read_resource(
+        await client.read_resource(
             "invalid://test",
-            params={
+            {
                 "entity_type": "test",
                 "page": 1,
                 "per_page": 10,
@@ -80,13 +81,14 @@ async def test_resource_protocol(mcp_server):
 @pytest.mark.asyncio
 async def test_tool_execution(mcp_server):
     """Test tool execution protocol"""
+    client = TestClient(mcp_server)
     # Test tool invocation
-    result = await mcp_server.call_tool("test-tool", {"param": "test"})
+    result = await client.call_tool("test-tool", {"param": "test"})
     assert result is not None
 
     # Test invalid tool
     with pytest.raises(Exception) as exc:
-        mcp_server.call_tool("invalid-tool", arguments={"param": "test"})
+        await client.call_tool("invalid-tool", arguments={"param": "test"})
     assert "tool not found" in str(exc.value).lower()
 
 

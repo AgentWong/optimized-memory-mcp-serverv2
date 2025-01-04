@@ -52,14 +52,15 @@ async def test_create_entity_tool(mcp_server):
 @pytest.mark.asyncio
 async def test_add_observation_tool(mcp_server):
     """Test add_observation tool"""
+    client = TestClient(mcp_server)
     # Create entity first
-    entity_result = await mcp_server.call_tool(
+    entity_result = await client.call_tool(
         "create_entity", arguments={"name": "obs_test_entity", "entity_type": "test"}
     )
     entity_id = entity_result["id"]
 
     # Test add_observation
-    result = await mcp_server.call_tool(
+    result = await client.call_tool(
         "add_observation",
         arguments={"entity_id": entity_id, "content": "Test observation"},
     )
