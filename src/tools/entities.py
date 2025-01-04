@@ -15,8 +15,7 @@ Each tool follows standard patterns:
 - Clean transaction management with commits and rollbacks
 """
 
-from typing import Dict, Any, List
-from sqlalchemy.orm import Session
+from typing import Dict, Any, List, Optional
 
 from mcp.server.fastmcp import FastMCP, Context
 from ..db.connection import get_db
@@ -55,7 +54,7 @@ def register_tools(mcp: FastMCP) -> None:
     async def create_entity(
         name: str,
         entity_type: str,
-        metadata: Dict[str, Any] = None,
+        metadata: Optional[Dict[str, Any]] = None,
         ctx: Context = None
     ) -> Dict[str, Any]:
         """Create a new entity in the system.
@@ -63,8 +62,8 @@ def register_tools(mcp: FastMCP) -> None:
         Args:
             name: Entity name (must be non-empty)
             entity_type: Type of entity (e.g. 'instance', 'database', 'network')
-            metadata: Optional metadata dictionary
-            db: Database session
+            metadata: Optional dictionary of metadata key-value pairs
+            ctx: MCP context object
 
         Returns:
             Dict containing entity id, name and type
@@ -88,6 +87,13 @@ def register_tools(mcp: FastMCP) -> None:
         """
         if not name or not name.strip():
             raise ValidationError("Entity name cannot be empty")
+            
+        if metadata is not None and not isinstance(metadata, dict):
+            raise ValidationError("Metadata must be a dictionary")
+            
+        valid_types = {'instance', 'database', 'network', 'storage', 'security'}
+        if entity_type.lower() not in valid_types:
+            raise ValidationError(f"Invalid entity type. Must be one of: {', '.join(valid_types)}")
 
         from ..db.connection import get_db
         db = next(get_db())
@@ -101,7 +107,8 @@ def register_tools(mcp: FastMCP) -> None:
             db.commit()
             db.refresh(entity)
 
-            return {"id": entity.id, "name": entity.name, "type": entity.entity_type}
+            result = {"id": entity.id, "name": entity.name, "type": entity.entity_type}
+            return result
         except Exception as e:
             db.rollback()
             raise DatabaseError(f"Failed to create entity: {str(e)}")
@@ -109,10 +116,11 @@ def register_tools(mcp: FastMCP) -> None:
             db.close()
 
     @mcp.tool()
-    def update_entity(
+    async def update_entity(
         entity_id: int,
         name: str = None,
         metadata: Dict[str, Any] = None,
+        ctx: Context = None
     ) -> Dict[str, Any]:
         """Update an existing entity's properties.
 
@@ -120,7 +128,7 @@ def register_tools(mcp: FastMCP) -> None:
             entity_id: ID of entity to update
             name: Optional new entity name
             metadata: Optional metadata to merge with existing
-            db: Database session
+            ctx: MCP context object
 
         Returns:
             Dict containing updated entity details
@@ -145,10 +153,12 @@ def register_tools(mcp: FastMCP) -> None:
                 }
             }
         """
+        from ..db.connection import get_db
+        db = next(get_db())
         try:
             entity = db.query(Entity).filter(Entity.id == entity_id).first()
             if not entity:
-                raise DatabaseError(f"Entity {entity_id} not found")
+                raise ValidationError(f"Entity {entity_id} not found")
 
             if name:
                 entity.name = name.strip()
@@ -161,15 +171,17 @@ def register_tools(mcp: FastMCP) -> None:
             return {
                 "id": entity.id,
                 "name": entity.name,
-                "type": entity.type,
+                "type": entity.entity_type,
                 "metadata": entity.metadata,
             }
         except Exception as e:
             db.rollback()
             raise DatabaseError(f"Failed to update entity {entity_id}: {str(e)}")
+        finally:
+            db.close()
 
     @mcp.tool()
-    def delete_entity(entity_id: int) -> Dict[str, str]:
+    async def delete_entity(entity_id: int, ctx: Context = None) -> Dict[str, str]:
         """Delete an entity from the system.
 
         Args:
@@ -190,10 +202,12 @@ def register_tools(mcp: FastMCP) -> None:
                 "message": "Entity 1 deleted successfully"
             }
         """
+        from ..db.connection import get_db
+        db = next(get_db())
         try:
             entity = db.query(Entity).filter(Entity.id == entity_id).first()
             if not entity:
-                raise DatabaseError(f"Entity {entity_id} not found")
+                raise ValidationError(f"Entity {entity_id} not found")
 
             db.delete(entity)
             db.commit()
@@ -201,4 +215,6 @@ def register_tools(mcp: FastMCP) -> None:
             return {"message": f"Entity {entity_id} deleted successfully"}
         except Exception as e:
             db.rollback()
-            raise DatabaseError(f"Failed to delete entity {entity_id}: {str(e)}")
+            raise DatabaseError(f"Failed to delete entity {str(entity_id)}: {str(e)}")
+        finally:
+            db.close()
