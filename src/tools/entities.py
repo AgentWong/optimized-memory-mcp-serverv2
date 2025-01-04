@@ -18,7 +18,7 @@ Each tool follows standard patterns:
 from typing import Dict, Any, List
 from sqlalchemy.orm import Session
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp import FastMCP, Context
 from ..db.connection import get_db
 from ..db.models.entities import Entity
 from ..utils.errors import DatabaseError, ValidationError
