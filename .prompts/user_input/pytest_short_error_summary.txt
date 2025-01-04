@@ -1,58 +1,41 @@
 =========================== short test summary info ============================
-FAILED tests/db/test_db_operations.py::test_base_model_to_dict - sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: entity
-[SQL: INSERT INTO entity (name, entity_type, meta_data, tags, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)]
-[parameters: ('test_entity', 'test_type', '{"key": "value"}', '["tag1", "tag2"]', '2025-01-04 20:23:13.818688', '2025-01-04 20:23:13.818692')]
-(Background on this error at: https://sqlalche.me/e/20/e3q8)
-FAILED tests/db/test_db_operations.py::test_entity_crud_operations - sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: entity
-[SQL: INSERT INTO entity (name, entity_type, meta_data, tags, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)]
-[parameters: ('test_entity', 'test_type', '{}', '[]', '2025-01-04 20:23:14.302196', '2025-01-04 20:23:14.302199')]
-(Background on this error at: https://sqlalche.me/e/20/e3q8)
-FAILED tests/db/test_db_operations.py::test_relationship_creation - sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: entity
-[SQL: INSERT INTO entity (name, entity_type, meta_data, tags, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?) RETURNING id]
-[parameters: ('entity1', 'test_type', '{}', '[]', '2025-01-04 20:23:14.765102', '2025-01-04 20:23:14.765105')]
-(Background on this error at: https://sqlalche.me/e/20/e3q8)
-FAILED tests/db/test_db_operations.py::test_observation_creation - sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: entity
-[SQL: INSERT INTO entity (name, entity_type, meta_data, tags, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)]
-[parameters: ('test_entity', 'test_type', '{}', '[]', '2025-01-04 20:23:15.225580', '2025-01-04 20:23:15.225583')]
-(Background on this error at: https://sqlalche.me/e/20/e3q8)
-FAILED tests/db_integration/test_db_integration.py::test_entity_relationships_cascade - sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: entity
-[SQL: INSERT INTO entity (name, entity_type, meta_data, tags, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?) RETURNING id]
-[parameters: ('test_entity_1', 'test', '{}', '[]', '2025-01-04 20:23:15.686622', '2025-01-04 20:23:15.686625')]
-(Background on this error at: https://sqlalche.me/e/20/e3q8)
-FAILED tests/db_integration/test_db_integration.py::test_observation_entity_integrity - sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: entity
-[SQL: INSERT INTO entity (name, entity_type, meta_data, tags, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)]
-[parameters: ('test_entity', 'test', '{}', '[]', '2025-01-04 20:23:16.148849', '2025-01-04 20:23:16.148852')]
-(Background on this error at: https://sqlalche.me/e/20/e3q8)
+FAILED tests/db_integration/test_db_integration.py::test_entity_relationships_cascade - ValueError: Invalid relationship type: None
+FAILED tests/db_integration/test_db_integration.py::test_observation_entity_integrity - ValueError: Invalid observation type: None
 FAILED tests/db_integration/test_db_integration.py::test_provider_version_tracking - ValueError: Invalid provider type: test_type
-FAILED tests/db_integration/test_db_integration.py::test_ansible_collection_relationships - sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: ansiblecollection
+FAILED tests/db_integration/test_db_integration.py::test_ansible_collection_relationships - sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: ansiblecollection.namespace
 [SQL: INSERT INTO ansiblecollection (namespace, name, version, meta_data, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)]
-[parameters: (None, 'test.collection', '1.0.0', '{}', '2025-01-04 20:23:16.664454', '2025-01-04 20:23:16.664457')]
-(Background on this error at: https://sqlalche.me/e/20/e3q8)
-FAILED tests/db_integration/test_db_integration.py::test_concurrent_transactions - sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: entity
-[SQL: INSERT INTO entity (name, entity_type, meta_data, tags, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)]
-[parameters: ('concurrent_test', 'test', '{}', '[]', '2025-01-04 20:23:17.129965', '2025-01-04 20:23:17.129969')]
-(Background on this error at: https://sqlalche.me/e/20/e3q8)
-FAILED tests/db_integration/test_db_integration.py::test_database_cleanup - sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: entity
-[SQL: INSERT INTO entity (name, entity_type, meta_data, tags, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)]
-[parameters: ('cleanup_test', 'test', '{}', '[]', '2025-01-04 20:23:17.594166', '2025-01-04 20:23:17.594169')]
-(Background on this error at: https://sqlalche.me/e/20/e3q8)
-ERROR tests/claude/test_claude_compatibility.py::test_server_info_endpoint - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'ctx', 'type', 'per_page', 'page', 'created_after'}
-ERROR tests/claude/test_claude_compatibility.py::test_resource_protocol - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'ctx', 'type', 'per_page', 'page', 'created_after'}
-ERROR tests/claude/test_claude_compatibility.py::test_tool_execution - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'ctx', 'type', 'per_page', 'page', 'created_after'}
-ERROR tests/claude/test_claude_compatibility.py::test_error_response_format - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'ctx', 'type', 'per_page', 'page', 'created_after'}
-ERROR tests/claude/test_claude_compatibility.py::test_async_operation_handling - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'ctx', 'type', 'per_page', 'page', 'created_after'}
-ERROR tests/claude/test_claude_compatibility.py::test_session_management - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'ctx', 'type', 'per_page', 'page', 'created_after'}
-ERROR tests/error_scenarios/test_error_scenarios.py::test_database_constraint_violations - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'ctx', 'type', 'per_page', 'page', 'created_after'}
-ERROR tests/error_scenarios/test_error_scenarios.py::test_invalid_relationship_creation - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'ctx', 'type', 'per_page', 'page', 'created_after'}
+[parameters: (None, 'test.collection', '1.0.0', '{}', '2025-01-04 20:28:18.246613', '2025-01-04 20:28:18.246616')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+FAILED tests/db_integration/test_db_integration.py::test_concurrent_transactions - Failed: DID NOT RAISE <class 'Exception'>
+FAILED tests/db_integration/test_db_integration.py::test_database_cleanup - assert <src.db.models.entities.Entity object at 0x70134a474490> is None
+ +  where <src.db.models.entities.Entity object at 0x70134a474490> = first()
+ +    where first = <sqlalchemy.orm.query.Query object at 0x70134a498d60>.first
+ +      where <sqlalchemy.orm.query.Query object at 0x70134a498d60> = filter_by(id=5)
+ +        where filter_by = <sqlalchemy.orm.query.Query object at 0x70134a498fc0>.filter_by
+ +          where <sqlalchemy.orm.query.Query object at 0x70134a498fc0> = query(Entity)
+ +            where query = <sqlalchemy.orm.session.Session object at 0x70134a5a3020>.query
+ERROR tests/claude/test_claude_compatibility.py::test_server_info_endpoint - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'created_after', 'per_page', 'ctx', 'page', 'type'}
+ERROR tests/claude/test_claude_compatibility.py::test_resource_protocol - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'created_after', 'per_page', 'ctx', 'page', 'type'}
+ERROR tests/claude/test_claude_compatibility.py::test_tool_execution - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'created_after', 'per_page', 'ctx', 'page', 'type'}
+ERROR tests/claude/test_claude_compatibility.py::test_error_response_format - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'created_after', 'per_page', 'ctx', 'page', 'type'}
+ERROR tests/claude/test_claude_compatibility.py::test_async_operation_handling - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'created_after', 'per_page', 'ctx', 'page', 'type'}
+ERROR tests/claude/test_claude_compatibility.py::test_session_management - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'created_after', 'per_page', 'ctx', 'page', 'type'}
+ERROR tests/db/test_db_operations.py::test_base_model_to_dict - src.utils.errors.DatabaseError: Database operation failed: Textual SQL expression 'SET statement_timeout = 1...' should be explicitly declared as text('SET statement_timeout = 1...')
+ERROR tests/db/test_db_operations.py::test_model_validation - src.utils.errors.DatabaseError: Database operation failed: Textual SQL expression 'SET statement_timeout = 1...' should be explicitly declared as text('SET statement_timeout = 1...')
+ERROR tests/db/test_db_operations.py::test_entity_crud_operations - src.utils.errors.DatabaseError: Database operation failed: Textual SQL expression 'SET statement_timeout = 1...' should be explicitly declared as text('SET statement_timeout = 1...')
+ERROR tests/db/test_db_operations.py::test_relationship_creation - src.utils.errors.DatabaseError: Database operation failed: Textual SQL expression 'SET statement_timeout = 1...' should be explicitly declared as text('SET statement_timeout = 1...')
+ERROR tests/db/test_db_operations.py::test_observation_creation - src.utils.errors.DatabaseError: Database operation failed: Textual SQL expression 'SET statement_timeout = 1...' should be explicitly declared as text('SET statement_timeout = 1...')
+ERROR tests/error_scenarios/test_error_scenarios.py::test_database_constraint_violations - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'created_after', 'per_page', 'ctx', 'page', 'type'}
+ERROR tests/error_scenarios/test_error_scenarios.py::test_invalid_relationship_creation - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'created_after', 'per_page', 'ctx', 'page', 'type'}
 ERROR tests/error_scenarios/test_error_scenarios.py::test_invalid_observation_data - ModuleNotFoundError: No module named 'mcp.testing'
 ERROR tests/error_scenarios/test_error_scenarios.py::test_concurrent_modification_conflicts - ModuleNotFoundError: No module named 'mcp.testing'
 ERROR tests/error_scenarios/test_error_scenarios.py::test_invalid_api_requests - ModuleNotFoundError: No module named 'mcp.testing'
 ERROR tests/error_scenarios/test_error_scenarios.py::test_resource_not_found_handling - ModuleNotFoundError: No module named 'mcp.testing'
 ERROR tests/error_scenarios/test_error_scenarios.py::test_validation_error_handling - ModuleNotFoundError: No module named 'mcp.testing'
 ERROR tests/error_scenarios/test_error_scenarios.py::test_transaction_rollback - ModuleNotFoundError: No module named 'mcp.testing'
-ERROR tests/integration/test_mcp_integration.py::test_full_entity_workflow - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'ctx', 'type', 'per_page', 'page', 'created_after'}
-ERROR tests/integration/test_mcp_integration.py::test_search_and_analysis_workflow - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'ctx', 'type', 'per_page', 'page', 'created_after'}
-ERROR tests/integration/test_mcp_integration.py::test_error_handling - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'ctx', 'type', 'per_page', 'page', 'created_after'}
+ERROR tests/integration/test_mcp_integration.py::test_full_entity_workflow - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'created_after', 'per_page', 'ctx', 'page', 'type'}
+ERROR tests/integration/test_mcp_integration.py::test_search_and_analysis_workflow - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'created_after', 'per_page', 'ctx', 'page', 'type'}
+ERROR tests/integration/test_mcp_integration.py::test_error_handling - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'created_after', 'per_page', 'ctx', 'page', 'type'}
 ERROR tests/models/test_validation.py::test_entity_required_fields
 ERROR tests/models/test_validation.py::test_relationship_required_fields
 ERROR tests/models/test_validation.py::test_observation_required_fields
@@ -66,4 +49,4 @@ ERROR tests/tools/test_tools.py::test_create_entity_tool
 ERROR tests/tools/test_tools.py::test_add_observation_tool
 ERROR tests/tools/test_tools.py::test_register_provider_tool
 ERROR tests/tools/test_tools.py::test_register_ansible_module_tool
-============= 10 failed, 7 passed, 41 warnings, 30 errors in 5.15s =============
+============= 6 failed, 6 passed, 28 warnings, 35 errors in 2.29s ==============
