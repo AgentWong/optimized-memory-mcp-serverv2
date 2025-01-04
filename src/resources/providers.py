@@ -29,11 +29,10 @@ def register_resources(mcp: FastMCP) -> None:
     """Register provider-related resources with the MCP server."""
 
     @mcp.resource("providers://{provider}/resources")
-    def list_provider_resources(
-        provider: str, db: Session = next(get_db())
-    ) -> List[Dict[str, Any]]:
+    def list_provider_resources(provider: str) -> List[Dict[str, Any]]:
         """List all resources for a specific provider."""
         try:
+            db = next(get_db())
             provider_obj = db.query(Provider).filter(Provider.name == provider).first()
 
             if not provider_obj:
