@@ -25,7 +25,7 @@ from ..db.models.entities import Entity
 from ..utils.errors import DatabaseError, ValidationError
 
 
-def register_tools(mcp: FastMCP) -> None:
+async def register_tools(mcp: FastMCP) -> list:
     """Register relationship management tools with the MCP server.
 
     This function registers all relationship-related tools with the MCP server instance.

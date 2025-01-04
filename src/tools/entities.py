@@ -24,7 +24,7 @@ from ..db.models.observations import Observation
 from ..utils.errors import DatabaseError, ValidationError
 
 
-def register_tools(mcp: FastMCP) -> None:
+async def register_tools(mcp: FastMCP) -> list:
     """Register entity management tools with the MCP server.
 
     This function registers all entity-related tools with the MCP server instance.
