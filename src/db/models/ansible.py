@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 from .base import BaseModel, TimestampMixin
 
 
-class AnsibleCollection(BaseModel, TimestampMixin):
+class AnsibleCollection(Base, BaseModel, TimestampMixin):
     """Represents an Ansible collection and its modules.
 
     Stores information about Ansible collections including

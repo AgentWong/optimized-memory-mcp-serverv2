@@ -27,3 +27,7 @@ class Config:
         return {
             key: value for key, value in cls.__dict__.items() if not key.startswith("_")
         }
+
+def load_environment() -> None:
+    """Load environment configuration."""
+    Config()  # Initialize config with environment variables

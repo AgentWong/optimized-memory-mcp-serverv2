@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 from .base import BaseModel, TimestampMixin
 
 
-class Relationship(BaseModel, TimestampMixin):
+class Relationship(Base, BaseModel, TimestampMixin):
     """Represents a relationship between entities.
 
     Captures directed relationships between entities with

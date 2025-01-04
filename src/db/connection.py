@@ -12,6 +12,8 @@ from datetime import datetime
 from functools import wraps
 from typing import Any, Callable, Generator
 
+from sqlalchemy import text
+
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError, TimeoutError
 from sqlalchemy.pool import QueuePool
@@ -98,12 +100,16 @@ def get_db_connection() -> Generator[Session, None, None]:
     start_time = datetime.utcnow()
 
     try:
-        # Set secure timeouts
-        db.execute("SET statement_timeout = %s", (STATEMENT_TIMEOUT,))
-        db.execute(
-            "SET idle_in_transaction_session_timeout = %s",
-            (IDLE_IN_TRANSACTION_TIMEOUT,),
-        )
+        # Set secure timeouts if not SQLite
+        if not db.bind.dialect.name == 'sqlite':
+            db.execute(
+                text("SET statement_timeout = :timeout"),
+                {"timeout": STATEMENT_TIMEOUT}
+            )
+            db.execute(
+                text("SET idle_in_transaction_session_timeout = :timeout"),
+                {"timeout": IDLE_IN_TRANSACTION_TIMEOUT}
+            )
         logger.debug("Database connection established")
 
         yield db

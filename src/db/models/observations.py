@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 from .base import BaseModel, TimestampMixin
 
 
-class Observation(BaseModel, TimestampMixin):
+class Observation(Base, BaseModel, TimestampMixin):
     """Represents an observation about an entity.
 
     Stores attributes, measurements, or other observations

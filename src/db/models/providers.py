@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 from .base import BaseModel, TimestampMixin
 
 
-class Provider(BaseModel, TimestampMixin):
+class Provider(Base, BaseModel, TimestampMixin):
     """Represents an infrastructure provider and its resources.
 
     Stores information about cloud/infrastructure providers
