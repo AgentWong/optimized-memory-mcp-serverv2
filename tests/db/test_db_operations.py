@@ -150,3 +150,43 @@ def test_observation_creation(db_session: Session):
     assert retrieved is not None
     assert retrieved.observation_type == "test"
     assert retrieved.value == {"test": "data"}
+"""Test database operations and model interactions."""
+
+import pytest
+from sqlalchemy.exc import IntegrityError
+
+from src.db.models.entities import Entity
+from src.db.connection import get_db
+
+def test_entity_creation():
+    """Test basic entity creation and validation."""
+    with next(get_db()) as db:
+        entity = Entity(name="test_entity", entity_type="test_type", meta_data={})
+        db.add(entity)
+        db.commit()
+        
+        assert entity.id is not None
+        assert entity.name == "test_entity"
+        assert entity.entity_type == "test_type"
+        assert entity.meta_data == {}
+
+def test_entity_required_fields():
+    """Test that required fields are enforced."""
+    with next(get_db()) as db:
+        entity = Entity(name="test_entity", entity_type="test_type")
+        db.add(entity)
+        db.commit()
+        
+        # Should have default values
+        assert entity.meta_data == {}
+        assert entity.tags == []
+
+def test_entity_timestamps():
+    """Test that timestamps are automatically set."""
+    with next(get_db()) as db:
+        entity = Entity(name="test_entity", entity_type="test_type")
+        db.add(entity)
+        db.commit()
+        
+        assert entity.created_at is not None
+        assert entity.updated_at is not None
