@@ -242,8 +242,9 @@ def mcp_server(db_session):
     db_session.execute(text("PRAGMA foreign_keys=ON"))
     db_session.commit()
 
+    import asyncio
     # Create and configure server
-    server = create_server()
+    server = asyncio.run(create_server())
 
     try:
         yield server
@@ -251,9 +252,9 @@ def mcp_server(db_session):
         # Cleanup
         try:
             if hasattr(server, "cleanup"):
-                server.cleanup()
+                asyncio.run(server.cleanup())
             if hasattr(server, "close"):
-                server.close()
+                asyncio.run(server.close())
         except Exception as e:
             # Log but don't raise to ensure cleanup continues
             print(f"Error during cleanup: {e}")

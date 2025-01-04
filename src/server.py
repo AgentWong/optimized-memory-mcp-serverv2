@@ -17,7 +17,7 @@ from .db.init_db import init_db, get_db
 logger = logging.getLogger(__name__)
 
 
-async def configure_server(server: FastMCP) -> None:
+async def configure_server(server: FastMCP) -> FastMCP:
     """
     Configure the MCP server with resources and tools.
 
@@ -176,14 +176,20 @@ async def configure_server(server: FastMCP) -> None:
                 # Clean up sessions
                 for session_id in list(server._sessions.keys()):
                     if server._sessions[session_id]["status"] == "active":
-                        await end_session(session_id)
+                        try:
+                            await end_session(session_id)
+                        except Exception as e:
+                            logger.error(f"Error ending session {session_id}: {str(e)}")
                 
                 # Clean up operations
                 server._operations.clear()
                 
                 # Close database connections
-                db = get_db()
-                next(db).close()
+                try:
+                    db = get_db()
+                    next(db).close()
+                except Exception as e:
+                    logger.error(f"Error closing database: {str(e)}")
                 
                 # Force garbage collection
                 gc.collect()
@@ -194,15 +200,11 @@ async def configure_server(server: FastMCP) -> None:
                 logger.error(f"Cleanup error: {str(e)}")
                 return False
 
-        # Attach all methods to server
-        server.read_resource = read_resource
-        server.get_server_info = get_server_info
-        server.create_session = create_session
-        server.start_async_operation = start_async_operation
-        server.get_operation_status = get_operation_status
-        server.end_session = end_session
+        # Attach cleanup methods
         server.cleanup = do_cleanup
         server.cleanup_callback = do_cleanup  # For backwards compatibility
+
+        return server
 
     except Exception as e:
         raise ConfigurationError(f"Failed to configure server: {str(e)}")

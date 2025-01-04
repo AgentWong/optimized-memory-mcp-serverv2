@@ -52,9 +52,21 @@ async def create_server() -> FastMCP:
 def main() -> None:
     """Main entry point."""
     try:
-        server = create_server()
+        import asyncio
+        server = asyncio.run(create_server())
         logger.info("Starting MCP server")
-        server.run()
+        try:
+            server.run()
+        except KeyboardInterrupt:
+            logger.info("Server shutdown requested")
+            asyncio.run(server.cleanup())
+        except Exception as e:
+            logger.error(f"Server error: {str(e)}")
+            try:
+                asyncio.run(server.cleanup())
+            except Exception as cleanup_error:
+                logger.error(f"Cleanup error during shutdown: {str(cleanup_error)}")
+            raise
     except Exception as e:
         logger.error(f"Server failed to start: {str(e)}")
         raise
