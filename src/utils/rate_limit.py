@@ -19,10 +19,10 @@ class RateLimiter:
 
     def check_rate_limit(self, client_id: str) -> bool:
         """Check if client has exceeded rate limit.
-        
+
         Args:
             client_id: Unique identifier for the client
-            
+
         Returns:
             bool: True if under limit, False if exceeded
         """

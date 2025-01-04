@@ -17,6 +17,7 @@ def setup_test_env():
     os.environ.pop("TESTING", None)
     os.environ.pop("LOG_LEVEL", None)
 
+
 @pytest.fixture(scope="function")
 def db_session():
     """Create a new database session for each test function."""
@@ -44,9 +45,9 @@ def db_session():
         providers,
         arguments,
         ansible,
-        parameters
+        parameters,
     )
-    
+
     # Create all tables
     Base.metadata.create_all(bind=engine)
 

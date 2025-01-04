@@ -34,10 +34,10 @@ def db_session():
 def test_base_model_to_dict(db_session: Session):
     """Test BaseModel.to_dict() conversion with all field types"""
     entity = Entity(
-        name="test_entity", 
+        name="test_entity",
         entity_type="test_type",
         meta_data={"key": "value"},
-        tags=["tag1", "tag2"]
+        tags=["tag1", "tag2"],
     )
     db_session.add(entity)
     db_session.commit()
@@ -140,7 +140,7 @@ def test_observation_creation(db_session: Session):
         type="state",  # Using a valid type from VALID_TYPES
         observation_type="test",
         value={"test": "data"},
-        meta_data={}
+        meta_data={},
     )
     db_session.add(obs)
     db_session.commit()
@@ -150,6 +150,8 @@ def test_observation_creation(db_session: Session):
     assert retrieved is not None
     assert retrieved.observation_type == "test"
     assert retrieved.value == {"test": "data"}
+
+
 """Test database operations and model interactions."""
 
 import pytest
@@ -158,17 +160,19 @@ from sqlalchemy.exc import IntegrityError
 from src.db.models.entities import Entity
 from src.db.connection import get_db
 
+
 def test_entity_creation():
     """Test basic entity creation and validation."""
     with next(get_db()) as db:
         entity = Entity(name="test_entity", entity_type="test_type", meta_data={})
         db.add(entity)
         db.commit()
-        
+
         assert entity.id is not None
         assert entity.name == "test_entity"
         assert entity.entity_type == "test_type"
         assert entity.meta_data == {}
+
 
 def test_entity_required_fields():
     """Test that required fields are enforced."""
@@ -176,10 +180,11 @@ def test_entity_required_fields():
         entity = Entity(name="test_entity", entity_type="test_type")
         db.add(entity)
         db.commit()
-        
+
         # Should have default values
         assert entity.meta_data == {}
         assert entity.tags == []
+
 
 def test_entity_timestamps():
     """Test that timestamps are automatically set."""
@@ -187,6 +192,6 @@ def test_entity_timestamps():
         entity = Entity(name="test_entity", entity_type="test_type")
         db.add(entity)
         db.commit()
-        
+
         assert entity.created_at is not None
         assert entity.updated_at is not None

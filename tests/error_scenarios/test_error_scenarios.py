@@ -51,16 +51,14 @@ def test_database_constraint_violations(mcp_server, db_session: Session):
     """Test database constraint violation handling"""
     # Test duplicate entity name
     result = mcp_server.call_tool(
-        "create_entity",
-        arguments={"name": "unique_entity", "entity_type": "test"}
+        "create_entity", arguments={"name": "unique_entity", "entity_type": "test"}
     )
     assert result is not None
 
     # Attempt duplicate
     with pytest.raises(ValidationError) as exc:
         mcp_server.call_tool(
-            "create_entity",
-            arguments={"name": "unique_entity", "entity_type": "test"}
+            "create_entity", arguments={"name": "unique_entity", "entity_type": "test"}
         )
     assert "already exists" in str(exc.value).lower()
 
@@ -69,8 +67,7 @@ def test_invalid_relationship_creation(mcp_server, db_session: Session):
     """Test invalid relationship handling"""
     # Create test entity
     result = mcp_server.call_tool(
-        "create_entity",
-        arguments={"name": "test_entity", "entity_type": "test"}
+        "create_entity", arguments={"name": "test_entity", "entity_type": "test"}
     )
     entity_id = result["id"]
 
@@ -82,7 +79,7 @@ def test_invalid_relationship_creation(mcp_server, db_session: Session):
                 "source_id": entity_id,
                 "target_id": entity_id,
                 "relationship_type": "self_ref",
-            }
+            },
         )
     assert "self-referential" in str(exc.value).lower()
 

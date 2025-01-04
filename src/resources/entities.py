@@ -20,7 +20,7 @@ VALID_ENTITY_TYPES: Set[str] = {"provider", "module", "resource"}
 
 def register_resources(mcp: FastMCP) -> None:
     """Register entity-related resources with the MCP server.
-    
+
     Args:
         mcp: The FastMCP server instance to register resources with
     """
@@ -149,9 +149,7 @@ def register_resources(mcp: FastMCP) -> None:
             )
 
     @mcp.resource("entities://{id}")
-    async def get_entity(
-        ctx: Context, id: str, include: str = None
-    ) -> Dict[str, Any]:
+    async def get_entity(ctx: Context, id: str, include: str = None) -> Dict[str, Any]:
         """Get details for a specific entity with optional related data.
 
         Args:
@@ -217,9 +215,7 @@ def register_resources(mcp: FastMCP) -> None:
             entity = query.filter(Entity.id == str(entity_uuid)).first()
 
             if not entity:
-                raise DatabaseError(
-                    f"Entity {id} not found", details={"id": id}
-                )
+                raise DatabaseError(f"Entity {id} not found", details={"id": id})
 
             # Convert to dict with related data and counts
             result = entity.to_dict()
@@ -244,6 +240,4 @@ def register_resources(mcp: FastMCP) -> None:
         except DatabaseError:
             raise
         except Exception as e:
-            raise DatabaseError(
-                f"Failed to get entity {id}", details={"error": str(e)}
-            )
+            raise DatabaseError(f"Failed to get entity {id}", details={"error": str(e)})

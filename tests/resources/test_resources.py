@@ -46,8 +46,7 @@ def test_entity_detail_resource(mcp_server, db_session):
     """Test entities://{id} resource"""
     # Create test entity first
     result = mcp_server.call_tool(
-        "create_entity",
-        arguments={"name": "test_entity", "entity_type": "test"}
+        "create_entity", arguments={"name": "test_entity", "entity_type": "test"}
     )
     entity_id = result["id"]
 

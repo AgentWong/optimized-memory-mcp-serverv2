@@ -36,7 +36,9 @@ class Relationship(Base, BaseModel, TimestampMixin):
         if "type" not in kwargs:
             kwargs["type"] = "depends_on"  # Default type
         if "entity_id" not in kwargs and "source_id" in kwargs:
-            kwargs["entity_id"] = kwargs["source_id"]  # Set entity_id to source_id by default
+            kwargs["entity_id"] = kwargs[
+                "source_id"
+            ]  # Set entity_id to source_id by default
         super().__init__(**kwargs)
         if self.type not in self.VALID_TYPES:
             raise ValueError(f"Invalid relationship type: {self.type}")

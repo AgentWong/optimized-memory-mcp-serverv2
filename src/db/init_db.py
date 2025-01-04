@@ -80,8 +80,9 @@ def get_db():
     db = SessionLocal()
     try:
         # Set timeouts if not SQLite
-        if not db.bind.dialect.name == 'sqlite':
+        if not db.bind.dialect.name == "sqlite":
             from sqlalchemy import text
+
             db.execute(text("SET statement_timeout = 10000"))  # 10s
             db.execute(text("SET idle_in_transaction_session_timeout = 60000"))  # 60s
         yield db

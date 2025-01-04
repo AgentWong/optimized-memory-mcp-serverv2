@@ -23,7 +23,14 @@ class Provider(Base, BaseModel, TimestampMixin):
     def __init__(self, **kwargs):
         """Initialize a Provider with validation."""
         super().__init__(**kwargs)
-        if self.type not in ("aws", "azure", "gcp", "kubernetes", "terraform", "test_type"):
+        if self.type not in (
+            "aws",
+            "azure",
+            "gcp",
+            "kubernetes",
+            "terraform",
+            "test_type",
+        ):
             raise ValueError(f"Invalid provider type: {self.type}")
         if self.namespace and not self.namespace.strip():
             raise ValueError("Namespace cannot be empty string if provided")

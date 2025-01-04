@@ -13,7 +13,7 @@ from ..config import Config
 def configure_logging() -> None:
     """Configure logging for the application."""
     is_test = os.getenv("TESTING", "").lower() == "true"
-    
+
     logging_config: Dict[str, Any] = {
         "version": 1,
         "disable_existing_loggers": True if is_test else False,

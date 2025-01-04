@@ -37,7 +37,7 @@ def db_session():
 def test_server_info_endpoint(mcp_server):
     """Test server info matches Claude Desktop requirements"""
     info = mcp_server.get_server_info()
-    
+
     # Verify required fields
     assert "name" in info
     assert "version" in info
@@ -48,24 +48,30 @@ def test_server_info_endpoint(mcp_server):
 def test_resource_protocol(mcp_server):
     """Test resource URL protocol handling"""
     # Test valid resource with parameters
-    result = mcp_server.read_resource("test://valid", params={
-        "type": "test",
-        "page": 1,
-        "per_page": 10,
-        "created_after": "2025-01-01",
-        "ctx": {}
-    })
+    result = mcp_server.read_resource(
+        "test://valid",
+        params={
+            "type": "test",
+            "page": 1,
+            "per_page": 10,
+            "created_after": "2025-01-01",
+            "ctx": {},
+        },
+    )
     assert result is not None
 
     # Test invalid resource
     with pytest.raises(Exception) as exc:
-        mcp_server.read_resource("invalid://test", params={
-            "entity_type": "test",
-            "page": 1,
-            "per_page": 10,
-            "created_after": "2025-01-01",
-            "ctx": {}
-        })
+        mcp_server.read_resource(
+            "invalid://test",
+            params={
+                "entity_type": "test",
+                "page": 1,
+                "per_page": 10,
+                "created_after": "2025-01-01",
+                "ctx": {},
+            },
+        )
     assert "invalid resource" in str(exc.value).lower()
 
 
@@ -86,10 +92,10 @@ def test_error_response_format(mcp_server):
     # Trigger an error
     with pytest.raises(Exception) as exc:
         mcp_server.read_resource("nonexistent://resource")
-    
+
     error = exc.value
     # Verify error format
-    assert hasattr(error, 'code')
+    assert hasattr(error, "code")
     assert str(error)  # Has message
     assert isinstance(error, MCPError)  # Proper error type
 
@@ -99,14 +105,14 @@ def test_async_operation_handling(mcp_server):
     # Start async operation
     operation = mcp_server.start_async_operation("test-async-tool", {"param": "test"})
     assert operation is not None
-    
+
     # Verify operation properties
-    assert hasattr(operation, 'id')
-    assert hasattr(operation, 'status')
-    
+    assert hasattr(operation, "id")
+    assert hasattr(operation, "status")
+
     # Check operation status
     status = mcp_server.get_operation_status(operation.id)
-    assert status in ['pending', 'running', 'completed', 'failed']
+    assert status in ["pending", "running", "completed", "failed"]
 
 
 def test_session_management(mcp_server):
@@ -114,15 +120,15 @@ def test_session_management(mcp_server):
     # Create session
     session = mcp_server.create_session()
     assert session is not None
-    assert hasattr(session, 'id')
-    
+    assert hasattr(session, "id")
+
     # Use session
     result = mcp_server.with_session(session.id, lambda: True)
     assert result is True
-    
+
     # End session
     mcp_server.end_session(session.id)
-    
+
     # Verify session ended
     with pytest.raises(Exception) as exc:
         mcp_server.with_session(session.id, lambda: True)

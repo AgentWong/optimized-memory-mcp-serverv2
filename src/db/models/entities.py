@@ -15,7 +15,7 @@ class Entity(Base, BaseModel, TimestampMixin):
 
     name = Column(String, nullable=False, index=True)
     entity_type = Column(String, nullable=False, index=True)
-    # Composite indexes for common lookups  
+    # Composite indexes for common lookups
     __table_args__ = (
         Index("ix_entity_name_type", "name", "entity_type"),
         Index("ix_entity_created_type", "created_at", "entity_type"),

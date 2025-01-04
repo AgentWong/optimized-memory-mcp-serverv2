@@ -34,6 +34,7 @@ def db_session():
         session.rollback()
         session.close()
 
+
 @pytest.fixture
 def mcp_server():
     """Create MCP server instance"""
@@ -50,10 +51,10 @@ def test_entity_relationships_cascade(db_session: Session):
 
     # Create relationship
     rel = Relationship(
-        source_id=entity1.id, 
-        target_id=entity2.id, 
+        source_id=entity1.id,
+        target_id=entity2.id,
         type="depends_on",
-        relationship_type="test_rel"
+        relationship_type="test_rel",
     )
     db_session.add(rel)
     db_session.commit()
@@ -85,7 +86,11 @@ def test_observation_entity_integrity(db_session: Session):
     # Verify constraint
     with pytest.raises(Exception):
         invalid_obs = Observation(
-            entity_id=99999, type="test", observation_type="test", value={}, meta_data={}  # Non-existent entity
+            entity_id=99999,
+            type="test",
+            observation_type="test",
+            value={},
+            meta_data={},  # Non-existent entity
         )
         db_session.add(invalid_obs)
         db_session.commit()
@@ -112,7 +117,9 @@ def test_provider_version_tracking(db_session: Session):
 def test_ansible_collection_relationships(db_session: Session):
     """Test ansible collection relationship handling"""
     # Create collection
-    collection = AnsibleCollection(namespace="test", name="test.collection", version="1.0.0")
+    collection = AnsibleCollection(
+        namespace="test", name="test.collection", version="1.0.0"
+    )
     db_session.add(collection)
     db_session.commit()
 
