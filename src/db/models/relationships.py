@@ -27,6 +27,11 @@ class Relationship(Base, BaseModel, TimestampMixin):
 
     # Relationships
     entity = relationship(
-        "Entity", back_populates="relationships", foreign_keys=[entity_id]
+        "Entity",
+        back_populates="relationships",
+        foreign_keys="[Relationship.entity_id]"
     )
-    target = relationship("Entity", foreign_keys=[target_id])
+    target = relationship(
+        "Entity",
+        foreign_keys="[Relationship.target_id]"
+    )

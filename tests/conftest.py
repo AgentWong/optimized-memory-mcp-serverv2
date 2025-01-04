@@ -10,8 +10,8 @@ from src.config import Config
 @pytest.fixture(scope="function")
 def db_session():
     """Create a new database session for each test function."""
-    # Set test database URL
-    os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+    # Set static test database URL
+    os.environ["DATABASE_URL"] = "sqlite:////home/herman/test.db"
     
     # Use in-memory SQLite for tests
     engine = create_engine(
@@ -45,8 +45,8 @@ def client(db_session):
     from src.main import create_server
     from fastapi.testclient import TestClient
     
-    # Set test database URL
-    os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+    # Set static test database URL 
+    os.environ["DATABASE_URL"] = "sqlite:////home/herman/test.db"
     
     # Create server
     server = create_server()

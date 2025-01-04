@@ -21,10 +21,8 @@ def create_server() -> FastMCP:
     # Configure logging first
     configure_logging()
 
-    # Validate database configuration
-    database_url = os.getenv("DATABASE_URL")
-    if not database_url:
-        raise ConfigurationError("DATABASE_URL environment variable is required")
+    # Use test SQLite database if DATABASE_URL not set
+    database_url = os.getenv("DATABASE_URL", "sqlite:///test.db")
 
     try:
         # Initialize database

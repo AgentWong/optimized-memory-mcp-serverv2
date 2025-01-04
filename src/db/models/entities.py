@@ -25,7 +25,10 @@ class Entity(Base, BaseModel, TimestampMixin):
 
     # Relationships
     relationships = relationship(
-        "Relationship", back_populates="entity", cascade="all, delete-orphan"
+        "Relationship",
+        back_populates="entity",
+        cascade="all, delete-orphan",
+        foreign_keys="[Relationship.entity_id]"
     )
     observations = relationship(
         "Observation", back_populates="entity", cascade="all, delete-orphan"
