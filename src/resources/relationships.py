@@ -25,7 +25,7 @@ Each resource follows MCP protocol for:
 from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp import FastMCP, Context
 from ..db.connection import get_db
 from ..db.models.relationships import Relationship
 from ..utils.errors import DatabaseError
