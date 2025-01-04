@@ -1,9 +1,8 @@
 """
-Rate limiting utilities for API endpoints.
+Rate limiting utilities for MCP server.
 """
 
 from typing import Optional
-from fastapi import HTTPException, Request
 from redis import Redis
 import time
 
@@ -18,26 +17,31 @@ class RateLimiter:
         self.requests_per_minute = requests_per_minute
         self.key_prefix = key_prefix
 
-    async def __call__(self, request: Request):
-        client_ip = request.client.host
-        key = f"{self.key_prefix}:{client_ip}"
+    def check_rate_limit(self, client_id: str) -> bool:
+        """Check if client has exceeded rate limit.
+        
+        Args:
+            client_id: Unique identifier for the client
+            
+        Returns:
+            bool: True if under limit, False if exceeded
+        """
+        key = f"{self.key_prefix}:{client_id}"
 
-        # Get current count for this IP
+        # Get current count for this client
         current = redis_client.get(key)
 
         if current is None:
             # First request, set initial count
             redis_client.setex(key, 60, 1)
+            return True
         elif int(current) >= self.requests_per_minute:
             # Rate limit exceeded
-            raise HTTPException(
-                status_code=429, detail="Too many requests. Please try again later."
-            )
+            return False
         else:
             # Increment request count
             redis_client.incr(key)
-
-        return True
+            return True
 
 
 # Default rate limiters

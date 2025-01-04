@@ -33,8 +33,7 @@ def create_server() -> FastMCP:
             "Infrastructure Memory Server",
             dependencies=[
                 "SQLAlchemy>=2.0.0",
-                "alembic>=1.13.0",
-                "uvx>=0.1.0",
+                "alembic>=1.13.0", 
                 "cachetools>=5.0.0",
             ],
         )
