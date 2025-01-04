@@ -36,7 +36,8 @@ def db_session():
 @pytest.mark.asyncio
 async def test_create_entity_tool(mcp_server):
     """Test create_entity tool"""
-    result = await mcp_server.call_tool(
+    client = TestClient(mcp_server)
+    result = await client.call_tool(
         "create_entity",
         arguments={
             "name": "test_entity",

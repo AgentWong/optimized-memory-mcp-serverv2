@@ -137,23 +137,23 @@ class TestClient:
     def __init__(self, server):
         self.server = server
 
-    def post(self, path: str, **kwargs):
+    async def post(self, path: str, **kwargs):
         """Simulate HTTP POST."""
-        return self.server.call_tool("create_entity", kwargs.get("json", {}))
+        return await self.server.call_tool("create_entity", kwargs.get("json", {}))
     
-    def get(self, path: str):
+    async def get(self, path: str):
         """Simulate HTTP GET."""
-        return self.server.read_resource(f"entities://{path.split('/')[-1]}")
+        return await self.server.read_resource(f"entities://{path.split('/')[-1]}")
 
-    def read_resource(self, resource_path: str, params: dict = None):
+    async def read_resource(self, resource_path: str, params: dict = None):
         """Read a resource."""
-        return self.server.read_resource(resource_path)
+        return await self.server.read_resource(resource_path, params)
 
-    def call_tool(self, tool_name: str, arguments: dict = None):
+    async def call_tool(self, tool_name: str, arguments: dict = None):
         """Call a tool."""
-        return self.server.call_tool(tool_name, arguments or {})
+        return await self.server.call_tool(tool_name, arguments or {})
 
-    def close(self):
+    async def close(self):
         """Clean up resources."""
         pass
 

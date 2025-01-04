@@ -49,7 +49,8 @@ async def test_server_info_endpoint(mcp_server):
 async def test_resource_protocol(mcp_server):
     """Test resource URL protocol handling"""
     # Test valid resource with parameters
-    result = await mcp_server.read_resource(
+    client = TestClient(mcp_server)
+    result = await client.read_resource(
         "test://valid",
         {
             "type": "test",
