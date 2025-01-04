@@ -87,7 +87,7 @@ auto-lint: false
 test-cmd: .venv/bin/python -m pytest -v
 
 ## Enable/disable automatic testing after changes (default: False)
-auto-test: true
+auto-test: false # Do NOT use with lots of errors (thousands of lines in chat)
 
 ## Run tests, fix problems found and then exit
 test: false

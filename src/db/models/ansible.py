@@ -4,6 +4,7 @@ from sqlalchemy import Column, JSON, String
 from sqlalchemy.orm import relationship
 
 from .base import Base, BaseModel, TimestampMixin
+from .parameters import ModuleParameter
 
 
 class AnsibleCollection(Base, BaseModel, TimestampMixin):
@@ -19,5 +20,5 @@ class AnsibleCollection(Base, BaseModel, TimestampMixin):
     meta_data = Column(JSON, nullable=False, default=dict)
     # Relationships
     modules = relationship(
-        "ModuleParameter", back_populates="collection", cascade="all, delete-orphan"
+        ModuleParameter, back_populates="collection", cascade="all, delete-orphan"
     )
