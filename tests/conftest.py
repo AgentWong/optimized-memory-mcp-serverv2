@@ -269,17 +269,20 @@ async def mcp_server(db_session):
 
     # Create and configure server
     server = await create_server()
-    configured_server = await server
+    if hasattr(server, "__anext__"):
+        server = await server.__anext__()
+    elif asyncio.iscoroutine(server):
+        server = await server
 
     try:
-        yield configured_server
+        yield server
     finally:
         # Cleanup
         try:
-            if hasattr(configured_server, "cleanup"):
-                await configured_server.cleanup()
-            if hasattr(configured_server, "close"):
-                await configured_server.close()
+            if hasattr(server, "cleanup"):
+                await server.cleanup()
+            if hasattr(server, "close"):
+                await server.close()
         except Exception as e:
             # Log but don't raise to ensure cleanup continues
             print(f"Error during cleanup: {e}")

@@ -16,7 +16,7 @@ from .db.init_db import init_db
 logger = logging.getLogger(__name__)
 
 
-async def create_server() -> "FastMCP":
+async def create_server() -> FastMCP:
     """Create and configure the MCP server instance."""
     # Configure logging first
     configure_logging()
@@ -39,10 +39,10 @@ async def create_server() -> "FastMCP":
         )
 
         # Configure server with all components
-        configured_server = await configure_server(server)
+        server = await configure_server(server)
 
         logger.info("MCP server created and configured successfully")
-        return configured_server
+        return server
 
     except Exception as e:
         logger.error(f"Failed to create server: {str(e)}")
