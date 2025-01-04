@@ -1,15 +1,29 @@
 """Entity-related MCP resources."""
 
-from typing import List, Dict, Any
+# Standard library imports
+from datetime import datetime
+from typing import List, Dict, Any, Set
+from uuid import UUID, ValueError as UUIDValueError
+
+# Third-party imports
 from mcp.server.fastmcp import FastMCP, Context
+from sqlalchemy.orm import joinedload
+
+# Local imports
 from ..db.connection import get_db
 from ..db.models.entities import Entity
-from ..utils.errors import DatabaseError
+from ..utils.errors import DatabaseError, ValidationError
 from ..utils.cache import generate_cache_key, get_cached, set_cached
+
+VALID_ENTITY_TYPES: Set[str] = {"provider", "module", "resource"}
 
 
 def register_resources(mcp: FastMCP) -> None:
-    """Register entity-related MCP resources."""
+    """Register entity-related resources with the MCP server.
+    
+    Args:
+        mcp: The FastMCP server instance to register resources with
+    """
 
     @mcp.resource("entities://list")
     async def list_entities(
@@ -39,8 +53,6 @@ def register_resources(mcp: FastMCP) -> None:
             DatabaseError: If database query fails
             ValidationError: If invalid parameters provided
         """
-        from ..utils.errors import ValidationError
-        from datetime import datetime
 
         # Convert and validate pagination params
         try:
@@ -89,11 +101,10 @@ def register_resources(mcp: FastMCP) -> None:
 
             if entity_type:
                 # Validate entity type
-                valid_types = {"provider", "module", "resource"}
-                if entity_type not in valid_types:
+                if entity_type not in VALID_ENTITY_TYPES:
                     raise ValidationError(
                         f"Invalid entity type: {entity_type}",
-                        details={"valid_types": list(valid_types)},
+                        details={"valid_types": list(VALID_ENTITY_TYPES)},
                     )
                 query = query.filter(Entity.entity_type == entity_type)
             if created_after:
@@ -151,7 +162,7 @@ def register_resources(mcp: FastMCP) -> None:
 
         Args:
             ctx: MCP context object
-            entity_id: Unique identifier of the entity
+            id: Unique identifier of the entity
             include: Comma-separated list of related data to include
                     (relationships, observations)
 
@@ -160,20 +171,20 @@ def register_resources(mcp: FastMCP) -> None:
 
         Raises:
             DatabaseError: If entity not found or database error occurs
-            ValidationError: If entity_id format is invalid or unknown include option
+            ValidationError: If id format is invalid or unknown include option
         """
         from ..utils.errors import ValidationError
         from sqlalchemy.orm import joinedload
 
-        # Validate entity_id format
+        # Validate id format
         from uuid import UUID
 
         try:
-            entity_uuid = UUID(entity_id)
-        except ValueError as e:
+            entity_uuid = UUID(id)
+        except UUIDValueError as e:
             raise ValidationError(
-                "Invalid entity ID format - must be UUID",
-                details={"entity_id": entity_id, "error": str(e)},
+                "Invalid id format - must be UUID",
+                details={"id": id, "error": str(e)},
             )
 
         # Parse and validate include parameter
@@ -190,10 +201,10 @@ def register_resources(mcp: FastMCP) -> None:
                 include_options.add(option)
 
         # Check cache first
-        cache_key = generate_cache_key("entity", entity_id, include=include)
+        cache_key = generate_cache_key("entity", id, include=include)
         cached_result = get_cached(cache_key)
         if cached_result:
-            await ctx.info(f"Retrieved entity {entity_id} from cache")
+            await ctx.info(f"Retrieved entity {id} from cache")
             return cached_result
 
         # Get database session
@@ -209,29 +220,25 @@ def register_resources(mcp: FastMCP) -> None:
                 query = query.options(joinedload(Entity.observations))
 
             # Execute query
-            entity = query.filter(Entity.id == entity_uuid).first()
+            entity = query.filter(Entity.id == str(entity_uuid)).first()
 
             if not entity:
                 raise DatabaseError(
-                    f"Entity {entity_id} not found", details={"entity_id": entity_id}
+                    f"Entity {id} not found", details={"id": id}
                 )
 
             # Convert to dict with related data and counts
             result = entity.to_dict()
 
             # Add relationship/observation counts
-            result["relationship_count"] = (
-                db.query(Entity.relationships).filter(Entity.id == entity_uuid).count()
-            )
-            result["observation_count"] = (
-                db.query(Entity.observations).filter(Entity.id == entity_uuid).count()
-            )
+            result["relationship_count"] = len(entity.relationships)
+            result["observation_count"] = len(entity.observations)
 
             # Log access via MCP context with details
             await ctx.info(
-                f"Retrieved entity {entity_id}",
+                f"Retrieved entity {id}",
                 details={
-                    "type": entity.type,
+                    "type": entity.entity_type,
                     "included_data": list(include_options) if include_options else None,
                 },
             )
@@ -244,5 +251,5 @@ def register_resources(mcp: FastMCP) -> None:
             raise
         except Exception as e:
             raise DatabaseError(
-                f"Failed to get entity {entity_id}", details={"error": str(e)}
+                f"Failed to get entity {id}", details={"error": str(e)}
             )
