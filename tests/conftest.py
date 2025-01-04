@@ -132,13 +132,18 @@ def test_observation(db_session, test_entity):
 
 
 @pytest.fixture(scope="function")
-async def mcp_server(db_session):
+def mcp_server(db_session):
     """Create MCP server instance for testing."""
     from src.main import create_server
+    from mcp.server.testing import TestClient
 
     # Use in-memory database for tests
     os.environ["DATABASE_URL"] = "sqlite:///:memory:"
     os.environ["TESTING"] = "true"
+
+    # Enable SQLite foreign key enforcement
+    db_session.execute("PRAGMA foreign_keys=ON")
+    db_session.commit()
 
     # Create and configure server
     server = create_server()
@@ -148,12 +153,12 @@ async def mcp_server(db_session):
     finally:
         # Cleanup
         if hasattr(server, 'cleanup'):
-            await server.cleanup()
+            server.cleanup()
 
 @pytest.fixture(scope="function")
 def client(mcp_server):
     """Create test client using the MCP server fixture."""
-    from mcp.testing import TestClient
+    from mcp.server.testing import TestClient
     
     client = TestClient(mcp_server)
     try:
