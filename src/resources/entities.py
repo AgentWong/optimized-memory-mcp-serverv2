@@ -36,17 +36,18 @@ def register_resources(mcp: FastMCP) -> None:
 
     @mcp.resource("entities://list")
     def list_entities(
+        entity_type: Optional[str] = None,
         db: Session = next(get_db())
     ) -> List[Dict[str, Any]]:
         """List all entities, optionally filtered by type."""
         try:
             query = db.query(Entity)
-            if entity_type:
+            if entity_type is not None:
                 query = query.filter(Entity.type == entity_type)
 
             entities = query.all()
             return [
-                {"id": e.id, "name": e.name, "type": e.type, "metadata": e.metadata}
+                {"id": e.id, "name": e.name, "type": e.type, "metadata": e.entity_metadata}
                 for e in entities
             ]
         except Exception as e:
@@ -64,7 +65,7 @@ def register_resources(mcp: FastMCP) -> None:
                 "id": entity.id,
                 "name": entity.name,
                 "type": entity.type,
-                "metadata": entity.metadata,
+                "metadata": entity.entity_metadata,
                 "created_at": entity.created_at.isoformat(),
                 "updated_at": entity.updated_at.isoformat(),
             }
