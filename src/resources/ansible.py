@@ -32,9 +32,9 @@ def register_resources(mcp: FastMCP) -> None:
     def list_collections() -> List[Dict[str, Any]]:
         """List all registered Ansible collections."""
         try:
-            with Session(engine) as db:
-                collections = db.query(AnsibleCollection).all()
-                return [
+            db = next(get_db())
+            collections = db.query(AnsibleCollection).all()
+            return [
                     {
                         "id": c.id,
                         "namespace": c.namespace,

@@ -29,11 +29,11 @@ from ..utils.errors import DatabaseError
 def register_resources(mcp: FastMCP) -> None:
     """Register search-related resources with the MCP server."""
 
-    @mcp.resource("search://{query}")
+    @mcp.resource("search://{query}/{entity_type}/{limit}")
     def search_entities(
         query: str,
-        entity_type: str = None,
-        limit: int = 10
+        entity_type: str,
+        limit: int
     ) -> List[Dict[str, Any]]:
         """Search entities by name, type, or metadata."""
         try:
