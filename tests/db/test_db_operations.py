@@ -35,7 +35,7 @@ def test_base_model_to_dict(db_session: Session):
     """Test BaseModel.to_dict() conversion with all field types"""
     entity = Entity(
         name="test_entity", 
-        type="test_type",
+        entity_type="test_type",
         meta_data={"key": "value"},
         tags=["tag1", "tag2"]
     )
@@ -103,8 +103,8 @@ def test_entity_crud_operations(db_session: Session):
 def test_relationship_creation(db_session: Session):
     """Test creating relationships between entities"""
     # Create two entities
-    entity1 = Entity(name="entity1", type="test_type")
-    entity2 = Entity(name="entity2", type="test_type")
+    entity1 = Entity(name="entity1", entity_type="test_type")
+    entity2 = Entity(name="entity2", entity_type="test_type")
     db_session.add_all([entity1, entity2])
     db_session.commit()
 

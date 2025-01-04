@@ -50,7 +50,10 @@ def test_entity_relationships_cascade(db_session: Session):
 
     # Create relationship
     rel = Relationship(
-        source_id=entity1.id, target_id=entity2.id, relationship_type="test_rel"
+        source_id=entity1.id, 
+        target_id=entity2.id, 
+        type="depends_on",
+        relationship_type="test_rel"
     )
     db_session.add(rel)
     db_session.commit()

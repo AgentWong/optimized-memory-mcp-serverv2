@@ -60,7 +60,7 @@ def test_resource_protocol(mcp_server):
     # Test invalid resource
     with pytest.raises(Exception) as exc:
         mcp_server.read_resource("invalid://test", params={
-            "type": "test",
+            "entity_type": "test",
             "page": 1,
             "per_page": 10,
             "created_after": "2025-01-01",
