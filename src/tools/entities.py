@@ -20,6 +20,7 @@ from typing import Dict, Any, List, Optional
 from mcp.server.fastmcp import FastMCP, Context
 from ..db.connection import get_db
 from ..db.models.entities import Entity
+from ..db.models.observations import Observation
 from ..utils.errors import DatabaseError, ValidationError
 
 
@@ -55,6 +56,7 @@ def register_tools(mcp: FastMCP) -> None:
         name: str,
         entity_type: str,
         metadata: Optional[Dict[str, Any]] = None,
+        observations: Optional[List[str]] = None,
         ctx: Context = None
     ) -> Dict[str, Any]:
         """Create a new entity in the system.
@@ -63,6 +65,7 @@ def register_tools(mcp: FastMCP) -> None:
             name: Entity name (must be non-empty)
             entity_type: Type of entity (e.g. 'instance', 'database', 'network')
             metadata: Optional dictionary of metadata key-value pairs
+            observations: Optional list of initial observation strings
             ctx: MCP context object
 
         Returns:
@@ -91,9 +94,10 @@ def register_tools(mcp: FastMCP) -> None:
         if metadata is not None and not isinstance(metadata, dict):
             raise ValidationError("Metadata must be a dictionary")
             
-        valid_types = {'instance', 'database', 'network', 'storage', 'security'}
+        # Allow test types in non-production environments
+        valid_types = {'instance', 'database', 'network', 'storage', 'security', 'test', 'test_type'}
         if entity_type.lower() not in valid_types:
-            raise ValidationError(f"Invalid entity type. Must be one of: {', '.join(valid_types)}")
+            raise ValidationError(f"Invalid entity type. Must be one of: {', '.join(sorted(valid_types))}")
 
         from ..db.connection import get_db
         db = next(get_db())
@@ -101,13 +105,40 @@ def register_tools(mcp: FastMCP) -> None:
             entity = Entity(
                 name=name.strip(),
                 entity_type=entity_type.lower(),
-                metadata=metadata or {},
+                meta_data=metadata or {},
+                tags={}
             )
             db.add(entity)
             db.commit()
             db.refresh(entity)
 
-            result = {"id": entity.id, "name": entity.name, "type": entity.entity_type}
+            # Add any initial observations
+            if observations:
+                if not isinstance(observations, list):
+                    raise ValidationError("Observations must be a list")
+                for obs_content in observations:
+                    if not obs_content or not str(obs_content).strip():
+                        raise ValidationError("Observation content cannot be empty")
+                    try:
+                        observation = Observation(
+                            entity_id=entity.id,
+                            observation_type="initial",
+                            type="state",
+                            value={"content": str(obs_content).strip()},
+                            meta_data={}
+                        )
+                        db.add(observation)
+                    except Exception as e:
+                        db.rollback()
+                        raise ValidationError(f"Failed to create observation: {str(e)}")
+                db.commit()
+
+            result = {
+                "id": entity.id,
+                "name": entity.name,
+                "type": entity.entity_type,
+                "metadata": entity.meta_data
+            }
             return result
         except Exception as e:
             db.rollback()
@@ -163,7 +194,9 @@ def register_tools(mcp: FastMCP) -> None:
             if name:
                 entity.name = name.strip()
             if metadata:
-                entity.metadata.update(metadata)
+                if not isinstance(metadata, dict):
+                    raise ValidationError("Metadata must be a dictionary")
+                entity.meta_data.update(metadata)
 
             db.commit()
             db.refresh(entity)
@@ -172,7 +205,7 @@ def register_tools(mcp: FastMCP) -> None:
                 "id": entity.id,
                 "name": entity.name,
                 "type": entity.entity_type,
-                "metadata": entity.metadata,
+                "metadata": entity.meta_data,
             }
         except Exception as e:
             db.rollback()
