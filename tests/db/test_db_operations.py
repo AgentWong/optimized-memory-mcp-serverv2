@@ -14,7 +14,7 @@ and ensures proper database state management.
 import pytest
 from sqlalchemy.orm import Session
 
-from src.db.connection import get_db
+from src.db.init_db import get_db
 from src.db.models.base import BaseModel
 from src.db.models.entities import Entity
 from src.db.models.relationships import Relationship

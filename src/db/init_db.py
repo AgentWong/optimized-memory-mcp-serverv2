@@ -7,8 +7,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 from ..utils.errors import DatabaseError
 
-# Base class for SQLAlchemy models
-Base = declarative_base()
+from .models.base import Base
 
 # Get database URL from environment or use default SQLite
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///mcp_server.db")

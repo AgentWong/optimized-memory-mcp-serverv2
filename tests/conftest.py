@@ -39,7 +39,7 @@ def db_session():
     )
     
     # Create all tables
-    Base.metadata.create_all(engine)
+    Base.metadata.create_all(bind=engine)
 
     # Create session
     session = TestingSessionLocal()
@@ -51,8 +51,8 @@ def db_session():
         session.rollback()
         session.close()
         # Drop and recreate tables for clean state
-        Base.metadata.drop_all(engine)
-        Base.metadata.create_all(engine)
+        Base.metadata.drop_all(bind=engine)
+        Base.metadata.create_all(bind=engine)
 
 
 @pytest.fixture
