@@ -47,13 +47,25 @@ def test_server_info_endpoint(mcp_server):
 
 def test_resource_protocol(mcp_server):
     """Test resource URL protocol handling"""
-    # Test valid resource
-    result = mcp_server.read_resource("test://valid")
+    # Test valid resource with parameters
+    result = mcp_server.read_resource("test://valid", params={
+        "type": "test",
+        "page": 1,
+        "per_page": 10,
+        "created_after": "2025-01-01",
+        "ctx": {}
+    })
     assert result is not None
 
     # Test invalid resource
     with pytest.raises(Exception) as exc:
-        mcp_server.read_resource("invalid://test")
+        mcp_server.read_resource("invalid://test", params={
+            "type": "test",
+            "page": 1,
+            "per_page": 10,
+            "created_after": "2025-01-01",
+            "ctx": {}
+        })
     assert "invalid resource" in str(exc.value).lower()
 
 

@@ -20,7 +20,7 @@ from src.db.connection import get_db
 def client():
     """Create test client"""
     server = create_server()
-    return TestClient(server.app)
+    return server
 
 
 @pytest.fixture

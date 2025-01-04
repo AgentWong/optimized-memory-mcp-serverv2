@@ -43,8 +43,8 @@ def mcp_server():
 def test_entity_relationships_cascade(db_session: Session):
     """Test entity deletion cascades relationships properly"""
     # Create test entities
-    entity1 = Entity(name="test_entity_1", entity_type="test")
-    entity2 = Entity(name="test_entity_2", entity_type="test")
+    entity1 = Entity(name="test_entity_1", type="test")
+    entity2 = Entity(name="test_entity_2", type="test")
     db_session.add_all([entity1, entity2])
     db_session.commit()
 
@@ -109,7 +109,7 @@ def test_provider_version_tracking(db_session: Session):
 def test_ansible_collection_relationships(db_session: Session):
     """Test ansible collection relationship handling"""
     # Create collection
-    collection = AnsibleCollection(name="test.collection", version="1.0.0")
+    collection = AnsibleCollection(namespace="test", name="test.collection", version="1.0.0")
     db_session.add(collection)
     db_session.commit()
 

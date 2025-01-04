@@ -34,10 +34,10 @@ def db_session():
 def test_base_model_to_dict(db_session: Session):
     """Test BaseModel.to_dict() conversion with all field types"""
     entity = Entity(
-        name="test_entity",
+        name="test_entity", 
         type="test_type",
         meta_data={"key": "value"},
-        tags=["tag1", "tag2"],
+        tags=["tag1", "tag2"]
     )
     db_session.add(entity)
     db_session.commit()
