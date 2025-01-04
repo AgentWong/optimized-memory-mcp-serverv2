@@ -3,7 +3,7 @@
 # Standard library imports
 from datetime import datetime
 from typing import List, Dict, Any, Set
-from uuid import UUID, ValueError as UUIDValueError
+from uuid import UUID
 
 # Third-party imports
 from mcp.server.fastmcp import FastMCP, Context
@@ -181,7 +181,7 @@ def register_resources(mcp: FastMCP) -> None:
 
         try:
             entity_uuid = UUID(id)
-        except UUIDValueError as e:
+        except ValueError as e:
             raise ValidationError(
                 "Invalid id format - must be UUID",
                 details={"id": id, "error": str(e)},
