@@ -3,7 +3,7 @@
 from sqlalchemy import Column, JSON, String
 from sqlalchemy.orm import relationship
 
-from .base import BaseModel, TimestampMixin
+from .base import Base, BaseModel, TimestampMixin
 
 
 class AnsibleCollection(Base, BaseModel, TimestampMixin):
@@ -16,7 +16,7 @@ class AnsibleCollection(Base, BaseModel, TimestampMixin):
     namespace = Column(String, nullable=False, index=True)
     name = Column(String, nullable=False, index=True)
     version = Column(String, nullable=False)
-    metadata = Column(JSON, nullable=False, default=dict)
+    meta_data = Column(JSON, nullable=False, default=dict)
     # Relationships
     modules = relationship(
         "ModuleParameter", back_populates="collection", cascade="all, delete-orphan"

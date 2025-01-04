@@ -3,7 +3,7 @@
 from sqlalchemy import Column, JSON, String
 from sqlalchemy.orm import relationship
 
-from .base import BaseModel, TimestampMixin
+from .base import Base, BaseModel, TimestampMixin
 
 
 class Provider(Base, BaseModel, TimestampMixin):
@@ -16,7 +16,7 @@ class Provider(Base, BaseModel, TimestampMixin):
     name = Column(String, nullable=False, index=True)
     type = Column(String, nullable=False, index=True)  # e.g. 'aws', 'azure', 'gcp'
     version = Column(String, nullable=False)
-    metadata = Column(JSON, nullable=False, default=dict)
+    meta_data = Column(JSON, nullable=False, default=dict)
     # Relationships
     resources = relationship(
         "ResourceArgument", back_populates="provider", cascade="all, delete-orphan"

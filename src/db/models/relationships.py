@@ -3,7 +3,7 @@
 from sqlalchemy import Column, ForeignKey, Index, Integer, JSON, String
 from sqlalchemy.orm import relationship
 
-from .base import BaseModel, TimestampMixin
+from .base import Base, BaseModel, TimestampMixin
 
 
 class Relationship(Base, BaseModel, TimestampMixin):
@@ -23,7 +23,7 @@ class Relationship(Base, BaseModel, TimestampMixin):
         Index("ix_relationship_type_entities", "type", "entity_id", "target_id"),
         Index("ix_relationship_created_type", "created_at", "type"),
     )
-    metadata = Column(JSON, nullable=False, default=dict)
+    meta_data = Column(JSON, nullable=False, default=dict)
 
     # Relationships
     entity = relationship(

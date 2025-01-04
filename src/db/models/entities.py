@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 from .base import BaseModel, TimestampMixin
 
 
-class Entity(BaseModel, TimestampMixin):
+class Entity(Base, BaseModel, TimestampMixin):
     """Represents a core entity in the system.
 
     Entities are the primary objects that can have relationships

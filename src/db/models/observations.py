@@ -3,7 +3,7 @@
 from sqlalchemy import Column, ForeignKey, Index, Integer, JSON, String
 from sqlalchemy.orm import relationship
 
-from .base import BaseModel, TimestampMixin
+from .base import Base, BaseModel, TimestampMixin
 
 
 class Observation(Base, BaseModel, TimestampMixin):
@@ -22,7 +22,7 @@ class Observation(Base, BaseModel, TimestampMixin):
         Index("ix_observation_type_value", "type", "value"),
     )
     value = Column(JSON, nullable=False)
-    metadata = Column(JSON, nullable=False, default=dict)
+    meta_data = Column(JSON, nullable=False, default=dict)
 
     # Relationships
     entity = relationship("Entity", back_populates="observations")

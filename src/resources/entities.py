@@ -34,9 +34,9 @@ from ..utils.errors import DatabaseError
 def register_resources(mcp: FastMCP) -> None:
     """Register entity-related resources with the MCP server."""
 
-    @mcp.resource("entities://list/{entity_type}")
+    @mcp.resource("entities://list")
     def list_entities(
-        entity_type: str, db: Session = next(get_db())
+        db: Session = next(get_db())
     ) -> List[Dict[str, Any]]:
         """List all entities, optionally filtered by type."""
         try:
