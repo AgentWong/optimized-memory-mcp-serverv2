@@ -111,7 +111,7 @@ upgrade: false
 # Other settings:
 
 ## specify a file to edit (can be used multiple times)
-file: tasks.md
+#file: tasks.md
 
 ## Specify multiple values like this:
 #file:
