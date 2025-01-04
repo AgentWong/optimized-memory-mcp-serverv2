@@ -14,7 +14,7 @@ class Observation(Base, BaseModel, TimestampMixin):
     """
 
     entity_id = Column(Integer, ForeignKey("entity.id"), nullable=False, index=True)
-    type = Column(String, nullable=False, index=True)  # Category of observation
+    entity_type = Column(String, nullable=False, index=True)  # Type of entity
     observation_type = Column(
         String, nullable=False, index=True
     )  # Specific observation kind
@@ -33,6 +33,8 @@ class Observation(Base, BaseModel, TimestampMixin):
         """Initialize an Observation with validation."""
         if "data" in kwargs:
             kwargs["value"] = kwargs.pop("data")
+        if "type" not in kwargs:
+            kwargs["type"] = "state"  # Default type
         super().__init__(**kwargs)
         if self.type not in self.VALID_TYPES:
             raise ValueError(f"Invalid observation type: {self.type}")

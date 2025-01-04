@@ -2,6 +2,7 @@
 Logging configuration for MCP server.
 """
 
+import os
 import logging
 from logging.config import dictConfig
 from typing import Dict, Any

@@ -33,6 +33,8 @@ class Relationship(Base, BaseModel, TimestampMixin):
 
     def __init__(self, **kwargs):
         """Initialize a Relationship with validation."""
+        if "type" not in kwargs:
+            kwargs["type"] = "depends_on"  # Default type
         super().__init__(**kwargs)
         if self.type not in self.VALID_TYPES:
             raise ValueError(f"Invalid relationship type: {self.type}")
