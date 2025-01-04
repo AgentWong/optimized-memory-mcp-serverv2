@@ -88,14 +88,19 @@ async def configure_server(server: FastMCP) -> None:
         )
 
 
-        # Add core protocol methods to server instance
-        server.get_server_info = lambda: {
-            "name": server.name,
-            "version": "1.0.0",
-            "capabilities": ["resources", "tools", "async_operations"],
-        }
+        # Add core protocol methods
+        async def get_server_info():
+            """Get server information."""
+            return {
+                "name": server.name,
+                "version": "1.0.0",
+                "capabilities": ["resources", "tools", "async_operations"],
+            }
 
-        server.create_session = lambda: {"id": str(uuid4())}
+        async def create_session():
+            """Create a new session."""
+            from uuid import uuid4
+            return {"id": str(uuid4())}
 
         async def start_async_operation(tool_name: str, arguments: dict = None) -> dict:
             """Start an async operation."""
@@ -108,15 +113,16 @@ async def configure_server(server: FastMCP) -> None:
                 "arguments": arguments or {},
             }
 
-        server.start_async_operation = start_async_operation
-
-        # Override read_resource to handle params
         async def read_resource(resource_path: str, params: dict = None) -> Any:
             """Read a resource with parameters."""
             if resource_path.startswith("nonexistent://"):
                 raise MCPError("Resource not found", code="RESOURCE_NOT_FOUND")
             return await server._handle_resource(resource_path, params or {})
 
+        # Attach methods to server
+        server.get_server_info = get_server_info
+        server.create_session = create_session
+        server.start_async_operation = start_async_operation
         server.read_resource = read_resource
 
         # Configure cleanup
