@@ -52,10 +52,11 @@ def register_tools(mcp: FastMCP) -> None:
     """
 
     @mcp.tool()
-    def create_entity(
+    async def create_entity(
         name: str,
         entity_type: str,
         metadata: Dict[str, Any] = None,
+        ctx: Context = None
     ) -> Dict[str, Any]:
         """Create a new entity in the system.
 
@@ -89,19 +90,24 @@ def register_tools(mcp: FastMCP) -> None:
             if not name or not name.strip():
                 raise ValidationError("Entity name cannot be empty")
 
-            entity = Entity(
-                name=name.strip(),
-                entity_type=entity_type.lower(),
-                metadata=metadata or {},
-            )
-            db.add(entity)
-            db.commit()
-            db.refresh(entity)
+            from ..db.connection import get_db
+            db = next(get_db())
+            try:
+                entity = Entity(
+                    name=name.strip(),
+                    entity_type=entity_type.lower(),
+                    metadata=metadata or {},
+                )
+                db.add(entity)
+                db.commit()
+                db.refresh(entity)
 
-            return {"id": entity.id, "name": entity.name, "type": entity.type}
-        except Exception as e:
-            db.rollback()
-            raise DatabaseError(f"Failed to create entity: {str(e)}")
+                return {"id": entity.id, "name": entity.name, "type": entity.type}
+            except Exception as e:
+                db.rollback()
+                raise DatabaseError(f"Failed to create entity: {str(e)}")
+            finally:
+                db.close()
 
     @mcp.tool()
     def update_entity(
