@@ -134,14 +134,15 @@ def test_observation(db_session, test_entity):
 class TestClient:
     """Test client for MCP server."""
 
-    def __init__(self, server):
+    def __init__(self, server: "FastMCP"):
+        """Initialize test client with MCP server instance."""
         self.server = server
 
-    async def post(self, path: str, **kwargs):
+    async def post(self, path: str, **kwargs) -> dict:
         """Simulate HTTP POST."""
         return await self.server.call_tool("create_entity", kwargs.get("json", {}))
     
-    async def get(self, path: str):
+    async def get(self, path: str) -> dict:
         """Simulate HTTP GET."""
         return await self.server.read_resource(f"entities://{path.split('/')[-1]}")
 
@@ -155,7 +156,40 @@ class TestClient:
 
     async def close(self):
         """Clean up resources."""
-        pass
+        if hasattr(self.server, "cleanup"):
+            await self.server.cleanup()
+
+    async def get_operation_status(self, operation_id: str):
+        """Get status of an async operation."""
+        return await self.server.get_operation_status(operation_id)
+
+    async def start_async_operation(self, tool_name: str, arguments: dict = None):
+        """Start an async operation."""
+        return await self.server.start_async_operation(tool_name, arguments or {})
+
+    async def with_session(self, session_id: str, callback: callable):
+        """Execute callback within a session context.
+        
+        Args:
+            session_id: The session ID to use
+            callback: Async callback function to execute within session
+        """
+        if not callable(callback):
+            raise ValueError("Callback must be callable")
+        return await self.server.with_session(session_id, callback)
+
+    async def end_session(self, session_id: str) -> None:
+        """End a session.
+        
+        Args:
+            session_id: The session ID to end
+            
+        Raises:
+            MCPError: If session not found or invalid
+        """
+        if not session_id:
+            raise ValueError("Session ID required")
+        return await self.server.end_session(session_id)
 
 
 @pytest.fixture(scope="function")

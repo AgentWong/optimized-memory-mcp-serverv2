@@ -11,9 +11,9 @@ Each tool follows the MCP protocol for performing actions and side effects.
 """
 
 import pytest
-
 from src.main import create_server
 from src.db.connection import get_db
+from tests.conftest import TestClient
 
 
 @pytest.fixture
@@ -37,7 +37,8 @@ def db_session():
 async def test_create_entity_tool(mcp_server):
     """Test create_entity tool"""
     client = TestClient(mcp_server)
-    result = await client.call_tool(
+    try:
+        result = await client.call_tool(
         "create_entity",
         arguments={
             "name": "test_entity",
@@ -47,14 +48,17 @@ async def test_create_entity_tool(mcp_server):
     )
     assert result["name"] == "test_entity"
     assert isinstance(result["id"], str)
+    finally:
+        await client.close()
 
 
 @pytest.mark.asyncio
 async def test_add_observation_tool(mcp_server):
     """Test add_observation tool"""
     client = TestClient(mcp_server)
-    # Create entity first
-    entity_result = await client.call_tool(
+    try:
+        # Create entity first
+        entity_result = await client.call_tool(
         "create_entity", arguments={"name": "obs_test_entity", "entity_type": "test"}
     )
     entity_id = entity_result["id"]
@@ -65,27 +69,35 @@ async def test_add_observation_tool(mcp_server):
         arguments={"entity_id": entity_id, "content": "Test observation"},
     )
     assert result is True
+    finally:
+        await client.close()
 
 
 @pytest.mark.asyncio
 async def test_register_provider_tool(mcp_server):
     """Test register_provider_resource tool"""
-    result = await mcp_server.call_tool(
+    client = TestClient(mcp_server)
+    try:
+        result = await client.call_tool(
         "register_provider_resource",
         arguments={
             "provider": "test_provider",
-            "resource_type": "test_resource",
+            "resource_type": "test_resource", 
             "schema_version": "1.0",
             "doc_url": "https://example.com/docs",
         },
     )
     assert isinstance(result, str)  # Returns resource_id
+    finally:
+        await client.close()
 
 
 @pytest.mark.asyncio
 async def test_register_ansible_module_tool(mcp_server):
     """Test register_ansible_module tool"""
-    result = await mcp_server.call_tool(
+    client = TestClient(mcp_server)
+    try:
+        result = await client.call_tool(
         "register_ansible_module",
         arguments={
             "collection": "test.collection",
@@ -95,3 +107,5 @@ async def test_register_ansible_module_tool(mcp_server):
         },
     )
     assert isinstance(result, str)  # Returns module_id
+    finally:
+        await client.close()
