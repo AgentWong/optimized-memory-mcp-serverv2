@@ -1,6 +1,7 @@
 import os
 import pytest
 from sqlalchemy import create_engine
+from src.utils.errors import MCPError
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
 
@@ -138,22 +139,15 @@ class TestClient:
         """Initialize test client with MCP server instance."""
         self.server = server
 
-    async def post(self, path: str, **kwargs) -> dict:
-        """Simulate HTTP POST."""
-        if path.startswith("/entities/"):
-            result = await self.server.call_tool("create_entity", kwargs.get("json", {}))
-            return {"id": result["id"]}
-        raise ValueError(f"Unknown path: {path}")
-    
-    async def get(self, path: str) -> dict:
-        """Simulate HTTP GET."""
-        if path.startswith("/entities/"):
-            entity_id = path.split("/")[-1]
-            result = await self.server.read_resource(f"entities://{entity_id}")
-            if not result:
-                return {"status_code": 404}
-            return result
-        raise ValueError(f"Unknown path: {path}")
+    async def __aenter__(self):
+        """Async context manager entry."""
+        self.session = await self.server.create_session()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit."""
+        if hasattr(self, 'session'):
+            await self.server.end_session(self.session['id'])
 
     async def read_resource(self, resource_path: str, params: dict = None) -> dict:
         """Read a resource with proper parameter handling.
@@ -164,25 +158,36 @@ class TestClient:
             
         Returns:
             Resource data as dictionary
+            
+        Raises:
+            MCPError: If resource cannot be read
         """
-        try:
-            result = await self.server.read_resource(resource_path, params)
-            if result is None:
-                return {}
-            if isinstance(result, (list, dict)):
-                return result
-            return {"result": str(result)}
-        except Exception as e:
-            # Log error but return empty result
-            print(f"Error reading resource: {e}")
-            return {}
+        result = await self.server.read_resource(resource_path, params)
+        if result is None:
+            raise MCPError("Resource not found", code="RESOURCE_NOT_FOUND")
+        return result
 
-    async def call_tool(self, tool_name: str, arguments: dict = None):
-        """Call a tool."""
-        result = await self.server.call_tool(tool_name, arguments or {})
-        if isinstance(result, (dict, list)):
-            return result
-        return {"result": str(result)} if result else {}
+    async def call_tool(self, tool_name: str, arguments: dict = None) -> dict:
+        """Call a tool.
+        
+        Args:
+            tool_name: Name of tool to call
+            arguments: Optional tool arguments
+            
+        Returns:
+            Tool result as dictionary
+            
+        Raises:
+            MCPError: If tool execution fails
+        """
+        operation = await self.server.start_async_operation(tool_name, arguments)
+        while operation['status'] not in ['completed', 'failed']:
+            operation = await self.server.get_operation_status(operation['id'])
+        
+        if operation['status'] == 'failed':
+            raise MCPError(operation.get('error', 'Tool execution failed'), code="TOOL_ERROR")
+            
+        return operation.get('result', {})
 
     async def close(self):
         """Clean up resources."""
@@ -213,14 +218,26 @@ class TestClient:
         Args:
             session_id: The session ID to use
             callback: Async callback function to execute within session
+            
+        Returns:
+            Result of callback execution
+            
+        Raises:
+            MCPError: If session is invalid or callback fails
         """
         if not callable(callback):
             raise ValueError("Callback must be callable")
+            
+        # Verify session exists and is active
+        sessions = getattr(self.server, '_sessions', {})
+        session = sessions.get(session_id)
+        if not session or session.get('status') != 'active':
+            raise MCPError(f"Session {session_id} not found or inactive", code="SESSION_NOT_FOUND")
+            
         try:
-            return await self.server.with_session(session_id, callback)
+            return await callback()
         except Exception as e:
-            print(f"Error in session execution: {e}")
-            return None
+            raise MCPError(f"Session callback failed: {str(e)}", code="SESSION_ERROR")
 
     async def end_session(self, session_id: str) -> None:
         """End a session.
@@ -252,16 +269,17 @@ async def mcp_server(db_session):
 
     # Create and configure server
     server = await create_server()
+    configured_server = await server
 
     try:
-        yield server
+        yield configured_server
     finally:
         # Cleanup
         try:
-            if hasattr(server, "cleanup"):
-                await server.cleanup()
-            if hasattr(server, "close"):
-                await server.close()
+            if hasattr(configured_server, "cleanup"):
+                await configured_server.cleanup()
+            if hasattr(configured_server, "close"):
+                await configured_server.close()
         except Exception as e:
             # Log but don't raise to ensure cleanup continues
             print(f"Error during cleanup: {e}")

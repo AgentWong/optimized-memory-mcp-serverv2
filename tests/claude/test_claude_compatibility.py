@@ -59,16 +59,15 @@ async def test_resource_protocol(mcp_server):
     client = TestClient(mcp_server)
     try:
         result = await client.read_resource(
-        "test://valid",
-        {
-            "type": "test",
-            "page": 1,
-            "per_page": 10,
-            "created_after": "2025-01-01",
-            "ctx": {},
-        },
-    )
-        assert result is not None
+            "entities://list",
+            {
+                "type": "test",
+                "page": 1,
+                "per_page": 10
+            }
+        )
+        assert isinstance(result, dict)
+        assert "data" in result
     finally:
         await client.close()
 
@@ -92,9 +91,16 @@ async def test_tool_execution(mcp_server):
     """Test tool execution protocol"""
     client = TestClient(mcp_server)
     try:
-        # Test tool invocation
-        result = await client.call_tool("test-tool", {"param": "test"})
-        assert result is not None
+        # Test tool invocation with a known tool
+        result = await client.call_tool(
+            "create_entity", 
+            {
+                "name": "test-entity",
+                "entity_type": "test",
+                "observations": ["Initial observation"]
+            }
+        )
+        assert isinstance(result, dict)
     finally:
         await client.close()
 

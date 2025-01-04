@@ -39,10 +39,10 @@ async def create_server() -> "FastMCP":
         )
 
         # Configure server with all components
-        await configure_server(server)
+        configured_server = await configure_server(server)
 
         logger.info("MCP server created and configured successfully")
-        return server
+        return configured_server
 
     except Exception as e:
         logger.error(f"Failed to create server: {str(e)}")
