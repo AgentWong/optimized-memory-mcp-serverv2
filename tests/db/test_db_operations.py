@@ -35,7 +35,7 @@ def test_base_model_to_dict(db_session: Session):
     """Test BaseModel.to_dict() conversion with all field types"""
     entity = Entity(
         name="test_entity",
-        entity_type="test_type",
+        type="test_type",
         meta_data={"key": "value"},
         tags=["tag1", "tag2"],
     )
@@ -56,20 +56,20 @@ def test_model_validation(db_session: Session):
     """Test model field validation"""
     # Test required fields
     with pytest.raises(Exception):
-        entity = Entity(entity_type="test_type")  # Missing name
+        entity = Entity(type="test_type")  # Missing name
         db_session.add(entity)
         db_session.commit()
 
     # Test field length limits
     with pytest.raises(Exception):
-        entity = Entity(name="x" * 256, entity_type="test_type")  # Exceeds max length
+        entity = Entity(name="x" * 256, type="test_type")  # Exceeds max length
         db_session.add(entity)
         db_session.commit()
 
     # Test JSON field validation
     with pytest.raises(Exception):
         entity = Entity(
-            name="test", entity_type="test_type", meta_data="invalid"  # Should be dict
+            name="test", type="test_type", meta_data="invalid"  # Should be dict
         )
         db_session.add(entity)
         db_session.commit()
@@ -78,7 +78,7 @@ def test_model_validation(db_session: Session):
 def test_entity_crud_operations(db_session: Session):
     """Test CRUD operations for Entity model"""
     # Create
-    entity = Entity(name="test_entity", entity_type="test_type", meta_data={})
+    entity = Entity(name="test_entity", type="test_type", meta_data={})
     db_session.add(entity)
     db_session.commit()
 
@@ -103,8 +103,8 @@ def test_entity_crud_operations(db_session: Session):
 def test_relationship_creation(db_session: Session):
     """Test creating relationships between entities"""
     # Create two entities
-    entity1 = Entity(name="entity1", entity_type="test_type")
-    entity2 = Entity(name="entity2", entity_type="test_type")
+    entity1 = Entity(name="entity1", type="test_type")
+    entity2 = Entity(name="entity2", type="test_type")
     db_session.add_all([entity1, entity2])
     db_session.commit()
 
@@ -130,15 +130,14 @@ def test_relationship_creation(db_session: Session):
 def test_observation_creation(db_session: Session):
     """Test creating observations for entities"""
     # Create entity
-    entity = Entity(name="test_entity", entity_type="test_type")
+    entity = Entity(name="test_entity", type="test_type")
     db_session.add(entity)
     db_session.commit()
 
     # Create observation
     obs = Observation(
         entity_id=entity.id,
-        type="test_observation",
-        observation_type="test",
+        type="test",
         value={"test": "data"},
         meta_data={}
     )
