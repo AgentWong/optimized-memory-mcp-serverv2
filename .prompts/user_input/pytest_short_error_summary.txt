@@ -1,49 +1,66 @@
-============================================================== short test summary info ==============================================================
-PASSED tests/db/test_db_operations.py::test_model_validation
-PASSED tests/models/test_validation.py::test_entity_required_fields
-PASSED tests/utils/test_errors.py::test_base_error
-PASSED tests/utils/test_errors.py::test_configuration_error
-PASSED tests/utils/test_errors.py::test_database_error
-PASSED tests/utils/test_errors.py::test_validation_error
-PASSED tests/utils/test_errors.py::test_error_inheritance
-PASSED tests/utils/test_errors.py::test_error_str_representation
-ERROR tests/claude/test_claude_compatibility.py::test_server_info_endpoint - ModuleNotFoundError: No module named 'mcp.testing'
-ERROR tests/claude/test_claude_compatibility.py::test_resource_protocol - ModuleNotFoundError: No module named 'mcp.testing'
-ERROR tests/claude/test_claude_compatibility.py::test_tool_execution - ModuleNotFoundError: No module named 'mcp.testing'
-ERROR tests/claude/test_claude_compatibility.py::test_error_response_format - ModuleNotFoundError: No module named 'mcp.testing'
-ERROR tests/claude/test_claude_compatibility.py::test_async_operation_handling - ModuleNotFoundError: No module named 'mcp.testing'
-ERROR tests/claude/test_claude_compatibility.py::test_session_management - ModuleNotFoundError: No module named 'mcp.testing'
-ERROR tests/error_scenarios/test_error_scenarios.py::test_database_constraint_violations - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: type object 'Config' has no attribute 'REDIS_HOST'
-ERROR tests/error_scenarios/test_error_scenarios.py::test_invalid_relationship_creation - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: type object 'Config' has no attribute 'REDIS_HOST'
-ERROR tests/error_scenarios/test_error_scenarios.py::test_invalid_observation_data - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: type object 'Config' has no attribute 'REDIS_HOST'
-ERROR tests/error_scenarios/test_error_scenarios.py::test_concurrent_modification_conflicts - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: type object 'Config' has no attribute 'REDIS_HOST'
-ERROR tests/error_scenarios/test_error_scenarios.py::test_invalid_api_requests - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: type object 'Config' has no attribute 'REDIS_HOST'
-ERROR tests/error_scenarios/test_error_scenarios.py::test_resource_not_found_handling - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: type object 'Config' has no attribute 'REDIS_HOST'
-ERROR tests/error_scenarios/test_error_scenarios.py::test_validation_error_handling - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: type object 'Config' has no attribute 'REDIS_HOST'
-ERROR tests/error_scenarios/test_error_scenarios.py::test_transaction_rollback - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: type object 'Config' has no attribute 'REDIS_HOST'
-ERROR tests/integration/test_mcp_integration.py::test_full_entity_workflow - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: type object 'Config' has no attribute 'REDIS_HOST'
-ERROR tests/integration/test_mcp_integration.py::test_search_and_analysis_workflow - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: type object 'Config' has no attribute 'REDIS_HOST'
-ERROR tests/integration/test_mcp_integration.py::test_error_handling - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: type object 'Config' has no attribute 'REDIS_HOST'
-ERROR tests/resources/test_resources.py::test_entities_list_resource - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: type object 'Config' has no attribute 'REDIS_HOST'
-ERROR tests/resources/test_resources.py::test_entity_detail_resource - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: type object 'Config' has no attribute 'REDIS_HOST'
-ERROR tests/resources/test_resources.py::test_providers_resource - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: type object 'Config' has no attribute 'REDIS_HOST'
-ERROR tests/resources/test_resources.py::test_ansible_collections_resource - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: type object 'Config' has no attribute 'REDIS_HOST'
-ERROR tests/tools/test_tools.py::test_create_entity_tool - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: type object 'Config' has no attribute 'REDIS_HOST'
-ERROR tests/tools/test_tools.py::test_add_observation_tool - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: type object 'Config' has no attribute 'REDIS_HOST'
-ERROR tests/tools/test_tools.py::test_register_provider_tool - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: type object 'Config' has no attribute 'REDIS_HOST'
-ERROR tests/tools/test_tools.py::test_register_ansible_module_tool - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: type object 'Config' has no attribute 'REDIS_HOST'
-FAILED tests/db/test_db_operations.py::test_base_model_to_dict - TypeError: 'meta_data' is an invalid keyword argument for Entity
+=========================== short test summary info ============================
+FAILED tests/db/test_db_operations.py::test_base_model_to_dict - TypeError: 'tags' is an invalid keyword argument for Entity
 FAILED tests/db/test_db_operations.py::test_entity_crud_operations - sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: entity
+[SQL: INSERT INTO entity (name, entity_type, meta_data, created_at, updated_at) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('test_entity', 'test_type', '{}', '2025-01-04 20:19:03.511770', '2025-01-04 20:19:03.511775')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
 FAILED tests/db/test_db_operations.py::test_relationship_creation - sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: entity
+[SQL: INSERT INTO entity (name, entity_type, meta_data, created_at, updated_at) VALUES (?, ?, ?, ?, ?) RETURNING id]
+[parameters: ('entity1', 'test_type', '{}', '2025-01-04 20:19:03.956276', '2025-01-04 20:19:03.956280')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
 FAILED tests/db/test_db_operations.py::test_observation_creation - sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: entity
+[SQL: INSERT INTO entity (name, entity_type, meta_data, created_at, updated_at) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('test_entity', 'test_type', '{}', '2025-01-04 20:19:04.399889', '2025-01-04 20:19:04.399892')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
 FAILED tests/db_integration/test_db_integration.py::test_entity_relationships_cascade - sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: entity
+[SQL: INSERT INTO entity (name, entity_type, meta_data, created_at, updated_at) VALUES (?, ?, ?, ?, ?) RETURNING id]
+[parameters: ('test_entity_1', 'test', '{}', '2025-01-04 20:19:04.837615', '2025-01-04 20:19:04.837618')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
 FAILED tests/db_integration/test_db_integration.py::test_observation_entity_integrity - sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: entity
+[SQL: INSERT INTO entity (name, entity_type, meta_data, created_at, updated_at) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('test_entity', 'test', '{}', '2025-01-04 20:19:05.279644', '2025-01-04 20:19:05.279647')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
 FAILED tests/db_integration/test_db_integration.py::test_provider_version_tracking - ValueError: Invalid provider type: test_type
 FAILED tests/db_integration/test_db_integration.py::test_ansible_collection_relationships - sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: ansiblecollection
+[SQL: INSERT INTO ansiblecollection (namespace, name, version, meta_data, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)]
+[parameters: (None, 'test.collection', '1.0.0', '{}', '2025-01-04 20:19:05.777809', '2025-01-04 20:19:05.777812')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
 FAILED tests/db_integration/test_db_integration.py::test_concurrent_transactions - sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: entity
+[SQL: INSERT INTO entity (name, entity_type, meta_data, created_at, updated_at) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('concurrent_test', 'test', '{}', '2025-01-04 20:19:06.220220', '2025-01-04 20:19:06.220224')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
 FAILED tests/db_integration/test_db_integration.py::test_database_cleanup - sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: entity
-FAILED tests/models/test_validation.py::test_relationship_required_fields - ValueError: Invalid relationship type: None
-FAILED tests/models/test_validation.py::test_observation_required_fields - TypeError: 'data' is an invalid keyword argument for Observation
-FAILED tests/models/test_validation.py::test_relationship_foreign_keys - ValueError: Invalid relationship type: None
-FAILED tests/models/test_validation.py::test_observation_foreign_keys - TypeError: 'data' is an invalid keyword argument for Observation
-=============================================== 14 failed, 8 passed, 51 warnings, 25 errors in 4.97s ================================================
+[SQL: INSERT INTO entity (name, entity_type, meta_data, created_at, updated_at) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('cleanup_test', 'test', '{}', '2025-01-04 20:19:06.661689', '2025-01-04 20:19:06.661693')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+ERROR tests/claude/test_claude_compatibility.py::test_server_info_endpoint - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'type', 'per_page', 'ctx', 'page', 'created_after'}
+ERROR tests/claude/test_claude_compatibility.py::test_resource_protocol - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'type', 'per_page', 'ctx', 'page', 'created_after'}
+ERROR tests/claude/test_claude_compatibility.py::test_tool_execution - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'type', 'per_page', 'ctx', 'page', 'created_after'}
+ERROR tests/claude/test_claude_compatibility.py::test_error_response_format - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'type', 'per_page', 'ctx', 'page', 'created_after'}
+ERROR tests/claude/test_claude_compatibility.py::test_async_operation_handling - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'type', 'per_page', 'ctx', 'page', 'created_after'}
+ERROR tests/claude/test_claude_compatibility.py::test_session_management - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'type', 'per_page', 'ctx', 'page', 'created_after'}
+ERROR tests/error_scenarios/test_error_scenarios.py::test_database_constraint_violations - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'type', 'per_page', 'ctx', 'page', 'created_after'}
+ERROR tests/error_scenarios/test_error_scenarios.py::test_invalid_relationship_creation - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'type', 'per_page', 'ctx', 'page', 'created_after'}
+ERROR tests/error_scenarios/test_error_scenarios.py::test_invalid_observation_data - ModuleNotFoundError: No module named 'mcp.testing'
+ERROR tests/error_scenarios/test_error_scenarios.py::test_concurrent_modification_conflicts - ModuleNotFoundError: No module named 'mcp.testing'
+ERROR tests/error_scenarios/test_error_scenarios.py::test_invalid_api_requests - ModuleNotFoundError: No module named 'mcp.testing'
+ERROR tests/error_scenarios/test_error_scenarios.py::test_resource_not_found_handling - ModuleNotFoundError: No module named 'mcp.testing'
+ERROR tests/error_scenarios/test_error_scenarios.py::test_validation_error_handling - ModuleNotFoundError: No module named 'mcp.testing'
+ERROR tests/error_scenarios/test_error_scenarios.py::test_transaction_rollback - ModuleNotFoundError: No module named 'mcp.testing'
+ERROR tests/integration/test_mcp_integration.py::test_full_entity_workflow - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'type', 'per_page', 'ctx', 'page', 'created_after'}
+ERROR tests/integration/test_mcp_integration.py::test_search_and_analysis_workflow - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'type', 'per_page', 'ctx', 'page', 'created_after'}
+ERROR tests/integration/test_mcp_integration.py::test_error_handling - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and function parameters {'type', 'per_page', 'ctx', 'page', 'created_after'}
+ERROR tests/models/test_validation.py::test_entity_required_fields
+ERROR tests/models/test_validation.py::test_relationship_required_fields
+ERROR tests/models/test_validation.py::test_observation_required_fields
+ERROR tests/models/test_validation.py::test_relationship_foreign_keys
+ERROR tests/models/test_validation.py::test_observation_foreign_keys
+ERROR tests/resources/test_resources.py::test_entities_list_resource
+ERROR tests/resources/test_resources.py::test_entity_detail_resource
+ERROR tests/resources/test_resources.py::test_providers_resource
+ERROR tests/resources/test_resources.py::test_ansible_collections_resource
+ERROR tests/tools/test_tools.py::test_create_entity_tool
+ERROR tests/tools/test_tools.py::test_add_observation_tool
+ERROR tests/tools/test_tools.py::test_register_provider_tool
+ERROR tests/tools/test_tools.py::test_register_ansible_module_tool
+============= 10 failed, 7 passed, 39 warnings, 30 errors in 4.62s =============
