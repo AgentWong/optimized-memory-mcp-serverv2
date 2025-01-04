@@ -14,6 +14,7 @@ import pytest
 
 from src.main import create_server
 from src.db.connection import get_db
+from src.db.models.base import Base
 
 
 @pytest.fixture
