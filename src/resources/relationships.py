@@ -34,25 +34,27 @@ from ..utils.errors import DatabaseError
 def register_resources(mcp: FastMCP) -> None:
     """Register relationship-related resources with the MCP server."""
 
-    @mcp.resource("relationships://list")
+    @mcp.resource("relationships://list?source_id={source_id}&target_id={target_id}&relationship_type={relationship_type}&ctx={ctx}")
     def list_relationships(
-        source_id: Optional[int] = None,
-        target_id: Optional[int] = None,
-        relationship_type: Optional[str] = None,
-        db: Session = next(get_db()),
+        ctx: Context,
+        source_id: str = "null",
+        target_id: str = "null", 
+        relationship_type: str = "null",
     ) -> List[Dict[str, Any]]:
         """List relationships, optionally filtered."""
         try:
+            db = next(get_db())
             query = db.query(Relationship)
 
-            if source_id:
-                query = query.filter(Relationship.source_id == source_id)
-            if target_id:
-                query = query.filter(Relationship.target_id == target_id)
-            if relationship_type:
+            if source_id != "null":
+                query = query.filter(Relationship.source_id == int(source_id))
+            if target_id != "null":
+                query = query.filter(Relationship.target_id == int(target_id))
+            if relationship_type != "null":
                 query = query.filter(Relationship.type == relationship_type)
 
             relationships = query.all()
+            await ctx.info(f"Listed {len(relationships)} relationships")
             return [
                 {
                     "id": r.id,
