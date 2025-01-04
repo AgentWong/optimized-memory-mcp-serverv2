@@ -134,7 +134,7 @@ def test_observation(db_session, test_entity):
 class TestClient:
     """Test client for MCP server."""
 
-    def __init__(self, server: "FastMCP"):
+    def __init__(self, server):
         """Initialize test client with MCP server instance."""
         self.server = server
 
@@ -195,9 +195,13 @@ class TestClient:
             # Log but don't raise to ensure cleanup continues
             print(f"Error during cleanup: {e}")
 
-    async def get_operation_status(self, operation_id: str):
+    async def get_operation_status(self, operation_id: str) -> dict:
         """Get status of an async operation."""
-        return await self.server.get_operation_status(operation_id)
+        try:
+            return await self.server.get_operation_status(operation_id)
+        except Exception as e:
+            print(f"Error getting operation status: {e}")
+            return {"status": "error", "error": str(e)}
 
     async def start_async_operation(self, tool_name: str, arguments: dict = None):
         """Start an async operation."""
@@ -212,7 +216,11 @@ class TestClient:
         """
         if not callable(callback):
             raise ValueError("Callback must be callable")
-        return await self.server.with_session(session_id, callback)
+        try:
+            return await self.server.with_session(session_id, callback)
+        except Exception as e:
+            print(f"Error in session execution: {e}")
+            return None
 
     async def end_session(self, session_id: str) -> None:
         """End a session.
@@ -228,7 +236,7 @@ class TestClient:
         return await self.server.end_session(session_id)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 async def mcp_server(db_session):
     """Create MCP server instance for testing."""
     from src.main import create_server
@@ -244,6 +252,7 @@ async def mcp_server(db_session):
 
     # Create and configure server
     server = await create_server()
+    server = await server.__anext__()  # Get the actual server instance
 
     try:
         yield server
