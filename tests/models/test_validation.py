@@ -20,7 +20,7 @@ from src.db.models.relationships import Relationship
 from src.db.models.observations import Observation
 
 
-def test_entity_required_fields(db_session):
+def test_entity_required_fields(db_session, mcp_server):
     """Test that entity required fields are enforced"""
     # Missing name
     with pytest.raises(IntegrityError):
@@ -37,7 +37,7 @@ def test_entity_required_fields(db_session):
     db_session.rollback()
 
 
-def test_relationship_required_fields(db_session):
+def test_relationship_required_fields(db_session, mcp_server):
     """Test that relationship required fields are enforced"""
     entity1 = Entity(name="entity1", entity_type="test_type")
     entity2 = Entity(name="entity2", entity_type="test_type")
@@ -59,7 +59,7 @@ def test_relationship_required_fields(db_session):
     db_session.rollback()
 
 
-def test_observation_required_fields(db_session):
+def test_observation_required_fields(db_session, mcp_server):
     """Test that observation required fields are enforced"""
     entity = Entity(name="test_entity", entity_type="test_type")
     db_session.add(entity)
@@ -80,7 +80,7 @@ def test_observation_required_fields(db_session):
     db_session.rollback()
 
 
-def test_relationship_foreign_keys(db_session):
+def test_relationship_foreign_keys(db_session, mcp_server):
     """Test that relationship foreign keys are enforced"""
     entity = Entity(name="entity1", entity_type="test_type")
     db_session.add(entity)
@@ -98,7 +98,7 @@ def test_relationship_foreign_keys(db_session):
     db_session.rollback()
 
 
-def test_observation_foreign_keys(db_session):
+def test_observation_foreign_keys(db_session, mcp_server):
     """Test that observation foreign keys are enforced"""
     # Invalid entity_id
     with pytest.raises(IntegrityError):

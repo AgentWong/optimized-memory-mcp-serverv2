@@ -31,10 +31,9 @@ from src.utils.errors import MCPError, ValidationError, DatabaseError
 
 
 @pytest.fixture
-def client():
-    """Create test client"""
-    server = create_server()
-    return TestClient(server.app)
+def mcp_server():
+    """Create MCP server instance"""
+    return create_server()
 
 
 @pytest.fixture
@@ -48,41 +47,44 @@ def db_session():
         session.close()
 
 
-def test_database_constraint_violations(client, db_session: Session):
+def test_database_constraint_violations(mcp_server, db_session: Session):
     """Test database constraint violation handling"""
     # Test duplicate entity name
-    response = client.post(
-        "/entities/", json={"name": "unique_entity", "entity_type": "test"}
+    result = mcp_server.call_tool(
+        "create_entity",
+        arguments={"name": "unique_entity", "entity_type": "test"}
     )
-    assert response.status_code == 200
+    assert result is not None
 
     # Attempt duplicate
-    response = client.post(
-        "/entities/", json={"name": "unique_entity", "entity_type": "test"}
-    )
-    assert response.status_code == 400
-    assert "already exists" in response.json()["message"].lower()
+    with pytest.raises(ValidationError) as exc:
+        mcp_server.call_tool(
+            "create_entity",
+            arguments={"name": "unique_entity", "entity_type": "test"}
+        )
+    assert "already exists" in str(exc.value).lower()
 
 
-def test_invalid_relationship_creation(client, db_session: Session):
+def test_invalid_relationship_creation(mcp_server, db_session: Session):
     """Test invalid relationship handling"""
     # Create test entity
-    entity_response = client.post(
-        "/entities/", json={"name": "test_entity", "entity_type": "test"}
+    result = mcp_server.call_tool(
+        "create_entity",
+        arguments={"name": "test_entity", "entity_type": "test"}
     )
-    entity_id = entity_response.json()["id"]
+    entity_id = result["id"]
 
     # Test self-referential relationship
-    response = client.post(
-        "/relationships/",
-        json={
-            "source_id": entity_id,
-            "target_id": entity_id,
-            "relationship_type": "self_ref",
-        },
-    )
-    assert response.status_code == 400
-    assert "self-referential" in response.json()["message"].lower()
+    with pytest.raises(ValidationError) as exc:
+        mcp_server.call_tool(
+            "create_relationship",
+            arguments={
+                "source_id": entity_id,
+                "target_id": entity_id,
+                "relationship_type": "self_ref",
+            }
+        )
+    assert "self-referential" in str(exc.value).lower()
 
 
 def test_invalid_observation_data(client, db_session: Session):

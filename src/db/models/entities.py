@@ -21,7 +21,7 @@ class Entity(Base, BaseModel, TimestampMixin):
         Index("ix_entity_created_type", "created_at", "entity_type"),
         Index("ix_entity_updated_type", "updated_at", "entity_type"),
     )
-    entity_metadata = Column(JSON, nullable=False, default=dict)
+    meta_data = Column(JSON, nullable=False, default=dict)
 
     # Relationships
     relationships = relationship(

@@ -33,40 +33,33 @@ def db_session():
         session.close()
 
 
-def test_entities_list_resource(client):
+def test_entities_list_resource(mcp_server):
     """Test entities://list resource"""
-    response = client.get("/resource/entities://list")
-    assert response.status_code == 200
-    data = response.json()
-    assert isinstance(data, list)
+    result = mcp_server.read_resource("entities://list")
+    assert isinstance(result, list)
 
 
-def test_entity_detail_resource(client, db_session):
+def test_entity_detail_resource(mcp_server, db_session):
     """Test entities://{id} resource"""
     # Create test entity first
-    response = client.post(
-        "/tools/create_entity", json={"name": "test_entity", "entity_type": "test"}
+    result = mcp_server.call_tool(
+        "create_entity",
+        arguments={"name": "test_entity", "entity_type": "test"}
     )
-    entity_id = response.json()["id"]
+    entity_id = result["id"]
 
     # Test resource
-    response = client.get(f"/resource/entities://{entity_id}")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["name"] == "test_entity"
+    entity = mcp_server.read_resource(f"entities://{entity_id}")
+    assert entity["name"] == "test_entity"
 
 
-def test_providers_resource(client):
+def test_providers_resource(mcp_server):
     """Test providers://{provider}/resources resource"""
-    response = client.get("/resource/providers://test/resources")
-    assert response.status_code == 200
-    data = response.json()
-    assert isinstance(data, list)
+    result = mcp_server.read_resource("providers://test/resources")
+    assert isinstance(result, list)
 
 
-def test_ansible_collections_resource(client):
+def test_ansible_collections_resource(mcp_server):
     """Test ansible://collections resource"""
-    response = client.get("/resource/ansible://collections")
-    assert response.status_code == 200
-    data = response.json()
-    assert isinstance(data, list)
+    result = mcp_server.read_resource("ansible://collections")
+    assert isinstance(result, list)

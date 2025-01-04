@@ -33,64 +33,60 @@ def db_session():
         session.close()
 
 
-def test_create_entity_tool(client):
+def test_create_entity_tool(mcp_server):
     """Test create_entity tool"""
-    response = client.post(
-        "/tools/create_entity",
-        json={
+    result = mcp_server.call_tool(
+        "create_entity",
+        arguments={
             "name": "test_entity",
             "entity_type": "test",
             "observations": ["Initial observation"],
-        },
+        }
     )
-    assert response.status_code == 200
-    data = response.json()
-    assert data["name"] == "test_entity"
-    assert isinstance(data["id"], str)
+    assert result["name"] == "test_entity"
+    assert isinstance(result["id"], str)
 
 
-def test_add_observation_tool(client):
+def test_add_observation_tool(mcp_server):
     """Test add_observation tool"""
     # Create entity first
-    entity_response = client.post(
-        "/tools/create_entity", json={"name": "obs_test_entity", "entity_type": "test"}
+    entity_result = mcp_server.call_tool(
+        "create_entity",
+        arguments={"name": "obs_test_entity", "entity_type": "test"}
     )
-    entity_id = entity_response.json()["id"]
+    entity_id = entity_result["id"]
 
     # Test add_observation
-    response = client.post(
-        "/tools/add_observation",
-        json={"entity_id": entity_id, "content": "Test observation"},
+    result = mcp_server.call_tool(
+        "add_observation",
+        arguments={"entity_id": entity_id, "content": "Test observation"}
     )
-    assert response.status_code == 200
-    assert response.json() is True
+    assert result is True
 
 
-def test_register_provider_tool(client):
+def test_register_provider_tool(mcp_server):
     """Test register_provider_resource tool"""
-    response = client.post(
-        "/tools/register_provider_resource",
-        json={
+    result = mcp_server.call_tool(
+        "register_provider_resource",
+        arguments={
             "provider": "test_provider",
-            "resource_type": "test_resource",
+            "resource_type": "test_resource", 
             "schema_version": "1.0",
-            "doc_url": "https://example.com/docs",
-        },
+            "doc_url": "https://example.com/docs"
+        }
     )
-    assert response.status_code == 200
-    assert isinstance(response.json(), str)  # Returns resource_id
+    assert isinstance(result, str)  # Returns resource_id
 
 
-def test_register_ansible_module_tool(client):
+def test_register_ansible_module_tool(mcp_server):
     """Test register_ansible_module tool"""
-    response = client.post(
-        "/tools/register_ansible_module",
-        json={
+    result = mcp_server.call_tool(
+        "register_ansible_module",
+        arguments={
             "collection": "test.collection",
             "module": "test_module",
             "version": "1.0.0",
-            "doc_url": "https://example.com/docs",
-        },
+            "doc_url": "https://example.com/docs"
+        }
     )
-    assert response.status_code == 200
-    assert isinstance(response.json(), str)  # Returns module_id
+    assert isinstance(result, str)  # Returns module_id

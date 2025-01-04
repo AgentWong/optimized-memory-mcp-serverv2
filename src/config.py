@@ -21,6 +21,12 @@ class Config:
     LOG_LEVEL = os.getenv("MCP_LOG_LEVEL", "INFO")
     LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
+    # Redis
+    REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+    REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
+    REDIS_DB = int(os.getenv("REDIS_DB", "0"))
+    REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", None)
+
     @classmethod
     def as_dict(cls) -> Dict[str, Any]:
         """Convert config to dictionary."""

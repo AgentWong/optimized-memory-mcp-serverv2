@@ -31,6 +31,8 @@ class Observation(Base, BaseModel, TimestampMixin):
 
     def __init__(self, **kwargs):
         """Initialize an Observation with validation."""
+        if "data" in kwargs:
+            kwargs["value"] = kwargs.pop("data")
         super().__init__(**kwargs)
         if self.type not in self.VALID_TYPES:
             raise ValueError(f"Invalid observation type: {self.type}")

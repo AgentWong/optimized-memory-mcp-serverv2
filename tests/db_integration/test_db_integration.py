@@ -33,6 +33,11 @@ def db_session():
         session.rollback()
         session.close()
 
+@pytest.fixture
+def mcp_server():
+    """Create MCP server instance"""
+    return create_server()
+
 
 def test_entity_relationships_cascade(db_session: Session):
     """Test entity deletion cascades relationships properly"""

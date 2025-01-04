@@ -19,6 +19,12 @@ from src.db.connection import get_db
 
 
 @pytest.fixture
+def mcp_server():
+    """Create MCP server instance"""
+    return create_server()
+
+
+@pytest.fixture
 def db_session():
     """Provide a database session for testing"""
     session = next(get_db())
@@ -28,87 +34,84 @@ def db_session():
         session.close()
 
 
-def test_server_info_endpoint(client):
-    """Test server info endpoint matches Claude Desktop requirements"""
-    response = client.get("/server-info")
-    assert response.status_code == 200
-    data = response.json()
-
+def test_server_info_endpoint(mcp_server):
+    """Test server info matches Claude Desktop requirements"""
+    info = mcp_server.get_server_info()
+    
     # Verify required fields
-    assert "name" in data
-    assert "version" in data
-    assert "capabilities" in data
-    assert isinstance(data["capabilities"], list)
+    assert "name" in info
+    assert "version" in info
+    assert "capabilities" in info
+    assert isinstance(info["capabilities"], list)
 
 
-def test_resource_protocol(client):
+def test_resource_protocol(mcp_server):
     """Test resource URL protocol handling"""
-    # Test valid resource URL
-    response = client.get("/resource/test")
-    assert response.status_code in (200, 404)  # Either success or not found
+    # Test valid resource
+    result = mcp_server.read_resource("test://valid")
+    assert result is not None
 
-    # Test invalid resource URL
-    response = client.get("/resource/invalid://test")
-    assert response.status_code == 400
+    # Test invalid resource
+    with pytest.raises(Exception) as exc:
+        mcp_server.read_resource("invalid://test")
+    assert "invalid resource" in str(exc.value).lower()
 
 
-def test_tool_execution(client):
+def test_tool_execution(mcp_server):
     """Test tool execution protocol"""
     # Test tool invocation
-    response = client.post("/tools/test-tool", json={"param": "test"})
-    assert response.status_code in (200, 404)  # Either success or not found
+    result = mcp_server.call_tool("test-tool", arguments={"param": "test"})
+    assert result is not None
 
-    # Test invalid tool request
-    response = client.post("/tools/invalid-tool", json={"param": "test"})
-    assert response.status_code == 404
+    # Test invalid tool
+    with pytest.raises(Exception) as exc:
+        mcp_server.call_tool("invalid-tool", arguments={"param": "test"})
+    assert "tool not found" in str(exc.value).lower()
 
 
-def test_error_response_format(client):
+def test_error_response_format(mcp_server):
     """Test error responses match Claude Desktop expectations"""
-    # Trigger a 404 error
-    response = client.get("/nonexistent")
-    assert response.status_code == 404
-    data = response.json()
-
+    # Trigger an error
+    with pytest.raises(Exception) as exc:
+        mcp_server.read_resource("nonexistent://resource")
+    
+    error = exc.value
     # Verify error format
-    assert "error" in data
-    assert "code" in data
-    assert "message" in data
+    assert hasattr(error, 'code')
+    assert str(error)  # Has message
+    assert isinstance(error, MCPError)  # Proper error type
 
 
-def test_async_operation_handling(client):
+def test_async_operation_handling(mcp_server):
     """Test async operation protocol"""
     # Start async operation
-    response = client.post("/tools/async-test", json={"param": "test"})
-    assert response.status_code in (200, 404)
-
-    if response.status_code == 200:
-        data = response.json()
-        # Verify async operation ID
-        assert "operation_id" in data
-
-        # Check operation status
-        op_id = data["operation_id"]
-        status_response = client.get(f"/operations/{op_id}")
-        assert status_response.status_code == 200
-        status_data = status_response.json()
-        assert "status" in status_data
+    operation = mcp_server.start_async_operation("test-async-tool", {"param": "test"})
+    assert operation is not None
+    
+    # Verify operation properties
+    assert hasattr(operation, 'id')
+    assert hasattr(operation, 'status')
+    
+    # Check operation status
+    status = mcp_server.get_operation_status(operation.id)
+    assert status in ['pending', 'running', 'completed', 'failed']
 
 
-def test_session_management(client):
+def test_session_management(mcp_server):
     """Test session handling protocol"""
     # Create session
-    response = client.post("/sessions")
-    assert response.status_code == 200
-    data = response.json()
-    assert "session_id" in data
-
-    session_id = data["session_id"]
-
+    session = mcp_server.create_session()
+    assert session is not None
+    assert hasattr(session, 'id')
+    
     # Use session
-    response = client.get("/test", headers={"X-Session-ID": session_id})
-    assert response.status_code in (200, 404)
-
+    result = mcp_server.with_session(session.id, lambda: True)
+    assert result is True
+    
     # End session
-    response = client.delete(f"/sessions/{session_id}")
-    assert response.status_code == 200
+    mcp_server.end_session(session.id)
+    
+    # Verify session ended
+    with pytest.raises(Exception) as exc:
+        mcp_server.with_session(session.id, lambda: True)
+    assert "session not found" in str(exc.value).lower()
