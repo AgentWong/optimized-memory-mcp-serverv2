@@ -101,7 +101,7 @@ def register_tools(mcp: FastMCP) -> None:
             db.commit()
             db.refresh(entity)
 
-            return {"id": entity.id, "name": entity.name, "type": entity.type}
+            return {"id": entity.id, "name": entity.name, "type": entity.entity_type}
         except Exception as e:
             db.rollback()
             raise DatabaseError(f"Failed to create entity: {str(e)}")
