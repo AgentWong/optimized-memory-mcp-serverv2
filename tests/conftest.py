@@ -123,9 +123,7 @@ def test_observation(db_session, test_entity):
 
 @pytest.fixture(scope="function")
 def client(db_session):
-    """Create MCP test client with database session."""
     from src.main import create_server
-    from mcp.testing import TestClient
 
     # Use in-memory database for tests
     os.environ["DATABASE_URL"] = "sqlite:///:memory:"

@@ -1,5 +1,3 @@
-- MCP_PORT, MCP_DEBUG, LOG_LEVEL, LOG_FORMAT, and MCP_HOST should be unnecessary.
-- The ONLY user provided environment variable should be "DATABASE_URL".
-- "mcp_python_sdk_readme.md" is the original README.md document for the MCP SDK.  Use it as the source of truth for how to utilize the "mcp" Python package.
-- I believe at a bare minimum, the Core Concepts "Tools" and "Resources" MUST be used in order to comply with the MCP SDK spec.  Other core concepts may be utilized where applicable.
-- API functions and use of "fastapi" should be removed from the code because the core "Tools" and "Resources" cover the same function.
+- "mcp.testing" is not a valid module of the MCP SDK and no attempts should be made to add it to any testing.
+- The AI keeps trying to add FastAPI, API, and HTTP related code despite "no-fastapi.xml" rules directing it not to, ensure nothing you create adds any references to these.
+- We've gone through at least 6 cycles of "I log pytest errors to pytest_short_error_summary.txt" => "AI tries to fix errors" with no improvement in the number of failed tests or the number of errors (appears to be consistently at 35).  I believe a comprehensive review of the entire codebase is necessary.  There appears to be a major inconsistency between what the module does and the tests that are written for it.
