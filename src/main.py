@@ -16,7 +16,7 @@ from .db.init_db import init_db
 logger = logging.getLogger(__name__)
 
 
-async def create_server() -> FastMCP:
+async def create_server() -> "FastMCP":
     """Create and configure the MCP server instance."""
     # Configure logging first
     configure_logging()
@@ -54,6 +54,8 @@ def main() -> None:
     try:
         import asyncio
         server = asyncio.run(create_server())
+        if hasattr(server, "__anext__"):
+            server = asyncio.run(server.__anext__())
         logger.info("Starting MCP server")
         try:
             server.run()

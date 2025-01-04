@@ -252,7 +252,6 @@ async def mcp_server(db_session):
 
     # Create and configure server
     server = await create_server()
-    server = await server.__anext__()  # Get the actual server instance
 
     try:
         yield server
