@@ -5,7 +5,7 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-from .utils.errors import DatabaseError
+from ..utils.errors import DatabaseError
 
 # Base class for SQLAlchemy models
 Base = declarative_base()
