@@ -52,7 +52,6 @@ async def configure_server(server: FastMCP) -> FastMCP:
         )
         from .resources.ansible import register_resources as register_ansible_resources
         from .resources.versions import register_resources as register_version_resources
-        from .resources.search import register_resources as register_search_resources
         from .tools.entities import register_tools as register_entity_tools
         from .tools.relationships import register_tools as register_relationship_tools
         from .tools.observations import register_tools as register_observation_tools
@@ -67,7 +66,6 @@ async def configure_server(server: FastMCP) -> FastMCP:
         register_provider_resources(server)
         register_ansible_resources(server)
         register_version_resources(server)
-        register_search_resources(server)
 
         # Register all tools with error handling
         try:
@@ -77,7 +75,6 @@ async def configure_server(server: FastMCP) -> FastMCP:
             register_provider_tools(server)
             register_ansible_tools(server)
             register_analysis_tools(server)
-            register_search_tools(server)  # Add search tools registration
         except Exception as e:
             logger.error(f"Failed to register tools: {str(e)}")
             raise ConfigurationError(f"Tool registration failed: {str(e)}")
