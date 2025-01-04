@@ -11,13 +11,13 @@ from ..utils.cache import generate_cache_key, get_cached, set_cached
 def register_resources(mcp: FastMCP) -> None:
     """Register entity-related MCP resources."""
 
-    @mcp.resource("entities://list/{page}/{per_page}/{type}/{created_after}")
+    @mcp.resource("entities://list")
     async def list_entities(
         ctx: Context,
-        page: str,
-        per_page: str,
-        type: str,
-        created_after: str,
+        page: str = "1",
+        per_page: str = "50", 
+        type: str = "null",
+        created_after: str = "null"
     ) -> Dict[str, Any]:
         """List entities with pagination and filtering.
 
