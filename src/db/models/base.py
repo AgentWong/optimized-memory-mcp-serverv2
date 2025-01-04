@@ -8,9 +8,6 @@ from sqlalchemy.ext.declarative import declared_attr
 
 from ..init_db import Base
 
-# Create a custom MetaData instance
-metadata = MetaData()
-
 class TimestampMixin:
     """Mixin to add created/updated timestamps."""
 
@@ -24,7 +21,6 @@ class BaseModel(Base):
     """Abstract base model with common fields and methods."""
 
     __abstract__ = True
-    metadata = metadata  # Use custom metadata instance
 
     id = Column(Integer, primary_key=True, autoincrement=True)
 
