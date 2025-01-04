@@ -25,14 +25,15 @@ def register_resources(mcp: FastMCP) -> None:
         mcp: The FastMCP server instance to register resources with
     """
 
-    @mcp.resource("entities://list")
-    async def list_entities(ctx: Context) -> Dict[str, Any]:
+    @mcp.resource("entities://list?page={page}&per_page={per_page}&type={type}&created_after={created_after}")
+    async def list_entities(ctx: Context, page: str = "null", per_page: str = "null", 
+                          type: str = "null", created_after: str = "null") -> Dict[str, Any]:
         """List entities with pagination and filtering.
 
         Args:
             ctx: MCP context object
             page: Page number (default: 1)
-            per_page: Items per page (default: 50, max: 100)
+            per_page: Items per page (default: 50, max: 100) 
             type: Filter by entity type
             created_after: Filter by creation date (ISO format)
 
@@ -148,8 +149,8 @@ def register_resources(mcp: FastMCP) -> None:
                 },
             )
 
-    @mcp.resource("entities://{id}")
-    async def get_entity(ctx: Context, id: str, include: str = None) -> Dict[str, Any]:
+    @mcp.resource("entities://{id}?include={include}")
+    async def get_entity(ctx: Context, id: str, include: str = "null") -> Dict[str, Any]:
         """Get details for a specific entity with optional related data.
 
         Args:

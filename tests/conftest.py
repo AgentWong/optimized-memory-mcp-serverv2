@@ -132,18 +132,30 @@ def test_observation(db_session, test_entity):
 
 
 @pytest.fixture(scope="function")
-def client(db_session):
+def mcp_server(db_session):
+    """Create MCP server instance for testing."""
     from src.main import create_server
 
     # Use in-memory database for tests
     os.environ["DATABASE_URL"] = "sqlite:///:memory:"
     os.environ["TESTING"] = "true"
 
-    # Create MCP server with test config
+    # Create and configure server
     server = create_server()
+    
+    try:
+        yield server
+    finally:
+        # Cleanup
+        if hasattr(server, 'cleanup'):
+            server.cleanup()
 
-    # Create and return MCP test client
-    client = TestClient(server)
+@pytest.fixture(scope="function")
+def client(mcp_server):
+    """Create test client using the MCP server fixture."""
+    from mcp.testing import TestClient
+    
+    client = TestClient(mcp_server)
     try:
         yield client
     finally:
