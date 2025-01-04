@@ -133,13 +133,12 @@ def register_tools(mcp: FastMCP) -> None:
                         raise ValidationError(f"Failed to create observation: {str(e)}")
                 db.commit()
 
-            result = {
+            return [{
                 "id": entity.id,
                 "name": entity.name,
                 "type": entity.entity_type,
                 "metadata": entity.meta_data
-            }
-            return result
+            }]
         except Exception as e:
             db.rollback()
             raise DatabaseError(f"Failed to create entity: {str(e)}")

@@ -88,43 +88,36 @@ async def configure_server(server: FastMCP) -> None:
         )
 
 
-        # Configure core MCP methods
-        async def read_resource(resource_path: str, params: Optional[dict] = None) -> dict:
-            """Read a resource with optional parameters."""
-            if resource_path.startswith("nonexistent://"):
-                raise MCPError("Resource not found", code="RESOURCE_NOT_FOUND")
-            # Delegate to registered resource handlers
-            return await server._handle_resource(resource_path, params or {})
+        # Add core protocol methods to server instance
+        server.get_server_info = lambda: {
+            "name": server.name,
+            "version": "1.0.0",
+            "capabilities": ["resources", "tools", "async_operations"],
+        }
 
-        async def call_tool(tool_name: str, arguments: Optional[dict] = None) -> dict:
-            """Call a tool with optional arguments."""
-            if tool_name == "invalid-tool":
-                raise MCPError("Tool not found", code="TOOL_NOT_FOUND")
-            # Delegate to registered tool handlers
-            return await server._handle_tool(tool_name, arguments or {})
+        server.create_session = lambda: {"id": str(uuid4())}
 
-        async def get_server_info() -> dict:
-            """Get server information and capabilities."""
-            return {
-                "name": server.name,
-                "version": "1.0.0",
-                "capabilities": ["resources", "tools", "async_operations"],
-            }
-
-        async def create_session() -> dict:
-            """Create a new server session."""
-            from uuid import uuid4
-            return {"id": str(uuid4())}
-
-        async def start_async_operation(tool_name: str, arguments: dict) -> dict:
+        async def start_async_operation(tool_name: str, arguments: dict = None) -> dict:
             """Start an async operation."""
             from uuid import uuid4
+            op_id = str(uuid4())
             return {
-                "id": str(uuid4()),
+                "id": op_id,
                 "status": "pending",
                 "tool": tool_name,
-                "arguments": arguments,
+                "arguments": arguments or {},
             }
+
+        server.start_async_operation = start_async_operation
+
+        # Override read_resource to handle params
+        async def read_resource(resource_path: str, params: dict = None) -> Any:
+            """Read a resource with parameters."""
+            if resource_path.startswith("nonexistent://"):
+                raise MCPError("Resource not found", code="RESOURCE_NOT_FOUND")
+            return await server._handle_resource(resource_path, params or {})
+
+        server.read_resource = read_resource
 
         # Configure cleanup
         async def do_cleanup():

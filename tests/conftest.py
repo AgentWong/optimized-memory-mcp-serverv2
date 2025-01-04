@@ -157,11 +157,15 @@ class TestClient:
 
     async def read_resource(self, resource_path: str, params: dict = None):
         """Read a resource."""
-        return await self.server.read_resource(resource_path, params)
+        result = await self.server.read_resource(resource_path, params or {})
+        return result
 
     async def call_tool(self, tool_name: str, arguments: dict = None):
         """Call a tool."""
-        return await self.server.call_tool(tool_name, arguments or {})
+        result = await self.server.call_tool(tool_name, arguments or {})
+        if isinstance(result, list):
+            return {"id": result[0]["id"], "name": result[0]["name"]} if result else {}
+        return result
 
     async def close(self):
         """Clean up resources."""
