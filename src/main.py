@@ -37,6 +37,13 @@ def create_server() -> FastMCP:
                 "cachetools>=5.0.0",
             ],
         )
+
+        # Register all tools
+        from .tools import ansible, entities, providers
+        ansible.register_tools(server)
+        entities.register_tools(server)
+        providers.register_tools(server)
+
         logger.info("MCP server created and configured successfully")
         return server
 

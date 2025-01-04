@@ -140,11 +140,20 @@ class TestClient:
 
     async def post(self, path: str, **kwargs) -> dict:
         """Simulate HTTP POST."""
-        return await self.server.call_tool("create_entity", kwargs.get("json", {}))
+        if path.startswith("/entities/"):
+            result = await self.server.call_tool("create_entity", kwargs.get("json", {}))
+            return {"id": result["id"]}
+        raise ValueError(f"Unknown path: {path}")
     
     async def get(self, path: str) -> dict:
         """Simulate HTTP GET."""
-        return await self.server.read_resource(f"entities://{path.split('/')[-1]}")
+        if path.startswith("/entities/"):
+            entity_id = path.split("/")[-1]
+            result = await self.server.read_resource(f"entities://{entity_id}")
+            if not result:
+                return {"status_code": 404}
+            return result
+        raise ValueError(f"Unknown path: {path}")
 
     async def read_resource(self, resource_path: str, params: dict = None):
         """Read a resource."""
