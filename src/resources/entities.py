@@ -25,7 +25,7 @@ def register_resources(mcp: FastMCP) -> None:
         mcp: The FastMCP server instance to register resources with
     """
 
-    @mcp.resource("entities://list")
+    @mcp.resource("entities://list?page={page}&per_page={per_page}&type={type}&created_after={created_after}")
     async def list_entities(
         ctx: Context,
         page: str = "1",
