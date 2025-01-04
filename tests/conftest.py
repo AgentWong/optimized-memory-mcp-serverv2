@@ -151,7 +151,7 @@ class TestClient:
 
 
 @pytest.fixture(scope="function")
-async def mcp_server(db_session):
+def mcp_server(db_session):
     """Create MCP server instance for testing."""
     from src.main import create_server
 
@@ -164,14 +164,14 @@ async def mcp_server(db_session):
     db_session.commit()
 
     # Create and configure server
-    server = await create_server()
+    server = create_server()
 
     try:
         yield server
     finally:
         # Cleanup
         if hasattr(server, "cleanup"):
-            await server.cleanup()
+            server.cleanup()
 
 
 @pytest.fixture(scope="function")
