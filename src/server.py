@@ -32,6 +32,8 @@ async def configure_server(server: FastMCP) -> FastMCP:
     # Initialize server state
     server._sessions = {}
     server._operations = {}
+    server._tools = {}  # Track registered tools
+    server._resources = {}  # Track registered resources
     try:
         # Configure logging
         configure_logging()
@@ -69,18 +71,25 @@ async def configure_server(server: FastMCP) -> FastMCP:
 
         # Register all tools with error handling
         try:
-            register_entity_tools(server)
-            register_relationship_tools(server)
-            register_observation_tools(server)
-            register_provider_tools(server)
-            register_ansible_tools(server)
-            register_analysis_tools(server)
+            # Register tools and store results
+            tools = []
+            tools.extend(await register_entity_tools(server))
+            tools.extend(await register_relationship_tools(server))
+            tools.extend(await register_observation_tools(server))
+            tools.extend(await register_provider_tools(server))
+            tools.extend(await register_ansible_tools(server))
+            tools.extend(await register_analysis_tools(server))
+            
+            # Store registered tools
+            for tool in tools:
+                server._tools[tool.name] = tool
         except Exception as e:
             logger.error(f"Failed to register tools: {str(e)}")
             raise ConfigurationError(f"Tool registration failed: {str(e)}")
 
         # Verify tool registration
-        if not server.list_tools():
+        tools = await server.list_tools()
+        if not tools:
             raise ConfigurationError("No tools were registered successfully")
 
         # Configure error handling
@@ -118,21 +127,43 @@ async def configure_server(server: FastMCP) -> FastMCP:
             from uuid import uuid4
             
             # Validate tool exists
-            if tool_name not in server._tools:
+            tool = server._tools.get(tool_name)
+            if not tool:
                 raise MCPError(f"Tool {tool_name} not found", code="TOOL_NOT_FOUND")
                 
             op_id = str(uuid4())
-            # Store operation state
-            server._operations[op_id] = {
-                "id": op_id,
-                "status": "pending",
-                "tool": tool_name,
-                "arguments": arguments or {},
-                "created_at": datetime.utcnow().isoformat()
-            }
+            
+            # Create context for tool
+            ctx = Context()
+            
+            try:
+                # Start tool execution asynchronously
+                result = await tool(ctx, **(arguments or {}))
+                
+                # Store operation state
+                server._operations[op_id] = {
+                    "id": op_id,
+                    "status": "completed",
+                    "tool": tool_name,
+                    "arguments": arguments or {},
+                    "created_at": datetime.utcnow().isoformat(),
+                    "completed_at": datetime.utcnow().isoformat(),
+                    "result": result
+                }
+            except Exception as e:
+                server._operations[op_id] = {
+                    "id": op_id,
+                    "status": "failed",
+                    "tool": tool_name,
+                    "arguments": arguments or {},
+                    "created_at": datetime.utcnow().isoformat(),
+                    "error": str(e)
+                }
+                raise MCPError(f"Tool execution failed: {str(e)}", code="TOOL_ERROR")
+                
             return server._operations[op_id]
 
-        async def read_resource(resource_path: str, params: dict = None) -> Any:
+        async def read_resource(resource_path: str, params: dict = None) -> Dict[str, Any]:
             """Read a resource with parameters."""
             if not resource_path:
                 raise MCPError("Resource path required", code="INVALID_RESOURCE")
@@ -141,7 +172,22 @@ async def configure_server(server: FastMCP) -> FastMCP:
                 raise MCPError("Resource not found", code="RESOURCE_NOT_FOUND")
                 
             try:
-                return await server._handle_resource(resource_path, params or {})
+                # Get resource handler
+                handler = server._resources.get(resource_path)
+                if not handler:
+                    raise MCPError(f"Resource {resource_path} not found", code="RESOURCE_NOT_FOUND")
+                
+                # Create context for resource
+                ctx = Context()
+                
+                # Call handler with context
+                result = await handler(ctx, **(params or {}))
+                
+                return {
+                    "data": result,
+                    "resource_path": resource_path,
+                    "timestamp": datetime.utcnow().isoformat()
+                }
             except Exception as e:
                 raise MCPError(f"Resource error: {str(e)}", code="RESOURCE_ERROR")
 
