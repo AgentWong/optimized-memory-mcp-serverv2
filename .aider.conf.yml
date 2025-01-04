@@ -42,10 +42,10 @@ cache-keepalive-pings: 1
 # Repomap settings:
 
 ## Suggested number of tokens to use for repo map, use 0 to disable (default: 1024)
-map-tokens: 2048
+map-tokens: 4098
 
 ## Control how often the repo map is refreshed. Options: auto, always, files, manual (default: auto)
-#map-refresh: auto
+map-refresh: auto
 
 ## Multiplier for map tokens when no files are specified (default: 2)
 #map-multiplier-no-files: true
@@ -81,13 +81,13 @@ lint-cmd:
 #  - zzz
 
 ## Enable/disable automatic linting after changes (default: True)
-auto-lint: false
+auto-lint: true
 
 ## Specify command to run tests
 test-cmd: .venv/bin/python -m pytest -v
 
 ## Enable/disable automatic testing after changes (default: False)
-auto-test: false
+auto-test: true
 
 ## Run tests, fix problems found and then exit
 test: false
@@ -114,8 +114,8 @@ upgrade: false
 #file: xxx
 
 ## Specify multiple values like this:
-file:
-  - tasks.md
+#file:
+#  - tasks.md
 #  - yyy
 #  - zzz
 
@@ -124,9 +124,8 @@ file:
 ## Specify multiple values like this:
 read:
   - .prompts/docs
-  - .prompts/rules
-  - .prompts/tasks/engineer-tasks.md
-  - .prompts/tasks/enhanced-mcp-server-tasksv2.md
+  - .prompts/rules/bug-fix-template.xml
+  - .prompts/context
 
 ## Always say yes to every confirmation
 yes-always: true

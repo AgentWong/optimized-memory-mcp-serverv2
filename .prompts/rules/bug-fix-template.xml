@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bugFixingTemplate>
+    <metadata>
+        <title>Python Bug Fixing Template</title>
+        <description>Template for structured bug fixing in Python codebases</description>
+    </metadata>
+    
+    <context>
+        <instruction>You are working in a Python codebase with the following characteristics:</instruction>
+        <placeholder>[Describe the project context, dependencies, and environment]</placeholder>
+    </context>
+    
+    <guidelines>
+        <guideline>Focus exclusively on fixing the identified issue</guideline>
+        <guideline>Do not add new features or enhance existing functionality</guideline>
+        <guideline>Maintain existing code structure unless the bug fix requires structural changes</guideline>
+        <guideline>Document your changes with clear comments</guideline>
+    </guidelines>
+    
+    <bugDetails>
+        <instruction>The bug details are:</instruction>
+        <placeholder>[Describe the bug, including symptoms and any error messages]</placeholder>
+        <affectedCode>
+            <instruction>The affected code is:</instruction>
+            <placeholder>[Insert the problematic code]</placeholder>
+        </affectedCode>
+    </bugDetails>
+    
+    <deliverables>
+        <section>
+            <title>Root Cause Analysis</title>
+            <placeholder>[Your analysis]</placeholder>
+        </section>
+        <section>
+            <title>Fix Implementation</title>
+            <placeholder>[The corrected code]</placeholder>
+        </section>
+        <section>
+            <title>Change Documentation</title>
+            <placeholder>[Comments and documentation]</placeholder>
+        </section>
+        <section>
+            <title>Test Cases</title>
+            <placeholder>[Verification tests]</placeholder>
+        </section>
+    </deliverables>
+</bugFixingTemplate>
