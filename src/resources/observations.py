@@ -64,10 +64,9 @@ def register_resources(mcp: FastMCP) -> None:
             raise DatabaseError(f"Failed to list observations: {str(e)}")
 
     @mcp.resource("observations://{observation_id}")
-    def get_observation(
-        observation_id: int, db: Session = next(get_db())
-    ) -> Dict[str, Any]:
+    def get_observation(observation_id: int) -> Dict[str, Any]:
         """Get details for a specific observation."""
+        db = next(get_db())
         try:
             observation = (
                 db.query(Observation).filter(Observation.id == observation_id).first()
