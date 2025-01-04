@@ -29,19 +29,20 @@ def register_resources(mcp: FastMCP) -> None:
     """Register Ansible-related resources with the MCP server."""
 
     @mcp.resource("ansible://collections")
-    def list_collections(db: Session = next(get_db())) -> List[Dict[str, Any]]:
+    def list_collections() -> List[Dict[str, Any]]:
         """List all registered Ansible collections."""
         try:
-            collections = db.query(AnsibleCollection).all()
-            return [
-                {
-                    "id": c.id,
-                    "namespace": c.namespace,
-                    "name": c.name,
-                    "version": c.version,
-                    "metadata": c.metadata,
-                }
-                for c in collections
-            ]
+            with Session(engine) as db:
+                collections = db.query(AnsibleCollection).all()
+                return [
+                    {
+                        "id": c.id,
+                        "namespace": c.namespace,
+                        "name": c.name,
+                        "version": c.version,
+                        "metadata": c.metadata,
+                    }
+                    for c in collections
+                ]
         except Exception as e:
             raise DatabaseError(f"Failed to list Ansible collections: {str(e)}")
