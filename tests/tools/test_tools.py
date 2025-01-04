@@ -37,19 +37,17 @@ def db_session():
 async def test_create_entity_tool(mcp_server):
     """Test create_entity tool"""
     client = TestClient(mcp_server)
-    try:
-        result = await client.call_tool(
-            "create_entity",
-            arguments={
-                "name": "test_entity",
-                "entity_type": "test",
-                "observations": ["Initial observation"],
-            },
-        )
-        assert result["name"] == "test_entity"
-        assert isinstance(result["id"], str)
-    finally:
-        await client.close()
+    result = await client.call_tool(
+        "create_entity",
+        arguments={
+            "name": "test_entity",
+            "entity_type": "test",
+            "observations": ["Initial observation"],
+        },
+    )
+    assert result["name"] == "test_entity"
+    assert isinstance(result["id"], str)
+    await client.close()
 
 
 @pytest.mark.asyncio

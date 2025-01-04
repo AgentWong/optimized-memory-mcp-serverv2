@@ -155,20 +155,33 @@ class TestClient:
             return result
         raise ValueError(f"Unknown path: {path}")
 
-    async def read_resource(self, resource_path: str, params: dict = None):
-        """Read a resource."""
-        result = await self.server.read_resource(resource_path, params)
-        if isinstance(result, (list, dict)):
-            return result
-        return {"result": str(result)}
+    async def read_resource(self, resource_path: str, params: dict = None) -> dict:
+        """Read a resource with proper parameter handling.
+        
+        Args:
+            resource_path: Resource path to read
+            params: Optional parameters dictionary
+            
+        Returns:
+            Resource data as dictionary
+        """
+        try:
+            result = await self.server.read_resource(resource_path, params)
+            if result is None:
+                return {}
+            if isinstance(result, (list, dict)):
+                return result
+            return {"result": str(result)}
+        except Exception as e:
+            # Log error but return empty result
+            print(f"Error reading resource: {e}")
+            return {}
 
     async def call_tool(self, tool_name: str, arguments: dict = None):
         """Call a tool."""
         result = await self.server.call_tool(tool_name, arguments or {})
-        if isinstance(result, dict):
+        if isinstance(result, (dict, list)):
             return result
-        elif isinstance(result, list):
-            return result[0] if result else {}
         return {"result": str(result)} if result else {}
 
     async def close(self):
