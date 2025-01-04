@@ -79,10 +79,11 @@ def get_db():
     """Get a database session with proper cleanup."""
     db = SessionLocal()
     try:
-        from sqlalchemy import text
-        # Set secure timeouts
-        db.execute(text("SET statement_timeout = 10000"))  # 10s
-        db.execute(text("SET idle_in_transaction_session_timeout = 60000"))  # 60s
+        # Set timeouts if not SQLite
+        if not db.bind.dialect.name == 'sqlite':
+            from sqlalchemy import text
+            db.execute(text("SET statement_timeout = 10000"))  # 10s
+            db.execute(text("SET idle_in_transaction_session_timeout = 60000"))  # 60s
         yield db
         db.commit()
     except Exception as e:

@@ -30,7 +30,10 @@ def db_session():
     try:
         yield session
     finally:
+        session.rollback()
         session.close()
+        Base.metadata.drop_all(bind=session.bind)
+        Base.metadata.create_all(bind=session.bind)
 
 
 def test_entities_list_resource(mcp_server):

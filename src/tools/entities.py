@@ -91,7 +91,7 @@ def register_tools(mcp: FastMCP) -> None:
                 raise ValidationError("Entity name cannot be empty")
 
             entity = Entity(
-                name=name.strip(), type=entity_type.lower(), metadata=metadata or {}
+                name=name.strip(), entity_type=entity_type.lower(), metadata=metadata or {}
             )
             db.add(entity)
             db.commit()
