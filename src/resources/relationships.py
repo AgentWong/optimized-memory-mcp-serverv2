@@ -69,9 +69,8 @@ def register_resources(mcp: FastMCP) -> None:
             raise DatabaseError(f"Failed to list relationships: {str(e)}")
 
     @mcp.resource("relationships://{relationship_id}")
-    def get_relationship(
-        relationship_id: int, db: Session = next(get_db())
-    ) -> Dict[str, Any]:
+    def get_relationship(relationship_id: int) -> Dict[str, Any]:
+        db = next(get_db())
         """Get details for a specific relationship."""
         try:
             relationship = (
