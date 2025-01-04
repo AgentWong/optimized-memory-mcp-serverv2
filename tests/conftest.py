@@ -16,31 +16,32 @@ def db_session():
         "sqlite:///:memory:",
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
+        echo=True  # Enable SQL logging for tests
+    )
+
+    # Create session factory
+    TestingSessionLocal = sessionmaker(
+        bind=engine,
+        autocommit=False,
+        autoflush=False,
+        expire_on_commit=False  # Prevent detached instance errors
     )
 
     # Create all tables
     Base.metadata.create_all(engine)
-
-    # Create session factory
-    TestingSessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
-
+    
     # Create session
     session = TestingSessionLocal()
 
     try:
-        # Start with clean state
-        Base.metadata.drop_all(engine)
-        Base.metadata.create_all(engine)
-        
         yield session
     finally:
-        # Cleanup
+        # Ensure clean state between tests
         session.rollback()
         session.close()
-        # Clear all tables
-        for table in reversed(Base.metadata.sorted_tables):
-            session.execute(table.delete())
-        session.commit()
+        # Drop and recreate tables for clean state
+        Base.metadata.drop_all(engine)
+        Base.metadata.create_all(engine)
 
 
 @pytest.fixture

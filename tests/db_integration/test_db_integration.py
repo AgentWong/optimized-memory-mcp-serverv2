@@ -156,3 +156,24 @@ def test_concurrent_transactions(db_session: Session):
     finally:
         session2.rollback()
         session2.close()
+
+def test_database_cleanup(db_session: Session):
+    """Verify database cleanup between tests"""
+    # Create test data
+    entity = Entity(name="cleanup_test", entity_type="test")
+    db_session.add(entity)
+    db_session.commit()
+    
+    # Get entity ID
+    entity_id = entity.id
+    
+    # Close session
+    db_session.close()
+    
+    # Create new session
+    new_session = next(get_db())
+    try:
+        # Verify entity doesn't exist in new session
+        assert new_session.query(Entity).filter_by(id=entity_id).first() is None
+    finally:
+        new_session.close()

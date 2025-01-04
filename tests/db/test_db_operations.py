@@ -32,8 +32,13 @@ def db_session():
 
 
 def test_base_model_to_dict(db_session: Session):
-    """Test BaseModel.to_dict() conversion"""
-    entity = Entity(name="test_entity", entity_type="test_type")
+    """Test BaseModel.to_dict() conversion with all field types"""
+    entity = Entity(
+        name="test_entity",
+        entity_type="test_type",
+        meta_data={"key": "value"},
+        tags=["tag1", "tag2"]
+    )
     db_session.add(entity)
     db_session.commit()
 
@@ -41,6 +46,37 @@ def test_base_model_to_dict(db_session: Session):
     assert isinstance(entity_dict, dict)
     assert entity_dict["name"] == "test_entity"
     assert entity_dict["entity_type"] == "test_type"
+    assert entity_dict["meta_data"] == {"key": "value"}
+    assert entity_dict["tags"] == ["tag1", "tag2"]
+    assert "created_at" in entity_dict
+    assert "updated_at" in entity_dict
+
+def test_model_validation(db_session: Session):
+    """Test model field validation"""
+    # Test required fields
+    with pytest.raises(Exception):
+        entity = Entity(entity_type="test_type")  # Missing name
+        db_session.add(entity)
+        db_session.commit()
+
+    # Test field length limits
+    with pytest.raises(Exception):
+        entity = Entity(
+            name="x" * 256,  # Exceeds max length
+            entity_type="test_type"
+        )
+        db_session.add(entity)
+        db_session.commit()
+
+    # Test JSON field validation
+    with pytest.raises(Exception):
+        entity = Entity(
+            name="test",
+            entity_type="test_type",
+            meta_data="invalid"  # Should be dict
+        )
+        db_session.add(entity)
+        db_session.commit()
 
 
 def test_entity_crud_operations(db_session: Session):
