@@ -47,26 +47,28 @@ def db_session():
         session.close()
 
 
-def test_database_constraint_violations(mcp_server, db_session: Session):
+@pytest.mark.asyncio
+async def test_database_constraint_violations(mcp_server, db_session: Session):
     """Test database constraint violation handling"""
     # Test duplicate entity name
-    result = mcp_server.call_tool(
+    result = await mcp_server.call_tool(
         "create_entity", arguments={"name": "unique_entity", "entity_type": "test"}
     )
     assert result is not None
 
     # Attempt duplicate
     with pytest.raises(ValidationError) as exc:
-        mcp_server.call_tool(
+        await mcp_server.call_tool(
             "create_entity", arguments={"name": "unique_entity", "entity_type": "test"}
         )
     assert "already exists" in str(exc.value).lower()
 
 
-def test_invalid_relationship_creation(mcp_server, db_session: Session):
+@pytest.mark.asyncio
+async def test_invalid_relationship_creation(mcp_server, db_session: Session):
     """Test invalid relationship handling"""
     # Create test entity
-    result = mcp_server.call_tool(
+    result = await mcp_server.call_tool(
         "create_entity", arguments={"name": "test_entity", "entity_type": "test"}
     )
     entity_id = result["id"]
@@ -84,34 +86,36 @@ def test_invalid_relationship_creation(mcp_server, db_session: Session):
     assert "self-referential" in str(exc.value).lower()
 
 
-def test_invalid_observation_data(client, db_session: Session):
+@pytest.mark.asyncio
+async def test_invalid_observation_data(mcp_server, db_session: Session):
     """Test invalid observation data handling"""
     # Create test entity
-    entity_response = client.post(
-        "/entities/", json={"name": "obs_test_entity", "entity_type": "test"}
+    result = await mcp_server.call_tool(
+        "create_entity", arguments={"name": "obs_test_entity", "entity_type": "test"}
     )
-    entity_id = entity_response.json()["id"]
+    entity_id = result["id"]
 
     # Test invalid observation data
-    response = client.post(
-        "/observations/",
-        json={
-            "entity_id": entity_id,
-            "observation_type": "test",
-            "data": None,  # Invalid data
-        },
-    )
-    assert response.status_code == 400
-    assert "invalid data" in response.json()["message"].lower()
+    with pytest.raises(ValidationError) as exc:
+        await mcp_server.call_tool(
+            "add_observation",
+            arguments={
+                "entity_id": entity_id,
+                "observation_type": "test",
+                "data": None,  # Invalid data
+            },
+        )
+    assert "invalid data" in str(exc.value).lower()
 
 
-def test_concurrent_modification_conflicts(client, db_session: Session):
+@pytest.mark.asyncio
+async def test_concurrent_modification_conflicts(mcp_server, db_session: Session):
     """Test concurrent modification handling"""
     # Create test entity
-    response = client.post(
-        "/entities/", json={"name": "concurrent_test", "entity_type": "test"}
+    result = await mcp_server.call_tool(
+        "create_entity", arguments={"name": "concurrent_test", "entity_type": "test"}
     )
-    entity_id = response.json()["id"]
+    entity_id = result["id"]
 
     # Simulate concurrent modifications
     session2 = next(get_db())
@@ -128,26 +132,32 @@ def test_concurrent_modification_conflicts(client, db_session: Session):
         db_session.commit()
 
         # Second session should fail
-        with pytest.raises(Exception):
+        with pytest.raises(DatabaseError) as exc:
             session2.commit()
+        assert "concurrent modification" in str(exc.value).lower()
     finally:
         session2.rollback()
         session2.close()
 
 
-def test_invalid_api_requests(client):
-    """Test invalid API request handling"""
-    # Test invalid JSON
-    response = client.post(
-        "/entities/", data="invalid json{", headers={"Content-Type": "application/json"}
-    )
-    assert response.status_code == 400
-    assert "invalid json" in response.json()["message"].lower()
+@pytest.mark.asyncio
+async def test_invalid_tool_requests(mcp_server):
+    """Test invalid tool request handling"""
+    # Test invalid arguments
+    with pytest.raises(ValidationError) as exc:
+        await mcp_server.call_tool(
+            "create_entity",
+            arguments={"invalid": "data"}
+        )
+    assert "invalid arguments" in str(exc.value).lower()
 
     # Test missing required fields
-    response = client.post("/entities/", json={"name": "test"})  # Missing entity_type
-    assert response.status_code == 400
-    assert "required" in response.json()["message"].lower()
+    with pytest.raises(ValidationError) as exc:
+        await mcp_server.call_tool(
+            "create_entity",
+            arguments={"name": "test"}  # Missing entity_type
+        )
+    assert "required field" in str(exc.value).lower()
 
 
 def test_resource_not_found_handling(client):

@@ -54,6 +54,7 @@ async def configure_server(server: FastMCP) -> None:
         from .tools.ansible import register_tools as register_ansible_tools
         from .tools.analysis import register_tools as register_analysis_tools
 
+        # Register all resources
         register_entity_resources(server)
         register_relationship_resources(server)
         register_observation_resources(server)
@@ -61,12 +62,23 @@ async def configure_server(server: FastMCP) -> None:
         register_ansible_resources(server)
         register_version_resources(server)
         register_search_resources(server)
-        register_entity_tools(server)
-        register_relationship_tools(server)
-        register_observation_tools(server)
-        register_provider_tools(server)
-        register_ansible_tools(server)
-        register_analysis_tools(server)
+
+        # Register all tools with error handling
+        try:
+            register_entity_tools(server)
+            register_relationship_tools(server)
+            register_observation_tools(server)
+            register_provider_tools(server)
+            register_ansible_tools(server)
+            register_analysis_tools(server)
+            register_search_tools(server)  # Add search tools registration
+        except Exception as e:
+            logger.error(f"Failed to register tools: {str(e)}")
+            raise ConfigurationError(f"Tool registration failed: {str(e)}")
+
+        # Verify tool registration
+        if not server.list_tools():
+            raise ConfigurationError("No tools were registered successfully")
 
         # Configure error handling
         server.error_callback = lambda error, ctx=None: (
@@ -75,8 +87,23 @@ async def configure_server(server: FastMCP) -> None:
             else "Internal server error occurred"
         )
 
-        # Add required server methods
-        async def get_server_info():
+
+        # Configure core MCP methods
+        async def read_resource(resource_path: str, params: Optional[dict] = None) -> dict:
+            """Read a resource with optional parameters."""
+            if resource_path.startswith("nonexistent://"):
+                raise MCPError("Resource not found", code="RESOURCE_NOT_FOUND")
+            # Delegate to registered resource handlers
+            return await server._handle_resource(resource_path, params or {})
+
+        async def call_tool(tool_name: str, arguments: Optional[dict] = None) -> dict:
+            """Call a tool with optional arguments."""
+            if tool_name == "invalid-tool":
+                raise MCPError("Tool not found", code="TOOL_NOT_FOUND")
+            # Delegate to registered tool handlers
+            return await server._handle_tool(tool_name, arguments or {})
+
+        async def get_server_info() -> dict:
             """Get server information and capabilities."""
             return {
                 "name": server.name,
@@ -84,43 +111,20 @@ async def configure_server(server: FastMCP) -> None:
                 "capabilities": ["resources", "tools", "async_operations"],
             }
 
-        async def create_session():
+        async def create_session() -> dict:
             """Create a new server session."""
             from uuid import uuid4
-
             return {"id": str(uuid4())}
 
-        async def start_async_operation(tool_name: str, arguments: dict):
+        async def start_async_operation(tool_name: str, arguments: dict) -> dict:
             """Start an async operation."""
             from uuid import uuid4
-
             return {
                 "id": str(uuid4()),
                 "status": "pending",
                 "tool": tool_name,
                 "arguments": arguments,
             }
-
-        # Add core MCP methods
-        async def read_resource(resource_path: str, params: dict = None) -> dict:
-            """Read a resource with optional parameters."""
-            if resource_path.startswith("nonexistent://"):
-                raise MCPError("Resource not found", code="RESOURCE_NOT_FOUND")
-            # Delegate to registered resource handlers
-            return await server._handle_resource(resource_path, params or {})
-
-        async def call_tool(tool_name: str, arguments: dict = None) -> dict:
-            """Call a tool with optional arguments."""
-            if tool_name == "invalid-tool":
-                raise MCPError("Tool not found", code="TOOL_NOT_FOUND")
-            # Delegate to registered tool handlers
-            return await server._handle_tool(tool_name, arguments or {})
-
-        server.read_resource = read_resource
-        server.call_tool = call_tool
-        server.get_server_info = get_server_info
-        server.create_session = create_session
-        server.start_async_operation = start_async_operation
 
         # Configure cleanup
         async def do_cleanup():
@@ -142,6 +146,12 @@ async def configure_server(server: FastMCP) -> None:
                 return False
             return True
 
+        # Attach all methods to server
+        server.read_resource = read_resource
+        server.call_tool = call_tool
+        server.get_server_info = get_server_info
+        server.create_session = create_session
+        server.start_async_operation = start_async_operation
         server.cleanup = do_cleanup
         server.cleanup_callback = do_cleanup  # For backwards compatibility
 

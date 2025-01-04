@@ -38,24 +38,25 @@ def db_session():
         session.close()
 
 
-def test_full_entity_workflow(mcp_server, db_session: Session):
+@pytest.mark.asyncio
+async def test_full_entity_workflow(mcp_server, db_session: Session):
     """Test complete entity lifecycle including relationships and observations"""
     # Create initial entity
-    entity1_result = mcp_server.call_tool(
+    entity1_result = await mcp_server.call_tool(
         "create_entity", arguments={"name": "test_entity_1", "entity_type": "test_type"}
     )
     assert entity1_result is not None
     entity1_id = entity1_result["id"]
 
     # Create related entity
-    entity2_result = mcp_server.call_tool(
+    entity2_result = await mcp_server.call_tool(
         "create_entity", arguments={"name": "test_entity_2", "entity_type": "test_type"}
     )
     assert entity2_result is not None
     entity2_id = entity2_result["id"]
 
     # Create relationship between entities
-    rel_result = mcp_server.call_tool(
+    rel_result = await mcp_server.call_tool(
         "create_relationship",
         arguments={
             "source_id": entity1_id,
@@ -66,7 +67,7 @@ def test_full_entity_workflow(mcp_server, db_session: Session):
     assert rel_result is not None
 
     # Add observation to first entity
-    obs_result = mcp_server.call_tool(
+    obs_result = await mcp_server.call_tool(
         "add_observation",
         arguments={
             "entity_id": entity1_id,
@@ -77,24 +78,25 @@ def test_full_entity_workflow(mcp_server, db_session: Session):
     assert obs_result is not None
 
     # Get related entities
-    related_result = mcp_server.read_resource(
+    related_result = await mcp_server.read_resource(
         f"entities://{entity1_id}/related?max_depth=1"
     )
     assert related_result is not None
     assert any(e["id"] == entity2_id for e in related_result)
 
 
-def test_search_and_analysis_workflow(mcp_server, db_session: Session):
+@pytest.mark.asyncio
+async def test_search_and_analysis_workflow(mcp_server, db_session: Session):
     """Test search functionality with analysis tools"""
     # Create test entity
-    entity_result = mcp_server.call_tool(
+    entity_result = await mcp_server.call_tool(
         "create_entity",
         arguments={"name": "searchable_entity", "entity_type": "test_type"},
     )
     assert entity_result is not None
 
     # Search for entity
-    search_result = mcp_server.call_tool(
+    search_result = await mcp_server.call_tool(
         "search_entities", arguments={"query": "searchable"}
     )
     assert search_result is not None
@@ -102,15 +104,16 @@ def test_search_and_analysis_workflow(mcp_server, db_session: Session):
     assert any(e["name"] == "searchable_entity" for e in search_result)
 
 
-def test_error_handling(mcp_server):
+@pytest.mark.asyncio
+async def test_error_handling(mcp_server):
     """Test MCP error handling"""
     # Test invalid entity ID
     with pytest.raises(Exception):
-        mcp_server.read_resource("entities://99999")
+        await mcp_server.read_resource("entities://99999")
 
     # Test invalid relationship creation
     with pytest.raises(Exception):
-        mcp_server.call_tool(
+        await mcp_server.call_tool(
             "create_relationship",
             arguments={
                 "source_id": 99999,
@@ -121,7 +124,7 @@ def test_error_handling(mcp_server):
 
     # Test invalid observation creation
     with pytest.raises(Exception):
-        mcp_server.call_tool(
+        await mcp_server.call_tool(
             "add_observation",
             arguments={"entity_id": 99999, "observation_type": "test", "data": {}},
         )
