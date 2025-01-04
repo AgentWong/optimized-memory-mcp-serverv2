@@ -137,7 +137,8 @@ def test_observation_creation(db_session: Session):
     # Create observation
     obs = Observation(
         entity_id=entity.id,
-        type="test",
+        type="state",  # Using a valid type from VALID_TYPES
+        observation_type="test",
         value={"test": "data"},
         meta_data={}
     )
@@ -147,5 +148,5 @@ def test_observation_creation(db_session: Session):
     # Verify observation
     retrieved = db_session.query(Observation).filter_by(entity_id=entity.id).first()
     assert retrieved is not None
-    assert retrieved.observation_type == "test_observation"
-    assert retrieved.data == {"test": "data"}
+    assert retrieved.observation_type == "test"
+    assert retrieved.value == {"test": "data"}
