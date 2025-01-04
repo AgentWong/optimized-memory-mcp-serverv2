@@ -10,7 +10,6 @@ Tests the core MCP resource patterns:
 Each resource follows the MCP protocol for read-only data access.
 """
 import pytest
-from fastapi.testclient import TestClient
 
 from src.main import create_server
 from src.db.connection import get_db

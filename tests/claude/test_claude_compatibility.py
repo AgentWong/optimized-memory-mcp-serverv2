@@ -13,16 +13,8 @@ These tests ensure the server can be used as a context provider
 for Claude Desktop's AI assistant features.
 """
 import pytest
-from fastapi.testclient import TestClient
-
 from src.main import create_server
 from src.db.connection import get_db
-
-@pytest.fixture
-def client():
-    """Create test client"""
-    server = create_server()
-    return TestClient(server.app)
 
 @pytest.fixture
 def db_session():

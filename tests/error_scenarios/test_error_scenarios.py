@@ -18,7 +18,6 @@ Each test verifies proper error response format per MCP protocol requirements:
 - Error context/details inclusion
 """
 import pytest
-from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 

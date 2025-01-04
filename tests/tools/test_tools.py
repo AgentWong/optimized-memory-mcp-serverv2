@@ -10,7 +10,6 @@ Tests the core MCP tool patterns:
 Each tool follows the MCP protocol for performing actions and side effects.
 """
 import pytest
-from fastapi.testclient import TestClient
 
 from src.main import create_server
 from src.db.connection import get_db

@@ -12,7 +12,6 @@ Each test verifies end-to-end functionality across multiple
 MCP components working together.
 """
 import pytest
-from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from src.main import create_server
