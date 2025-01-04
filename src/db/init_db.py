@@ -42,7 +42,11 @@ def init_db():
 
     # Create all tables - only used for testing/development
     # For production, use Alembic migrations
-    Base.metadata.create_all(bind=engine)
+    try:
+        Base.metadata.drop_all(bind=engine)  # Clear existing tables
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        raise DatabaseError(f"Failed to initialize database: {str(e)}")
 
 
 def get_db():

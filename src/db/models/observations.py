@@ -15,6 +15,7 @@ class Observation(Base, BaseModel, TimestampMixin):
 
     entity_id = Column(Integer, ForeignKey("entity.id"), nullable=False, index=True)
     type = Column(String, nullable=False, index=True)
+    observation_type = Column(String, nullable=False, index=True)
     # Composite indexes for common lookups
     __table_args__ = (
         Index("ix_observation_entity_type", "entity_id", "type"),

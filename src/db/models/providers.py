@@ -15,6 +15,7 @@ class Provider(Base, BaseModel, TimestampMixin):
     """
 
     name = Column(String, nullable=False, index=True)
+    namespace = Column(String, nullable=True)  # Added namespace field
     type = Column(String, nullable=False, index=True)  # e.g. 'aws', 'azure', 'gcp'
     version = Column(String, nullable=False)
     meta_data = Column(JSON, nullable=False, default=dict)

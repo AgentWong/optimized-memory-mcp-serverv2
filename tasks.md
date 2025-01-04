@@ -1,7 +1,7 @@
 # MCP Server Bug Fix Tasks
 
 ## Database Schema and Migration Issues
-- [ ] Task 1: Fix database initialization for test environments
+- [x] Task 1: Fix database initialization for test environments
   - Add missing table creation migrations in alembic
   - Ensure test database gets properly initialized
   - Verify SQLite configuration for tests

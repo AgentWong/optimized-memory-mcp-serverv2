@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<noFastAPIConstraint>
+    <overview>
+        <description>This constraint enforces strict avoidance of FastAPI and general API frameworks in MCP server implementations.</description>
+    </overview>
+
+    <rules>
+        <rule id="no-fastapi-imports">
+            <description>Do not import FastAPI or related packages</description>
+            <rationale>MCP servers use the MCP protocol directly, not HTTP/REST APIs</rationale>
+        </rule>
+
+        <rule id="no-api-patterns">
+            <description>Avoid API-centric patterns and terminology</description>
+            <rationale>MCP uses resources and tools, not endpoints or routes</rationale>
+            <examples>
+                <incorrect>API endpoints, routes, FastAPI dependencies</incorrect>
+                <correct>MCP resources, MCP tools, MCP context</correct>
+            </examples>
+        </rule>
+
+        <rule id="mcp-native-patterns">
+            <description>Use MCP-native patterns exclusively</description>
+            <patterns>
+                <pattern>@mcp.resource("resource://path")</pattern>
+                <pattern>@mcp.tool()</pattern>
+                <pattern>Context object for MCP capabilities</pattern>
+            </patterns>
+        </rule>
+    </rules>
+
+    <implementation>
+        <requirements>
+            <requirement>Use only MCP SDK for server implementation</requirement>
+            <requirement>Follow MCP protocol specifications</requirement>
+            <requirement>Use resource:// and tool patterns</requirement>
+        </requirements>
+    </implementation>
+</noFastAPIConstraint>

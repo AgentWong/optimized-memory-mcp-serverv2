@@ -1,73 +1,33 @@
-"""
-Entity-related resources for the MCP server.
-
-Implements core MCP resource patterns for entity management:
-
-entities://list
-- Lists all entities in the system
-- Optional filtering by entity_type
-- Returns list of entity objects with core fields
-- Read-only access to entity data
-
-entities://{entity_id} 
-- Gets detailed information for a specific entity
-- Includes metadata and timestamps
-- Returns single entity object with full details
-- Read-only access to entity details
-
-Each resource follows MCP protocol for:
-- URL pattern matching
-- Query parameter handling
-- Response formatting
-- Error handling with proper MCP error types
-"""
-
-from typing import List, Dict, Any, Optional
-from sqlalchemy.orm import Session
-
-from mcp.server.fastmcp import FastMCP
+"""Entity-related MCP resources."""
+from typing import List, Dict, Any
+from mcp.server.fastmcp import FastMCP, Context
 from ..db.connection import get_db
 from ..db.models.entities import Entity
 from ..utils.errors import DatabaseError
 
-
 def register_resources(mcp: FastMCP) -> None:
-    """Register entity-related resources with the MCP server."""
+    """Register entity-related MCP resources."""
 
-    @mcp.resource("entities://list")
-    def list_entities() -> List[Dict[str, Any]]:
+    @mcp.resource("resource://entities/list")
+    async def list_entities(ctx: Context) -> List[Dict[str, Any]]:
         """List all entities."""
         db = next(get_db())
         try:
-            query = db.query(Entity)
-            entities = query.all()
-            return [
-                {
-                    "id": e.id,
-                    "name": e.name,
-                    "type": e.type,
-                    "metadata": e.entity_metadata,
-                }
-                for e in entities
-            ]
+            entities = db.query(Entity).all()
+            return [entity.to_dict() for entity in entities]
         except Exception as e:
             raise DatabaseError(f"Failed to list entities: {str(e)}")
 
-    @mcp.resource("entities://{entity_id}")
-    def get_entity(entity_id: int, db: Session = next(get_db())) -> Dict[str, Any]:
+    @mcp.resource("resource://entities/{entity_id}")
+    async def get_entity(ctx: Context, entity_id: str) -> Dict[str, Any]:
         """Get details for a specific entity."""
+        db = next(get_db())
         try:
-            entity = db.query(Entity).filter(Entity.id == entity_id).first()
+            entity = db.query(Entity).filter(Entity.id == int(entity_id)).first()
             if not entity:
                 raise DatabaseError(f"Entity {entity_id} not found")
-
-            return {
-                "id": entity.id,
-                "name": entity.name,
-                "type": entity.type,
-                "metadata": entity.entity_metadata,
-                "created_at": entity.created_at.isoformat(),
-                "updated_at": entity.updated_at.isoformat(),
-            }
+            return entity.to_dict()
+        except ValueError:
+            raise DatabaseError(f"Invalid entity ID format: {entity_id}")
         except Exception as e:
             raise DatabaseError(f"Failed to get entity {entity_id}: {str(e)}")

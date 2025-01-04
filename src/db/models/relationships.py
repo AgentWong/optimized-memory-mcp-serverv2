@@ -14,8 +14,10 @@ class Relationship(Base, BaseModel, TimestampMixin):
     """
 
     entity_id = Column(Integer, ForeignKey("entity.id"), nullable=False, index=True)
+    source_id = Column(Integer, ForeignKey("entity.id"), nullable=False, index=True)
     target_id = Column(Integer, ForeignKey("entity.id"), nullable=False, index=True)
     type = Column(String, nullable=False, index=True)
+    relationship_type = Column(String, nullable=False, index=True)
     # Composite indexes for common lookups and traversals
     __table_args__ = (
         Index("ix_relationship_entity_type", "entity_id", "type"),
