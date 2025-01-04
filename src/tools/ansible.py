@@ -83,9 +83,10 @@ def register_tools(mcp: FastMCP) -> None:
                 version=version,
                 metadata=metadata or {},
             )
-            db.add(collection)
-            db.commit()
-            db.refresh(collection)
+            with get_db() as db:
+                db.add(collection)
+                db.commit()
+                db.refresh(collection)
 
             return {
                 "id": collection.id,

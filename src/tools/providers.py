@@ -143,9 +143,10 @@ def register_tools(mcp: FastMCP) -> None:
                 version=version,
                 metadata=metadata or {},
             )
-            db.add(provider)
-            db.commit()
-            db.refresh(provider)
+            with get_db() as db:
+                db.add(provider)
+                db.commit()
+                db.refresh(provider)
 
             return {
                 "id": provider.id,

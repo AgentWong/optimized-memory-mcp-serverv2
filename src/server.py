@@ -147,7 +147,6 @@ async def configure_server(server: FastMCP) -> None:
 
         # Attach all methods to server
         server.read_resource = read_resource
-        server.call_tool = call_tool
         server.get_server_info = get_server_info
         server.create_session = create_session
         server.start_async_operation = start_async_operation

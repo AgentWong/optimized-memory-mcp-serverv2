@@ -165,11 +165,11 @@ class TestClient:
     async def call_tool(self, tool_name: str, arguments: dict = None):
         """Call a tool."""
         result = await self.server.call_tool(tool_name, arguments or {})
-        if isinstance(result, list) and result:
-            if isinstance(result[0], dict):
-                return result[0]
-            return {"result": str(result[0])}
-        return result
+        if isinstance(result, dict):
+            return result
+        elif isinstance(result, list):
+            return result[0] if result else {}
+        return {"result": str(result)} if result else {}
 
     async def close(self):
         """Clean up resources."""
