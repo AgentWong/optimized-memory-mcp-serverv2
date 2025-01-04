@@ -21,7 +21,7 @@ sonnet: true
 #edit-format: xxx
 
 ## Use architect edit format for the main chat
-architect: true
+architect: false
 
 ## Specify the model to use for commit messages and chat history summarization (default depends on --model)
 #weak-model: xxx
