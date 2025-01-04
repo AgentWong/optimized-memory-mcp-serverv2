@@ -81,7 +81,7 @@ auto-commits: false
 #  - zzz
 
 ## Enable/disable automatic linting after changes (default: True)
-auto-lint: true
+auto-lint: false
 
 ## Specify command to run tests
 test-cmd: .venv/bin/python -m pytest -v
