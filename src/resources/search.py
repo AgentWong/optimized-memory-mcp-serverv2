@@ -33,11 +33,11 @@ def register_resources(mcp: FastMCP) -> None:
     def search_entities(
         query: str,
         entity_type: str = None,
-        limit: int = 10,
-        db: Session = next(get_db()),
+        limit: int = 10
     ) -> List[Dict[str, Any]]:
         """Search entities by name, type, or metadata."""
         try:
+            db = next(get_db())
             base_query = db.query(Entity)
 
             # Apply search filters

@@ -29,11 +29,10 @@ def register_resources(mcp: FastMCP) -> None:
     """Register version-related resources with the MCP server."""
 
     @mcp.resource("collections://{collection_name}/versions")
-    def list_collection_versions(
-        collection_name: str, db: Session = next(get_db())
-    ) -> List[Dict[str, Any]]:
+    def list_collection_versions(collection_name: str) -> List[Dict[str, Any]]:
         """List all versions for a specific collection."""
         try:
+            db = next(get_db())
             versions = (
                 db.query(AnsibleCollection)
                 .filter(AnsibleCollection.name == collection_name)
