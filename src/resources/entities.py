@@ -149,7 +149,7 @@ def register_resources(mcp: FastMCP) -> None:
                 },
             )
 
-    @mcp.resource("entities://{id}?include={include}")
+    @mcp.resource("entities://{id}?include={include}&ctx={ctx}")
     async def get_entity(ctx: Context, id: str, include: str = "null") -> Dict[str, Any]:
         """Get details for a specific entity with optional related data.
 
