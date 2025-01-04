@@ -56,7 +56,6 @@ def register_tools(mcp: FastMCP) -> None:
         name: str,
         entity_type: str,
         metadata: Dict[str, Any] = None,
-        db: Session = next(get_db()),
     ) -> Dict[str, Any]:
         """Create a new entity in the system.
 
@@ -109,7 +108,6 @@ def register_tools(mcp: FastMCP) -> None:
         entity_id: int,
         name: str = None,
         metadata: Dict[str, Any] = None,
-        db: Session = next(get_db()),
     ) -> Dict[str, Any]:
         """Update an existing entity's properties.
 
@@ -166,7 +164,7 @@ def register_tools(mcp: FastMCP) -> None:
             raise DatabaseError(f"Failed to update entity {entity_id}: {str(e)}")
 
     @mcp.tool()
-    def delete_entity(entity_id: int, db: Session = next(get_db())) -> Dict[str, str]:
+    def delete_entity(entity_id: int) -> Dict[str, str]:
         """Delete an entity from the system.
 
         Args:

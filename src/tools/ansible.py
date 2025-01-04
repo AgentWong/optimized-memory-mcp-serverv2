@@ -56,7 +56,6 @@ def register_tools(mcp: FastMCP) -> None:
         name: str,
         version: str,
         metadata: Dict[str, Any] = None,
-        db: Session = next(get_db()),
     ) -> Dict[str, Any]:
         """Register a new Ansible collection.
 
@@ -103,7 +102,6 @@ def register_tools(mcp: FastMCP) -> None:
         collection_name: str,
         version: str,
         metadata: Dict[str, Any] = None,
-        db: Session = next(get_db()),
     ) -> Dict[str, Any]:
         """Add a new version for an existing Ansible collection.
 

@@ -44,7 +44,6 @@ def register_tools(mcp: FastMCP) -> None:
         target_id: int,
         relationship_type: str,
         metadata: Dict[str, Any] = None,
-        db: Session = next(get_db()),
     ) -> Dict[str, Any]:
         """Create a new relationship between entities.
 
@@ -110,7 +109,6 @@ def register_tools(mcp: FastMCP) -> None:
         relationship_id: int,
         relationship_type: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        db: Session = next(get_db()),
     ) -> Dict[str, Any]:
         """Update an existing relationship.
 
@@ -177,9 +175,7 @@ def register_tools(mcp: FastMCP) -> None:
             )
 
     @mcp.tool()
-    def delete_relationship(
-        relationship_id: int, db: Session = next(get_db())
-    ) -> Dict[str, str]:
+    def delete_relationship(relationship_id: int) -> Dict[str, str]:
         """Delete a relationship between entities.
 
         Args:

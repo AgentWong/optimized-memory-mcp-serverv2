@@ -58,7 +58,6 @@ def register_tools(mcp: FastMCP) -> None:
         observation_type: str,
         value: Dict[str, Any],
         metadata: Dict[str, Any] = None,
-        db: Session = next(get_db()),
     ) -> Dict[str, Any]:
         """Create a new observation for an entity.
 
@@ -125,7 +124,6 @@ def register_tools(mcp: FastMCP) -> None:
         observation_id: int,
         value: Optional[Dict[str, Any]] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        db: Session = next(get_db()),
     ) -> Dict[str, Any]:
         """Update an existing observation.
 
@@ -193,9 +191,7 @@ def register_tools(mcp: FastMCP) -> None:
             )
 
     @mcp.tool()
-    def delete_observation(
-        observation_id: int, db: Session = next(get_db())
-    ) -> Dict[str, str]:
+    def delete_observation(observation_id: int) -> Dict[str, str]:
         """Delete an observation.
 
         Args:

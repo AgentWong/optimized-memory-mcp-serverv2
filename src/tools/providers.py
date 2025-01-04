@@ -58,7 +58,6 @@ def register_tools(mcp: FastMCP) -> None:
         provider_type: str,
         version: str,
         metadata: Dict[str, Any] = None,
-        db: Session = next(get_db()),
     ) -> Dict[str, Any]:
         """Register a new infrastructure provider.
 
