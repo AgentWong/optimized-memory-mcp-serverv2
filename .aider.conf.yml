@@ -21,7 +21,7 @@ sonnet: true
 #edit-format: xxx
 
 ## Use architect edit format for the main chat
-architect: true
+architect: false
 
 ## Specify the model to use for commit messages and chat history summarization (default depends on --model)
 #weak-model: xxx
@@ -111,11 +111,11 @@ upgrade: false
 # Other settings:
 
 ## specify a file to edit (can be used multiple times)
-#file: xxx
+file: tasks.md
 
 ## Specify multiple values like this:
 #file:
-#  - tasks.md
+#  - xxx
 #  - yyy
 #  - zzz
 
