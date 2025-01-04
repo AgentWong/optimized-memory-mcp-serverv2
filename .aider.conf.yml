@@ -42,7 +42,7 @@ cache-keepalive-pings: 1
 # Repomap settings:
 
 ## Suggested number of tokens to use for repo map, use 0 to disable (default: 1024)
-map-tokens: 4098
+map-tokens: 2048
 
 ## Control how often the repo map is refreshed. Options: auto, always, files, manual (default: auto)
 map-refresh: auto
@@ -87,7 +87,7 @@ auto-lint: false
 test-cmd: .venv/bin/python -m pytest -v
 
 ## Enable/disable automatic testing after changes (default: False)
-auto-test: false
+auto-test: true
 
 ## Run tests, fix problems found and then exit
 test: false
