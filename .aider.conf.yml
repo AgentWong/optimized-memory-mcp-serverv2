@@ -124,9 +124,11 @@ file: tasks.md
 ## Specify multiple values like this:
 read:
   - .prompts/docs
-  - .prompts/rules/bug-fix-template.xml
-  - .prompts/rules/task-generation.xml
-  - .prompts/rules/repo-exploration.xml
+  - .prompts/rules
+  #- .prompts/rules/bug-fix-template.xml
+  #- .prompts/rules/task-generation.xml
+  #- .prompts/rules/repo-exploration.xml
+  #- .prompts/rules/no-fastapi.xml
   - .prompts/context
 
 ## Always say yes to every confirmation
