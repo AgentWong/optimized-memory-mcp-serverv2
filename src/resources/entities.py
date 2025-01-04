@@ -11,7 +11,7 @@ from ..utils.cache import generate_cache_key, get_cached, set_cached
 def register_resources(mcp: FastMCP) -> None:
     """Register entity-related MCP resources."""
 
-    @mcp.resource("entities://list{?page,per_page,type,created_after}")
+    @mcp.resource("entities://list")
     async def list_entities(
         ctx: Context,
         page: int = 1,
