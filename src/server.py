@@ -4,6 +4,7 @@ MCP server implementation using FastMCP.
 Handles server configuration, resource/tool registration,
 and error handling for the MCP server.
 """
+
 import logging
 import gc
 from typing import Optional
@@ -14,10 +15,11 @@ from .db.init_db import init_db, get_db
 
 logger = logging.getLogger(__name__)
 
+
 def configure_server(server: FastMCP) -> None:
     """
     Configure the MCP server with resources and tools.
-    
+
     Sets up:
     - Logging configuration
     - Database initialization
@@ -27,15 +29,21 @@ def configure_server(server: FastMCP) -> None:
     try:
         # Configure logging
         configure_logging()
-        
+
         # Initialize database
         init_db()
-        
+
         # Register resources and tools
         from .resources.entities import register_resources as register_entity_resources
-        from .resources.relationships import register_resources as register_relationship_resources
-        from .resources.observations import register_resources as register_observation_resources
-        from .resources.providers import register_resources as register_provider_resources
+        from .resources.relationships import (
+            register_resources as register_relationship_resources,
+        )
+        from .resources.observations import (
+            register_resources as register_observation_resources,
+        )
+        from .resources.providers import (
+            register_resources as register_provider_resources,
+        )
         from .resources.ansible import register_resources as register_ansible_resources
         from .resources.versions import register_resources as register_version_resources
         from .resources.search import register_resources as register_search_resources
@@ -45,7 +53,7 @@ def configure_server(server: FastMCP) -> None:
         from .tools.providers import register_tools as register_provider_tools
         from .tools.ansible import register_tools as register_ansible_tools
         from .tools.analysis import register_tools as register_analysis_tools
-        
+
         register_entity_resources(server)
         register_relationship_resources(server)
         register_observation_resources(server)
@@ -59,20 +67,20 @@ def configure_server(server: FastMCP) -> None:
         register_provider_tools(server)
         register_ansible_tools(server)
         register_analysis_tools(server)
-        
+
         # Register error handler
         @server.error_handler()
         def handle_error(error: Exception, ctx: Optional[Context] = None) -> str:
             if isinstance(error, MCPError):
                 logger.error(
                     f"MCP error: {error.message}",
-                    extra={"code": error.code, "details": error.details}
+                    extra={"code": error.code, "details": error.details},
                 )
                 return f"Error: {error.message}"
-            
+
             logger.error(f"Unexpected error: {str(error)}")
             return "Internal server error occurred"
-            
+
         # Register cleanup handler
         @server.cleanup_handler()
         def cleanup(ctx: Optional[Context] = None) -> None:
@@ -81,13 +89,13 @@ def configure_server(server: FastMCP) -> None:
                 # Close any open database connections
                 db = get_db()
                 next(db).close()
-                
+
                 # Force garbage collection
                 gc.collect()
-                
+
             except Exception as e:
                 logger.error(f"Cleanup error: {str(e)}")
                 raise DatabaseError("Failed to cleanup resources")
-            
+
     except Exception as e:
         raise ConfigurationError(f"Failed to configure server: {str(e)}")

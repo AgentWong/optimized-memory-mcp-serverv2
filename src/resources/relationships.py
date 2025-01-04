@@ -21,6 +21,7 @@ Each resource follows MCP protocol for:
 - Response formatting
 - Error handling with proper MCP error types
 """
+
 from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
 
@@ -29,27 +30,28 @@ from ..db.connection import get_db
 from ..db.models.relationships import Relationship
 from ..utils.errors import DatabaseError
 
+
 def register_resources(mcp: FastMCP) -> None:
     """Register relationship-related resources with the MCP server."""
-    
+
     @mcp.resource("relationships://list")
     def list_relationships(
         source_id: Optional[int] = None,
         target_id: Optional[int] = None,
         relationship_type: Optional[str] = None,
-        db: Session = next(get_db())
+        db: Session = next(get_db()),
     ) -> List[Dict[str, Any]]:
         """List relationships, optionally filtered."""
         try:
             query = db.query(Relationship)
-            
+
             if source_id:
                 query = query.filter(Relationship.source_id == source_id)
             if target_id:
                 query = query.filter(Relationship.target_id == target_id)
             if relationship_type:
                 query = query.filter(Relationship.type == relationship_type)
-                
+
             relationships = query.all()
             return [
                 {
@@ -57,7 +59,7 @@ def register_resources(mcp: FastMCP) -> None:
                     "source_id": r.source_id,
                     "target_id": r.target_id,
                     "type": r.type,
-                    "metadata": r.metadata
+                    "metadata": r.metadata,
                 }
                 for r in relationships
             ]
@@ -66,18 +68,19 @@ def register_resources(mcp: FastMCP) -> None:
 
     @mcp.resource("relationships://{relationship_id}")
     def get_relationship(
-        relationship_id: int,
-        db: Session = next(get_db())
+        relationship_id: int, db: Session = next(get_db())
     ) -> Dict[str, Any]:
         """Get details for a specific relationship."""
         try:
-            relationship = db.query(Relationship).filter(
-                Relationship.id == relationship_id
-            ).first()
-            
+            relationship = (
+                db.query(Relationship)
+                .filter(Relationship.id == relationship_id)
+                .first()
+            )
+
             if not relationship:
                 raise DatabaseError(f"Relationship {relationship_id} not found")
-                
+
             return {
                 "id": relationship.id,
                 "source_id": relationship.source_id,
@@ -85,7 +88,9 @@ def register_resources(mcp: FastMCP) -> None:
                 "type": relationship.type,
                 "metadata": relationship.metadata,
                 "created_at": relationship.created_at.isoformat(),
-                "updated_at": relationship.updated_at.isoformat()
+                "updated_at": relationship.updated_at.isoformat(),
             }
         except Exception as e:
-            raise DatabaseError(f"Failed to get relationship {relationship_id}: {str(e)}")
+            raise DatabaseError(
+                f"Failed to get relationship {relationship_id}: {str(e)}"
+            )

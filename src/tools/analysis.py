@@ -15,6 +15,7 @@ Tools follow MCP patterns for:
 - Database integration
 - Version comparison logic
 """
+
 from typing import Dict, Any, List
 from sqlalchemy.orm import Session
 
@@ -23,15 +24,16 @@ from ..db.connection import get_db
 from ..db.models.providers import Provider
 from ..utils.errors import DatabaseError, ValidationError
 
+
 def register_tools(mcp: FastMCP) -> None:
     """Register analysis tools with the MCP server.
-    
+
     This function registers all analysis-related tools with the MCP server instance.
     Tools include:
     - analyze_provider: Compare provider versions for changes
     - analyze_collection: Compare Ansible collection versions
     - analyze_dependencies: Check for dependency conflicts
-    
+
     Each tool is registered with proper type hints, error handling, and database integration.
     Tools follow MCP protocol patterns for consistent behavior and error reporting.
     """
@@ -41,10 +43,10 @@ def register_tools(mcp: FastMCP) -> None:
         provider_id: int,
         from_version: str,
         to_version: str,
-        db: Session = next(get_db())
+        db: Session = next(get_db()),
     ) -> Dict[str, Any]:
         """Analyze changes between provider versions.
-        
+
         Performs deep analysis comparing two versions of a provider to identify:
         - Breaking changes (removed/modified resources, fields, etc)
         - New features and capabilities
@@ -52,7 +54,7 @@ def register_tools(mcp: FastMCP) -> None:
         - Security updates and patches
         - API compatibility changes
         - Configuration requirement changes
-        
+
         The analysis looks at:
         - Resource type definitions and schemas
         - Field specifications and validation rules
@@ -74,13 +76,13 @@ def register_tools(mcp: FastMCP) -> None:
         - Performance characteristics
         - Cost implications
         - Integration patterns
-        
+
         Args:
             provider_id: ID of the provider to analyze
             from_version: Starting version for comparison
             to_version: Target version for comparison
             db: Database session
-            
+
         Returns:
             Dict containing categorized changes:
             {
@@ -117,11 +119,11 @@ def register_tools(mcp: FastMCP) -> None:
                     }
                 ]
             }
-            
+
         Raises:
             ValidationError: If provider not found or versions invalid
             DatabaseError: If analysis fails
-            
+
         Example:
             >>> result = analyze_provider(
             ...     provider_id=1,
@@ -136,23 +138,25 @@ def register_tools(mcp: FastMCP) -> None:
                 "details": "Region field removed, now using provider-level config"
             }
         """
-        
+
         try:
             provider = db.query(Provider).filter(Provider.id == provider_id).first()
             if not provider:
-                raise ValidationError("Provider not found", {"provider_id": provider_id})
-                
+                raise ValidationError(
+                    "Provider not found", {"provider_id": provider_id}
+                )
+
             analysis = {
                 "breaking_changes": [],
                 "new_features": [],
                 "deprecations": [],
-                "security_updates": []
+                "security_updates": [],
             }
-            
+
             # Add version analysis logic here
             # For now returning empty analysis structure
-            
+
             return analysis
-            
+
         except Exception as e:
             raise DatabaseError(f"Failed to analyze provider: {str(e)}")

@@ -11,6 +11,7 @@ Tests the core database integration patterns required by MCP:
 Each test verifies proper database integration and data integrity
 across the MCP server implementation.
 """
+
 import pytest
 from sqlalchemy.orm import Session
 
@@ -20,6 +21,7 @@ from src.db.models.relationships import Relationship
 from src.db.models.observations import Observation
 from src.db.models.providers import Provider
 from src.db.models.ansible import AnsibleCollection
+
 
 @pytest.fixture
 def db_session():
@@ -31,6 +33,7 @@ def db_session():
         session.rollback()
         session.close()
 
+
 def test_entity_relationships_cascade(db_session: Session):
     """Test entity deletion cascades relationships properly"""
     # Create test entities
@@ -41,9 +44,7 @@ def test_entity_relationships_cascade(db_session: Session):
 
     # Create relationship
     rel = Relationship(
-        source_id=entity1.id,
-        target_id=entity2.id,
-        relationship_type="test_rel"
+        source_id=entity1.id, target_id=entity2.id, relationship_type="test_rel"
     )
     db_session.add(rel)
     db_session.commit()
@@ -51,11 +52,12 @@ def test_entity_relationships_cascade(db_session: Session):
     # Delete entity and verify cascade
     db_session.delete(entity1)
     db_session.commit()
-    
+
     # Check relationship was deleted
-    assert db_session.query(Relationship).filter_by(
-        source_id=entity1.id
-    ).first() is None
+    assert (
+        db_session.query(Relationship).filter_by(source_id=entity1.id).first() is None
+    )
+
 
 def test_observation_entity_integrity(db_session: Session):
     """Test observation foreign key constraints"""
@@ -66,9 +68,7 @@ def test_observation_entity_integrity(db_session: Session):
 
     # Create observation
     obs = Observation(
-        entity_id=entity.id,
-        observation_type="test_obs",
-        data={"test": "data"}
+        entity_id=entity.id, observation_type="test_obs", data={"test": "data"}
     )
     db_session.add(obs)
     db_session.commit()
@@ -76,21 +76,17 @@ def test_observation_entity_integrity(db_session: Session):
     # Verify constraint
     with pytest.raises(Exception):
         invalid_obs = Observation(
-            entity_id=99999,  # Non-existent entity
-            observation_type="test",
-            data={}
+            entity_id=99999, observation_type="test", data={}  # Non-existent entity
         )
         db_session.add(invalid_obs)
         db_session.commit()
+
 
 def test_provider_version_tracking(db_session: Session):
     """Test provider version management"""
     # Create provider
     provider = Provider(
-        name="test_provider",
-        namespace="test",
-        type="test_type",
-        version="1.0.0"
+        name="test_provider", namespace="test", type="test_type", version="1.0.0"
     )
     db_session.add(provider)
     db_session.commit()
@@ -100,26 +96,19 @@ def test_provider_version_tracking(db_session: Session):
     db_session.commit()
 
     # Verify version history
-    updated = db_session.query(Provider).filter_by(
-        id=provider.id
-    ).first()
+    updated = db_session.query(Provider).filter_by(id=provider.id).first()
     assert updated.version == "1.0.1"
+
 
 def test_ansible_collection_relationships(db_session: Session):
     """Test ansible collection relationship handling"""
     # Create collection
-    collection = AnsibleCollection(
-        name="test.collection",
-        version="1.0.0"
-    )
+    collection = AnsibleCollection(name="test.collection", version="1.0.0")
     db_session.add(collection)
     db_session.commit()
 
     # Create related entity
-    entity = Entity(
-        name="test_module",
-        entity_type="ansible_module"
-    )
+    entity = Entity(name="test_module", entity_type="ansible_module")
     db_session.add(entity)
     db_session.commit()
 
@@ -127,16 +116,19 @@ def test_ansible_collection_relationships(db_session: Session):
     rel = Relationship(
         source_id=collection.id,
         target_id=entity.id,
-        relationship_type="contains_module"
+        relationship_type="contains_module",
     )
     db_session.add(rel)
     db_session.commit()
 
     # Verify relationship
-    assert db_session.query(Relationship).filter_by(
-        source_id=collection.id,
-        target_id=entity.id
-    ).first() is not None
+    assert (
+        db_session.query(Relationship)
+        .filter_by(source_id=collection.id, target_id=entity.id)
+        .first()
+        is not None
+    )
+
 
 def test_concurrent_transactions(db_session: Session):
     """Test concurrent database operations"""
@@ -150,16 +142,14 @@ def test_concurrent_transactions(db_session: Session):
     try:
         # Modify in first session
         entity.name = "modified_in_session1"
-        
+
         # Try to modify in second session
-        entity2 = session2.query(Entity).filter_by(
-            id=entity.id
-        ).first()
+        entity2 = session2.query(Entity).filter_by(id=entity.id).first()
         entity2.name = "modified_in_session2"
-        
+
         # Commit first session
         db_session.commit()
-        
+
         # Second session should fail
         with pytest.raises(Exception):
             session2.commit()

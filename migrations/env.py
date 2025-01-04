@@ -12,6 +12,7 @@ Dependencies:
     - Alembic for migration management
     - All models from src.db.models
 """
+
 from logging.config import fileConfig
 import os
 
@@ -21,8 +22,13 @@ from sqlalchemy import pool
 
 from src.db.init_db import Base
 from src.db.models import (  # Import specific models instead of *
-    ansible, arguments, entities, observations,
-    parameters, providers, relationships
+    ansible,
+    arguments,
+    entities,
+    observations,
+    parameters,
+    providers,
+    relationships,
 )
 
 # Load alembic.ini config
@@ -38,6 +44,7 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
     url = config.get_main_option("sqlalchemy.url")
@@ -51,6 +58,7 @@ def run_migrations_offline() -> None:
     with context.begin_transaction():
         context.run_migrations()
 
+
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
     connectable = engine_from_config(
@@ -60,12 +68,11 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()
+
 
 if context.is_offline_mode():
     run_migrations_offline()

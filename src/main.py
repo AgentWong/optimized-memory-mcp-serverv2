@@ -15,20 +15,21 @@ from .db.init_db import init_db
 
 logger = logging.getLogger(__name__)
 
+
 def create_server() -> FastMCP:
     """Create and configure the MCP server instance."""
     # Configure logging first
     configure_logging()
-    
+
     # Validate database configuration
     database_url = os.getenv("DATABASE_URL")
     if not database_url:
         raise ConfigurationError("DATABASE_URL environment variable is required")
-    
+
     try:
         # Initialize database
         init_db()
-        
+
         # Create and configure server
         server = FastMCP(
             "Infrastructure Memory Server",
@@ -36,16 +37,17 @@ def create_server() -> FastMCP:
                 "SQLAlchemy>=2.0.0",
                 "alembic>=1.13.0",
                 "uvx>=0.1.0",
-                "cachetools>=5.0.0"
-            ]
+                "cachetools>=5.0.0",
+            ],
         )
         configure_server(server)
         logger.info("MCP server created and configured successfully")
         return server
-        
+
     except Exception as e:
         logger.error(f"Failed to create server: {str(e)}")
         raise ConfigurationError(f"Server initialization failed: {str(e)}")
+
 
 def main() -> None:
     """Main entry point."""
@@ -56,6 +58,7 @@ def main() -> None:
     except Exception as e:
         logger.error(f"Server failed to start: {str(e)}")
         raise
+
 
 if __name__ == "__main__":
     main()

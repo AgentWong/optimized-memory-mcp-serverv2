@@ -1,4 +1,5 @@
 """Relationship model for connecting entities."""
+
 from sqlalchemy import Column, ForeignKey, Index, Integer, JSON, String
 from sqlalchemy.orm import relationship
 
@@ -12,19 +13,20 @@ class Relationship(BaseModel, TimestampMixin):
     optional metadata and relationship type.
     """
 
-    entity_id = Column(Integer, ForeignKey('entity.id'), nullable=False, index=True)
-    target_id = Column(Integer, ForeignKey('entity.id'), nullable=False, index=True)
+    entity_id = Column(Integer, ForeignKey("entity.id"), nullable=False, index=True)
+    target_id = Column(Integer, ForeignKey("entity.id"), nullable=False, index=True)
     type = Column(String, nullable=False, index=True)
     # Composite indexes for common lookups and traversals
     __table_args__ = (
-        Index('ix_relationship_entity_type', 'entity_id', 'type'),
-        Index('ix_relationship_target_type', 'target_id', 'type'),
-        Index('ix_relationship_type_entities', 'type', 'entity_id', 'target_id'),
-        Index('ix_relationship_created_type', 'created_at', 'type')
+        Index("ix_relationship_entity_type", "entity_id", "type"),
+        Index("ix_relationship_target_type", "target_id", "type"),
+        Index("ix_relationship_type_entities", "type", "entity_id", "target_id"),
+        Index("ix_relationship_created_type", "created_at", "type"),
     )
     metadata = Column(JSON, nullable=False, default=dict)
 
     # Relationships
-    entity = relationship("Entity", back_populates="relationships",
-                        foreign_keys=[entity_id])
+    entity = relationship(
+        "Entity", back_populates="relationships", foreign_keys=[entity_id]
+    )
     target = relationship("Entity", foreign_keys=[target_id])
