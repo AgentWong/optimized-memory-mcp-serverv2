@@ -103,7 +103,9 @@ def test_error_response_format(mcp_server):
 async def test_async_operation_handling(mcp_server):
     """Test async operation protocol"""
     # Start async operation
-    operation = await mcp_server.start_async_operation("test-async-tool", {"param": "test"})
+    operation = await mcp_server.start_async_operation(
+        "test-async-tool", {"param": "test"}
+    )
     assert operation is not None
 
     # Verify operation properties

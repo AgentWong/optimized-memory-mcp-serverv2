@@ -31,9 +31,7 @@ def register_resources(mcp: FastMCP) -> None:
 
     @mcp.resource("search://{query}/{entity_type}/{limit}")
     def search_entities(
-        query: str,
-        entity_type: str,
-        limit: int
+        query: str, entity_type: str, limit: int
     ) -> List[Dict[str, Any]]:
         """Search entities by name, type, or metadata."""
         try:

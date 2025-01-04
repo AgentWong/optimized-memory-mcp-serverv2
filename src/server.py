@@ -70,7 +70,8 @@ async def configure_server(server: FastMCP) -> None:
 
         # Configure error handling
         server.error_callback = lambda error, ctx=None: (
-            f"Error: {error.message}" if isinstance(error, MCPError)
+            f"Error: {error.message}"
+            if isinstance(error, MCPError)
             else "Internal server error occurred"
         )
 
@@ -80,22 +81,24 @@ async def configure_server(server: FastMCP) -> None:
             return {
                 "name": server.name,
                 "version": "1.0.0",
-                "capabilities": ["resources", "tools", "async_operations"]
+                "capabilities": ["resources", "tools", "async_operations"],
             }
 
         async def create_session():
             """Create a new server session."""
             from uuid import uuid4
+
             return {"id": str(uuid4())}
 
         async def start_async_operation(tool_name: str, arguments: dict):
             """Start an async operation."""
             from uuid import uuid4
+
             return {
                 "id": str(uuid4()),
                 "status": "pending",
                 "tool": tool_name,
-                "arguments": arguments
+                "arguments": arguments,
             }
 
         # Add core MCP methods
@@ -116,7 +119,7 @@ async def configure_server(server: FastMCP) -> None:
         server.read_resource = read_resource
         server.call_tool = call_tool
         server.get_server_info = get_server_info
-        server.create_session = create_session 
+        server.create_session = create_session
         server.start_async_operation = start_async_operation
 
         # Configure cleanup
@@ -128,7 +131,7 @@ async def configure_server(server: FastMCP) -> None:
             except Exception as e:
                 logger.error(f"Cleanup error: {str(e)}")
                 raise DatabaseError("Failed to cleanup resources")
-            
+
         server.cleanup_callback = do_cleanup
 
     except Exception as e:

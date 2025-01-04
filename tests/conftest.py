@@ -133,21 +133,22 @@ def test_observation(db_session, test_entity):
 
 class TestClient:
     """Test client for MCP server."""
-    
+
     def __init__(self, server):
         self.server = server
-        
+
     async def read_resource(self, resource_path: str, params: dict = None):
         """Read a resource with optional parameters."""
         return await self.server.read_resource(resource_path, params or {})
-        
+
     async def call_tool(self, tool_name: str, arguments: dict = None):
         """Call a tool with optional arguments."""
         return await self.server.call_tool(tool_name, arguments or {})
-        
+
     def close(self):
         """Clean up resources."""
         pass
+
 
 @pytest.fixture(scope="function")
 async def mcp_server(db_session):
@@ -164,13 +165,14 @@ async def mcp_server(db_session):
 
     # Create and configure server
     server = await create_server()
-    
+
     try:
         yield server
     finally:
         # Cleanup
-        if hasattr(server, 'cleanup'):
+        if hasattr(server, "cleanup"):
             await server.cleanup()
+
 
 @pytest.fixture(scope="function")
 async def client(mcp_server):

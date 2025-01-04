@@ -34,10 +34,11 @@ from ..utils.errors import DatabaseError
 def register_resources(mcp: FastMCP) -> None:
     """Register observation-related resources with the MCP server."""
 
-    @mcp.resource("observations://list?entity_id={entity_id}&observation_type={observation_type}")
+    @mcp.resource(
+        "observations://list?entity_id={entity_id}&observation_type={observation_type}"
+    )
     def list_observations(
-        entity_id: str = "null",
-        observation_type: str = "null"
+        entity_id: str = "null", observation_type: str = "null"
     ) -> List[Dict[str, Any]]:
         """List observations, optionally filtered."""
         try:

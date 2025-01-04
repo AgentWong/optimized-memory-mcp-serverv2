@@ -34,11 +34,13 @@ from ..utils.errors import DatabaseError
 def register_resources(mcp: FastMCP) -> None:
     """Register relationship-related resources with the MCP server."""
 
-    @mcp.resource("relationships://list?source_id={source_id}&target_id={target_id}&relationship_type={relationship_type}&ctx={ctx}")
+    @mcp.resource(
+        "relationships://list?source_id={source_id}&target_id={target_id}&relationship_type={relationship_type}&ctx={ctx}"
+    )
     async def list_relationships(
         ctx: Context,
         source_id: str = "null",
-        target_id: str = "null", 
+        target_id: str = "null",
         relationship_type: str = "null",
     ) -> List[Dict[str, Any]]:
         """List relationships, optionally filtered."""

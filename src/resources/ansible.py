@@ -35,14 +35,14 @@ def register_resources(mcp: FastMCP) -> None:
             db = next(get_db())
             collections = db.query(AnsibleCollection).all()
             return [
-                    {
-                        "id": c.id,
-                        "namespace": c.namespace,
-                        "name": c.name,
-                        "version": c.version,
-                        "metadata": c.metadata,
-                    }
-                    for c in collections
-                ]
+                {
+                    "id": c.id,
+                    "namespace": c.namespace,
+                    "name": c.name,
+                    "version": c.version,
+                    "metadata": c.metadata,
+                }
+                for c in collections
+            ]
         except Exception as e:
             raise DatabaseError(f"Failed to list Ansible collections: {str(e)}")
