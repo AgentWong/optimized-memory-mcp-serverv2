@@ -13,13 +13,13 @@ class Entity(Base, BaseModel, TimestampMixin):
     and observations attached to them.
     """
 
-    name = Column(String, nullable=False, index=True) 
-    type = Column(String, nullable=False, index=True)
-    # Composite indexes for common lookups
+    name = Column(String, nullable=False, index=True)
+    entity_type = Column(String, nullable=False, index=True)
+    # Composite indexes for common lookups  
     __table_args__ = (
-        Index("ix_entity_name_type", "name", "type"),
-        Index("ix_entity_created_type", "created_at", "type"), 
-        Index("ix_entity_updated_type", "updated_at", "type"),
+        Index("ix_entity_name_type", "name", "entity_type"),
+        Index("ix_entity_created_type", "created_at", "entity_type"),
+        Index("ix_entity_updated_type", "updated_at", "entity_type"),
     )
     meta_data = Column(JSON, nullable=False, default=dict)
     tags = Column(JSON, nullable=False, default=list)

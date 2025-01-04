@@ -85,7 +85,7 @@ def test_observation_entity_integrity(db_session: Session):
     # Verify constraint
     with pytest.raises(Exception):
         invalid_obs = Observation(
-            entity_id=99999, observation_type="test", data={}  # Non-existent entity
+            entity_id=99999, type="test", observation_type="test", value={}, meta_data={}  # Non-existent entity
         )
         db_session.add(invalid_obs)
         db_session.commit()
