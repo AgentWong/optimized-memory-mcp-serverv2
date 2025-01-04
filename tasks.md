@@ -16,7 +16,7 @@
   - Update model tests
 
 ## MCP Resource Implementation
-- [ ] Task 3: Fix entity resource parameter handling
+- [x] Task 3: Fix entity resource parameter handling
   - Update get_entity resource function signature to match MCP protocol
   - Ensure proper MCP context usage
   - Add error handling for invalid entity IDs
