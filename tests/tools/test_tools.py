@@ -39,15 +39,15 @@ async def test_create_entity_tool(mcp_server):
     client = TestClient(mcp_server)
     try:
         result = await client.call_tool(
-        "create_entity",
-        arguments={
-            "name": "test_entity",
-            "entity_type": "test",
-            "observations": ["Initial observation"],
-        },
-    )
-    assert result["name"] == "test_entity"
-    assert isinstance(result["id"], str)
+            "create_entity",
+            arguments={
+                "name": "test_entity",
+                "entity_type": "test",
+                "observations": ["Initial observation"],
+            },
+        )
+        assert result["name"] == "test_entity"
+        assert isinstance(result["id"], str)
     finally:
         await client.close()
 
@@ -59,16 +59,16 @@ async def test_add_observation_tool(mcp_server):
     try:
         # Create entity first
         entity_result = await client.call_tool(
-        "create_entity", arguments={"name": "obs_test_entity", "entity_type": "test"}
-    )
-    entity_id = entity_result["id"]
+            "create_entity", arguments={"name": "obs_test_entity", "entity_type": "test"}
+        )
+        entity_id = entity_result["id"]
 
-    # Test add_observation
-    result = await client.call_tool(
-        "add_observation",
-        arguments={"entity_id": entity_id, "content": "Test observation"},
-    )
-    assert result is True
+        # Test add_observation
+        result = await client.call_tool(
+            "add_observation",
+            arguments={"entity_id": entity_id, "content": "Test observation"},
+        )
+        assert result is True
     finally:
         await client.close()
 
@@ -79,15 +79,15 @@ async def test_register_provider_tool(mcp_server):
     client = TestClient(mcp_server)
     try:
         result = await client.call_tool(
-        "register_provider_resource",
-        arguments={
-            "provider": "test_provider",
-            "resource_type": "test_resource", 
-            "schema_version": "1.0",
-            "doc_url": "https://example.com/docs",
-        },
-    )
-    assert isinstance(result, str)  # Returns resource_id
+            "register_provider_resource",
+            arguments={
+                "provider": "test_provider",
+                "resource_type": "test_resource", 
+                "schema_version": "1.0",
+                "doc_url": "https://example.com/docs",
+            },
+        )
+        assert isinstance(result, str)  # Returns resource_id
     finally:
         await client.close()
 
@@ -98,14 +98,14 @@ async def test_register_ansible_module_tool(mcp_server):
     client = TestClient(mcp_server)
     try:
         result = await client.call_tool(
-        "register_ansible_module",
-        arguments={
-            "collection": "test.collection",
-            "module": "test_module",
-            "version": "1.0.0",
-            "doc_url": "https://example.com/docs",
-        },
-    )
-    assert isinstance(result, str)  # Returns module_id
+            "register_ansible_module",
+            arguments={
+                "collection": "test.collection",
+                "module": "test_module",
+                "version": "1.0.0",
+                "doc_url": "https://example.com/docs",
+            },
+        )
+        assert isinstance(result, str)  # Returns module_id
     finally:
         await client.close()

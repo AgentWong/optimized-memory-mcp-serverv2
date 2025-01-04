@@ -43,11 +43,11 @@ async def test_server_info_endpoint(mcp_server):
     try:
         info = await client.server.get_server_info()
 
-    # Verify required fields
-    assert "name" in info
-    assert "version" in info
-    assert "capabilities" in info
-    assert isinstance(info["capabilities"], list)
+        # Verify required fields
+        assert "name" in info
+        assert "version" in info
+        assert "capabilities" in info
+        assert isinstance(info["capabilities"], list)
     finally:
         await client.close()
 
@@ -126,23 +126,23 @@ async def test_async_operation_handling(mcp_server):
     try:
         # Start async operation
         operation = await client.start_async_operation(
-        "test-async-tool", {"param": "test"}
-    )
-    assert operation is not None
+            "test-async-tool", {"param": "test"}
+        )
+        assert operation is not None
 
-    # Verify operation properties
-    assert isinstance(operation["id"], str)
-    assert operation["status"] in ["pending", "running", "completed", "failed"]
+        # Verify operation properties
+        assert isinstance(operation["id"], str)
+        assert operation["status"] in ["pending", "running", "completed", "failed"]
 
-    # Check operation status
-    status = await client.get_operation_status(operation["id"])
-    assert isinstance(status, dict)
+        # Check operation status
+        status = await client.get_operation_status(operation["id"])
+        assert isinstance(status, dict)
+        assert status["id"] == operation["id"]
+        assert status["status"] in ["pending", "running", "completed", "failed"]
+        assert "tool" in status
+        assert "arguments" in status
     finally:
         await client.close()
-    assert status["id"] == operation["id"]
-    assert status["status"] in ["pending", "running", "completed", "failed"]
-    assert "tool" in status
-    assert "arguments" in status
 
 
 @pytest.mark.asyncio
@@ -152,23 +152,23 @@ async def test_session_management(mcp_server):
     try:
         # Create session
         session = await client.server.create_session()
-    assert session is not None
-    assert isinstance(session["id"], str)
+        assert session is not None
+        assert isinstance(session["id"], str)
 
-    # Use session with async callback
-    async def test_callback():
-        return await client.read_resource("test://resource")
-    
-    result = await client.with_session(session["id"], test_callback)
-    assert isinstance(result, dict)
+        # Use session with async callback
+        async def test_callback():
+            return await client.read_resource("test://resource")
+        
+        result = await client.with_session(session["id"], test_callback)
+        assert isinstance(result, dict)
 
-    # End session
-    await client.end_session(session["id"])
+        # End session
+        await client.end_session(session["id"])
 
-    # Verify session ended
-    with pytest.raises(MCPError) as exc:
-        await client.with_session(session["id"], test_callback)
-    assert exc.value.code == "SESSION_NOT_FOUND"
-    assert "session not found" in str(exc.value).lower()
+        # Verify session ended
+        with pytest.raises(MCPError) as exc:
+            await client.with_session(session["id"], test_callback)
+        assert exc.value.code == "SESSION_NOT_FOUND"
+        assert "session not found" in str(exc.value).lower()
     finally:
         await client.close()
