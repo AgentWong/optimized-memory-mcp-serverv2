@@ -10,7 +10,11 @@ import signal
 import time
 from typing import Optional
 import asyncio
+from datetime import datetime
 from src.db.connection import get_db
+from src.db.models.entities import Entity
+from src.db.models.observations import Observation
+from src.db.models.relationships import Relationship
 from mcp.server.fastmcp import FastMCP
 from .utils.logging import configure_logging
 from .db.init_db import init_db

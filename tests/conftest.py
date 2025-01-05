@@ -9,6 +9,7 @@ from sqlalchemy.pool import StaticPool
 from src.main import create_server
 from src.db.models.base import Base
 from src.config import Config
+from src.db.connection import get_db
 from mcp.client.session import ClientSession
 from mcp.client.stdio import stdio_client, StdioServerParameters
 
@@ -25,7 +26,7 @@ def setup_test_env():
 
 @pytest.fixture(scope="function", autouse=True)
 def db_session():
-    """Create a new database session for each test function."""
+    """Create a new database session for testing."""
     # Use in-memory SQLite for tests
     engine = create_engine(
         "sqlite:///:memory:",
@@ -141,65 +142,24 @@ def test_observation(db_session, test_entity):
 
 
 
-@pytest.fixture(autouse=True)
-def sync_mcp_server(mcp_server):
-    """Wrap MCP server methods to return synchronous results."""
-    import asyncio
-    import json
-    from functools import wraps
-    
-    def make_sync(async_func):
-        @wraps(async_func)
-        def sync_wrapper(*args, **kwargs):
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            try:
-                result = loop.run_until_complete(async_func(*args, **kwargs))
-                # Handle result conversion
-                if isinstance(result, (list, tuple)):
-                    # Convert content objects
-                    return [
-                        json.loads(item.text) if hasattr(item, 'text') else item 
-                        for item in result
-                    ]
-                elif hasattr(result, 'text'):
-                    return json.loads(result.text)
-                return result
-            finally:
-                loop.close()
-        return sync_wrapper
-
-    # Patch server methods
-    for method_name in ['call_tool', 'read_resource', 'list_resources']:
-        if hasattr(mcp_server, method_name):
-            orig_method = getattr(mcp_server, method_name)
-            setattr(mcp_server, method_name, make_sync(orig_method))
-    
-    # Add execute_tool alias for compatibility
-    mcp_server.execute_tool = mcp_server.call_tool
-    
-    return mcp_server
-
 @pytest.fixture
-def mcp_server():
+def mcp_server(db_session):
     """Create MCP server instance for testing."""
     server = create_server()
+    # Ensure server uses test db session
+    server._db_session = db_session
     return server
 
 @pytest.fixture
-def client(mcp_server):
+def client(mcp_server, db_session):
     """Create MCP client connected to test server."""
-    from mcp.client.stdio import StdioServerParameters, stdio_client
-    from mcp.client.session import ClientSession
-    
-    # Create client session with synchronous initialization
     params = StdioServerParameters(
         command="python",
         args=["-m", "src.main"],
-        env={"TESTING": "true", "LOG_LEVEL": "ERROR"}
+        env={"TESTING": "true", "LOG_LEVEL": "ERROR", "DB_SESSION": "test"}
     )
     
     with stdio_client(params) as (read_stream, write_stream):
         session = ClientSession(read_stream, write_stream)
-        session.initialize()  # Synchronous initialization
-        yield session
+        session.initialize()
+        return session
