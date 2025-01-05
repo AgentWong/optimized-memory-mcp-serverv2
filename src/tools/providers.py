@@ -53,6 +53,7 @@ async def register_tools(mcp: FastMCP) -> list:
     """
 
     @mcp.tool()
+    @mcp.tool()
     def register_provider(
         name: str,
         provider_type: str,
