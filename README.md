@@ -2,6 +2,9 @@
 
 A high-performance Python-based Model Context Protocol (MCP) server implementation optimized for Claude Desktop integration. This server provides efficient memory management and robust infrastructure component tracking capabilities.
 
+> [!CAUTION]
+> This project has been archived due to faulty project specifications and AI direction that led to endless looping behavior.
+
 ## Overview
 
 This MCP server implementation focuses on:
