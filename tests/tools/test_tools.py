@@ -11,32 +11,56 @@ Each tool follows the MCP protocol for performing actions and side effects.
 """
 
 import pytest
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 from src.main import create_server
 from src.db.connection import get_db
 from src.utils.errors import MCPError
+from src.db.models.base import Base
 
 
 @pytest.fixture
 def db_session():
     """Provide a database session for testing"""
-    session = next(get_db())
+    # Use in-memory SQLite for tests
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    
+    # Create all tables
+    Base.metadata.create_all(bind=engine)
+    
+    # Create session factory
+    Session = sessionmaker(bind=engine)
+    
+    # Create and configure session
+    session = Session()
+    
+    # Enable foreign keys
+    session.execute(text("PRAGMA foreign_keys=ON"))
+    
     try:
         yield session
     finally:
+        session.rollback()
         session.close()
+        Base.metadata.drop_all(bind=engine)
 
 
 def test_create_entity_tool(mcp_server):
     """Test create_entity tool"""
     
-    result = mcp_server.call_tool(
-        "create_entity",
-        {
+    result = mcp_server.send_request_sync("tools/call", {
+        "name": "create_entity",
+        "arguments": {
             "name": "test_entity",
             "entity_type": "test",
-            "observations": ["Initial observation"],
+            "observations": ["Initial observation"]
         }
-    )
+    })
     
     assert isinstance(result, dict), "Result should be a dictionary"
     assert result["name"] == "test_entity", "Entity name mismatch"

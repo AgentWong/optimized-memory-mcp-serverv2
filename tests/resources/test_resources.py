@@ -2,6 +2,7 @@
 Unit tests for MCP resources.
 
 from src.utils.errors import MCPError, ValidationError
+from sqlalchemy import text
 
 Tests the core MCP resource patterns:
 - entities://list - Lists all entities in the system
@@ -13,6 +14,10 @@ Each resource follows the MCP protocol for read-only data access.
 """
 
 import pytest
+from sqlalchemy import create_engine, text
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
 from src.main import create_server
 from src.db.connection import get_db
@@ -29,14 +34,31 @@ def client():
 @pytest.fixture
 def db_session():
     """Provide a database session for testing"""
-    session = next(get_db())
+    # Use in-memory SQLite for tests
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    
+    # Create all tables
+    Base.metadata.create_all(bind=engine)
+    
+    # Create session factory
+    Session = sessionmaker(bind=engine)
+    
+    # Create and configure session
+    session = Session()
+    
+    # Enable foreign keys
+    session.execute(text("PRAGMA foreign_keys=ON"))
+    
     try:
         yield session
     finally:
         session.rollback()
         session.close()
-        Base.metadata.drop_all(bind=session.bind)
-        Base.metadata.create_all(bind=session.bind)
+        Base.metadata.drop_all(bind=engine)
 
 
 def test_entities_list_resource(mcp_server):
@@ -56,7 +78,8 @@ def test_entity_detail_resource(mcp_server, db_session):
 
     # Create test entity first
     result = mcp_server.call_tool(
-        "create_entity", {"name": "test_entity", "entity_type": "test"}
+        "create_entity", {"name": "test_entity", "entity_type": "test"},
+        sync=True
     )
     entity_id = result["id"]
     assert entity_id, "No entity ID returned"

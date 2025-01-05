@@ -12,7 +12,11 @@ and ensures proper database state management.
 """
 
 import pytest
-from sqlalchemy.orm import Session
+from sqlalchemy import create_engine, text
+from sqlalchemy.exc import IntegrityError
+from src.db.models.base import Base
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.pool import StaticPool
 
 from src.db.init_db import get_db
 from src.db.models.base import BaseModel
@@ -24,11 +28,31 @@ from src.db.models.observations import Observation
 @pytest.fixture
 def db_session():
     """Provide a database session for testing"""
-    session = next(get_db())
+    # Use in-memory SQLite for tests
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    
+    # Create all tables
+    Base.metadata.create_all(bind=engine)
+    
+    # Create session factory
+    Session = sessionmaker(bind=engine)
+    
+    # Create and configure session
+    session = Session()
+    
+    # Enable foreign keys
+    session.execute(text("PRAGMA foreign_keys=ON"))
+    
     try:
         yield session
     finally:
+        session.rollback()
         session.close()
+        Base.metadata.drop_all(bind=engine)
 
 
 def test_base_model_to_dict(db_session: Session):
@@ -217,7 +241,7 @@ def test_entity_creation(db_session, mcp_server):
 
 def test_entity_required_fields():
     """Test that required fields are enforced."""
-    with next(get_db()) as db:
+    with get_db() as db:
         entity = Entity(name="test_entity", entity_type="test_type")
         db.add(entity)
         db.commit()

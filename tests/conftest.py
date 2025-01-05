@@ -1,6 +1,8 @@
 import os
 import inspect
+import anyio
 from sqlalchemy.exc import IntegrityError
+from src.db.models.base import Base
 import pytest
 from sqlalchemy import create_engine
 from src.utils.errors import MCPError
@@ -32,46 +34,20 @@ def db_session():
         "sqlite:///:memory:",
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
-        echo=True,  # Enable SQL logging for tests
-    )
-
-    # Import all models to ensure they're registered
-    from src.db.models import (
-        entities,
-        relationships,
-        observations,
-        providers,
-        arguments,
-        ansible,
-        parameters,
     )
     
-    # Create all tables first
+    # Create all tables
     Base.metadata.create_all(bind=engine)
-
+    
     # Create session factory
-    TestingSessionLocal = sessionmaker(
-        bind=engine,
-        autocommit=False,
-        autoflush=False,
-        expire_on_commit=False,  # Prevent detached instance errors
-    )
-
-    # Create session
-    session = TestingSessionLocal()
-
-    # Enable foreign key constraints
-    from sqlalchemy import text
-
-    session.execute(text("PRAGMA foreign_keys = ON"))
-    session.commit()
-
-    try:
-        yield session
-    finally:
-        session.rollback()
-        session.close()
-        Base.metadata.drop_all(bind=engine)
+    TestSession = sessionmaker(bind=engine)
+    
+    # Create and configure session
+    session = TestSession()
+    session.execute(text("PRAGMA foreign_keys=ON"))
+    
+    # Return session directly instead of yielding
+    return session
 
 
 @pytest.fixture
@@ -153,13 +129,20 @@ def mcp_server(db_session):
 @pytest.fixture
 def client(mcp_server, db_session):
     """Create MCP client connected to test server."""
+    # Create test client using stdio parameters
     params = StdioServerParameters(
         command="python",
         args=["-m", "src.main"],
-        env={"TESTING": "true", "LOG_LEVEL": "ERROR", "DB_SESSION": "test"}
+        env={"TESTING": "true", "LOG_LEVEL": "ERROR"}
     )
     
-    with stdio_client(params) as (read_stream, write_stream):
-        session = ClientSession(read_stream, write_stream)
-        session.initialize()
-        return session
+    # Create memory streams for testing
+    read_stream, write_stream = anyio.create_memory_object_stream(0)
+    
+    # Create client session
+    session = ClientSession(read_stream, write_stream)
+    session.send_request("initialize", {
+        "protocolVersion": "1.0",
+        "capabilities": {}
+    })
+    return session

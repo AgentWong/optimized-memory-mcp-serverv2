@@ -14,20 +14,20 @@ for Claude Desktop's AI assistant features.
 """
 
 import pytest
-from src.utils.errors import MCPError
+from src.utils.errors import MCPError, ValidationError
 from src.db.connection import get_db
 
 
 def test_server_info_endpoint(client):
     """Test server info matches Claude Desktop requirements"""
-    result = client.get_server_info()
+    result = client.send_request_sync("server/info", {})
     assert result.name == "Infrastructure Memory Server"
     assert result.version is not None
     assert result.capabilities is not None
 
 def test_resource_protocol(client, db_session):
     """Test resource URL protocol handling"""
-    resources = client.list_resources()
+    resources = client.send_request_sync("resources/list", {}).get("resources", [])
     assert len(resources) > 0, "No resources found"
 
     first_resource = resources[0]
