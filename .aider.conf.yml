@@ -21,7 +21,7 @@ sonnet: true
 #edit-format: xxx
 
 ## Use architect edit format for the main chat
-architect: false
+architect: true
 
 ## Specify the model to use for commit messages and chat history summarization (default depends on --model)
 #weak-model: xxx
@@ -111,7 +111,7 @@ upgrade: false
 # Other settings:
 
 ## specify a file to edit (can be used multiple times)
-file: tasks.md
+#file: tasks.md
 
 ## Specify multiple values like this:
 #file:
@@ -125,7 +125,7 @@ file: tasks.md
 read:
   - .prompts/docs
   - .prompts/rules
-  #- .prompts/user_input # pytest_short_error_summary.txt
+  - .prompts/user_input # pytest_short_error_summary.txt
   #- .prompts/rules/bug-fix-template.xml
   #- .prompts/rules/task-generation.xml
   #- .prompts/rules/repo-exploration.xml
