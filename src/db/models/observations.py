@@ -32,21 +32,51 @@ class Observation(Base, BaseModel, TimestampMixin):
 
     def __init__(self, **kwargs):
         """Initialize an Observation with validation."""
-        # Validate entity_id before calling super()
-        if "entity_id" not in kwargs or not kwargs["entity_id"]:
-            from sqlalchemy.exc import IntegrityError
+        from sqlalchemy.exc import IntegrityError
+        
+        # Validate required fields and types before calling super()
+        required_fields = ['entity_id', 'observation_type', 'type', 'value']
+        for field in required_fields:
+            if field not in kwargs or kwargs[field] is None:
+                raise IntegrityError(
+                    f"{field} is required",
+                    params={field: None},
+                    orig=None
+                )
+        
+        # Validate entity_id
+        entity_id = kwargs.get('entity_id')
+        if not isinstance(entity_id, int) or entity_id <= 0:
             raise IntegrityError(
-                "entity_id is required",
-                params={"entity_id": None},
+                "entity_id must be a positive integer",
+                params={'entity_id': entity_id},
                 orig=None
             )
-
-        # Validate observation_type
-        if "observation_type" not in kwargs or not kwargs.get("observation_type"):
-            from sqlalchemy.exc import IntegrityError
+        
+        # Validate type
+        obs_type = kwargs.get('type')
+        if not obs_type or obs_type not in self.VALID_TYPES:
             raise IntegrityError(
-                "observation_type is required",
-                params={"observation_type": None},
+                f"Invalid observation type: {obs_type}",
+                params={'type': obs_type},
+                orig=None
+            )
+            
+        # Validate observation_type
+        obs_subtype = kwargs.get('observation_type')
+        if not obs_subtype or not isinstance(obs_subtype, str):
+            raise IntegrityError(
+                "observation_type must be a non-empty string",
+                params={'observation_type': obs_subtype},
+                orig=None
+            )
+            
+        # Validate value
+        value = kwargs.get('value')
+        if not isinstance(value, (dict, list)):
+            raise IntegrityError(
+                "value must be a dict or list",
+                params={'value': value},
                 orig=None
             )
 
@@ -62,13 +92,10 @@ class Observation(Base, BaseModel, TimestampMixin):
             if not entity:
                 from sqlalchemy.exc import IntegrityError
                 raise IntegrityError(
+                    "Constraint failed",
                     f"Referenced entity_id={self.entity_id} does not exist",
-                    params={"entity_id": self.entity_id},
-                    orig=None
+                    None
                 )
-
-        if not self.type or self.type not in self.VALID_TYPES:
-            raise ValueError(f"Invalid observation type: {self.type}")
 
     # Composite indexes for common lookups
     __table_args__ = (

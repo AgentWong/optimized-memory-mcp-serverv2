@@ -7,6 +7,7 @@ for infrastructure management.
 """
 import os
 import asyncio
+import inspect
 import logging
 from mcp.server.lowlevel import Server, NotificationOptions
 from mcp.server.models import InitializationOptions
@@ -34,6 +35,8 @@ async def create_server() -> Server:
 
         # Configure server with all components
         server = await configure_server(server)
+        if inspect.iscoroutine(server):
+            server = await server
 
         # Initialize the server
         init_options = InitializationOptions(
@@ -54,22 +57,6 @@ async def create_server() -> Server:
                 raise ConfigurationError(f"Server missing {method} method")
             if not callable(getattr(server, method)):
                 raise ConfigurationError(f"Server {method} is not callable")
-        
-        # Verify and await all async configuration
-        if inspect.iscoroutine(server):
-            server = await server
-            
-        # Verify server has required methods and they are callable
-        required_methods = ['read_resource', 'call_tool', 'start_async_operation']
-        for method in required_methods:
-            if not hasattr(server, method):
-                raise ConfigurationError(f"Server missing {method} method")
-            if not callable(getattr(server, method)):
-                raise ConfigurationError(f"Server {method} is not callable")
-            
-        # Initialize server if needed
-        if hasattr(server, 'initialize') and callable(server.initialize):
-            await server.initialize()
                 
         return server
 
