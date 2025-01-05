@@ -147,27 +147,8 @@ class TestClient:
     async def __aenter__(self):
         """Async context manager entry."""
         try:
-            # Ensure server is not a coroutine
-            while inspect.iscoroutine(self.server):
-                self.server = await self.server
-
-            # Add mock methods if needed
-            mock_methods = {
-                'create_session': async_mock_create_session,
-                'end_session': async_mock_end_session,
-                'read_resource': async_mock_read_resource,
-                'call_tool': async_mock_call_tool,
-                'start_async_operation': async_mock_start_async_operation,
-                'get_operation_status': async_mock_get_operation_status
-            }
-            
-            for method_name, mock_func in mock_methods.items():
-                if not hasattr(self.server, method_name):
-                    setattr(self.server, method_name, mock_func)
-                    
+            # Create session
             self.session = await self.server.create_session()
-            if inspect.iscoroutine(self.session):
-                self.session = await self.session
             return self
         except Exception as e:
             print(f"Error in __aenter__: {e}")
@@ -338,12 +319,10 @@ async def mcp_server():
     try:
         # Create and configure server
         server = await create_server()
-        
-        # Ensure server is fully resolved and configured
-        while inspect.iscoroutine(server):
+        if inspect.iscoroutine(server):
             server = await server
-
-        # Add mock methods directly to server instance
+            
+        # Add mock methods
         mock_methods = {
             'read_resource': async_mock_read_resource,
             'call_tool': async_mock_call_tool,
@@ -353,27 +332,19 @@ async def mcp_server():
             'end_session': async_mock_end_session
         }
         
+        # Force attach all mock methods
         for name, method in mock_methods.items():
-            if not hasattr(server, name):
-                setattr(server, name, method)
-
-        # Verify required methods are present
-        required_methods = ['read_resource', 'call_tool', 'start_async_operation']
-        for method in required_methods:
-            if not hasattr(server, method):
-                raise AttributeError(f"Server missing required method: {method}")
-
+            setattr(server, name, method)
+            
+        init_options = server.get_initialization_options()
+        if inspect.iscoroutine(init_options):
+            init_options = await init_options
+            
+        await server.initialize(init_options)
         return server
     except Exception as e:
         print(f"Error creating server: {e}")
         raise
-    finally:
-        # Cleanup
-        if 'server' in locals() and hasattr(server, 'cleanup'):
-            try:
-                await server.cleanup()
-            except Exception as e:
-                print(f"Error during cleanup: {e}")
 
 
 @pytest.fixture

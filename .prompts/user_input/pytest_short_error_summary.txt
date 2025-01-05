@@ -1,3 +1,274 @@
+/home/herman/Documents/vscode/optimized-memory-mcp-serverv2/.venv/lib/python3.13/site-packages/pytest_asyncio/plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+============================= test session starts ==============================
+platform linux -- Python 3.13.1, pytest-8.3.4, pluggy-1.5.0
+rootdir: /home/herman/Documents/vscode/optimized-memory-mcp-serverv2
+configfile: pytest.ini
+testpaths: tests
+plugins: anyio-4.7.0, asyncio-0.25.1, cov-6.0.0
+asyncio: mode=Mode.STRICT, asyncio_default_fixture_loop_scope=None
+collecting ... /home/herman/Documents/vscode/optimized-memory-mcp-serverv2/tests/conftest.py:140: PytestCollectionWarning: cannot collect test class 'TestClient' because it has a __init__ constructor (from: tests/claude/test_claude_compatibility.py)
+  class TestClient:
+collected 53 items                                                             
+
+tests/claude/test_claude_compatibility.py sFFsss                         [ 11%]
+tests/db/test_db_operations.py ........                                  [ 26%]
+tests/db_integration/test_db_integration.py .F..ss                       [ 37%]
+tests/error_scenarios/test_error_scenarios.py FFFFsss                    [ 50%]
+tests/integration/test_mcp_integration.py FF./home/herman/Documents/vscode/optimized-memory-mcp-serverv2/.venv/lib/python3.13/site-packages/_pytest/runner.py:142: RuntimeWarning: coroutine 'create_server' was never awaited
+  item.funcargs = None  # type: ignore[attr-defined]
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+                            [ 56%]
+tests/models/test_validation.py ./home/herman/Documents/vscode/optimized-memory-mcp-serverv2/.venv/lib/python3.13/site-packages/_pytest/runner.py:142: RuntimeWarning: coroutine 'mcp_server' was never awaited
+  item.funcargs = None  # type: ignore[attr-defined]
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+....                                    [ 66%]
+tests/resources/test_resources.py ssssss                                 [ 77%]
+tests/tools/test_tools.py ssss<frozen abc>:117: RuntimeWarning: coroutine 'mcp_server' was never awaited
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+ss                                         [ 88%]
+tests/utils/test_errors.py ......                                        [100%]
+
+=================================== FAILURES ===================================
+____________________________ test_resource_protocol ____________________________
+
+mcp_server = <coroutine object create_server at 0x7cdcb192a9e0>
+
+    @pytest.mark.asyncio
+    async def test_resource_protocol(mcp_server):
+        """Test resource URL protocol handling"""
+        # Test valid resource with parameters
+        client = TestClient(mcp_server)
+        try:
+>           result = await client.read_resource(
+                "entities://list",
+                {
+                    "type": "test",
+                    "page": 1,
+                    "per_page": 10
+                }
+            )
+
+tests/claude/test_claude_compatibility.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.conftest.TestClient object at 0x7cdcb1a2aba0>
+resource_path = 'entities://list'
+params = {'page': 1, 'per_page': 10, 'type': 'test'}
+
+    async def read_resource(self, resource_path: str, params: dict = None) -> dict:
+        """Read a resource with proper parameter handling.
+    
+        Args:
+            resource_path: Resource path to read
+            params: Optional parameters dictionary
+    
+        Returns:
+            Resource data as dictionary
+    
+        Raises:
+            MCPError: If resource cannot be read
+            AttributeError: If server doesn't implement read_resource
+        """
+        if not hasattr(self.server, 'read_resource'):
+>           raise AttributeError("Server does not implement read_resource")
+E           AttributeError: Server does not implement read_resource
+
+tests/conftest.py:177: AttributeError
+----------------------------- Captured stdout call -----------------------------
+Error during cleanup: object NoneType can't be used in 'await' expression
+_____________________________ test_tool_execution ______________________________
+
+mcp_server = <coroutine object create_server at 0x7cdcb1aeee60>
+
+    @pytest.mark.asyncio
+    async def test_tool_execution(mcp_server):
+        """Test tool execution protocol"""
+        client = TestClient(mcp_server)
+        try:
+            # Test tool invocation with a known tool
+>           result = await client.call_tool(
+                "create_entity",
+                {
+                    "name": "test-entity",
+                    "entity_type": "test",
+                    "observations": ["Initial observation"]
+                }
+            )
+
+tests/claude/test_claude_compatibility.py:95: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.conftest.TestClient object at 0x7cdcb1944690>
+tool_name = 'create_entity'
+arguments = {'entity_type': 'test', 'name': 'test-entity', 'observations': ['Initial observation']}
+
+    async def call_tool(self, tool_name: str, arguments: dict = None) -> dict:
+        """Call a tool.
+    
+        Args:
+            tool_name: Name of tool to call
+            arguments: Optional tool arguments
+    
+        Returns:
+            Tool result as dictionary
+    
+        Raises:
+            MCPError: If tool execution fails
+            AttributeError: If server doesn't implement required methods
+        """
+        if hasattr(self.server, 'call_tool'):
+            result = await self.server.call_tool(tool_name, arguments or {})
+            if inspect.iscoroutine(result):
+                result = await result
+            return result
+    
+        if not hasattr(self.server, 'start_async_operation'):
+>           raise AttributeError("Server does not implement call_tool or start_async_operation")
+E           AttributeError: Server does not implement call_tool or start_async_operation
+
+tests/conftest.py:204: AttributeError
+----------------------------- Captured stdout call -----------------------------
+Error during cleanup: object NoneType can't be used in 'await' expression
+______________________ test_observation_entity_integrity _______________________
+
+db_session = <sqlalchemy.orm.session.Session object at 0x7cdcb183b950>
+
+    def test_observation_entity_integrity(db_session):
+        """Test observation foreign key constraints"""
+        from src.db.models.entities import Entity
+        from src.db.models.observations import Observation
+    
+        # Create entity
+        entity = Entity(name="test_entity", entity_type="test")
+        db_session.add(entity)
+        db_session.commit()
+    
+        # Create valid observation
+        obs = Observation(
+            entity_id=entity.id,
+            type="test",
+            observation_type="test_obs",
+            value={"test": "data"},
+            meta_data={}
+        )
+        db_session.add(obs)
+        db_session.commit()
+    
+        # Verify constraint with invalid entity_id
+>       with pytest.raises(IntegrityError):
+E       Failed: DID NOT RAISE <class 'sqlalchemy.exc.IntegrityError'>
+
+tests/db_integration/test_db_integration.py:96: Failed
+_____________________ test_database_constraint_violations ______________________
+
+mcp_server = <coroutine object create_server at 0x7cdcb18d1900>
+db_session = <sqlalchemy.orm.session.Session object at 0x7cdcb18327b0>
+
+    @pytest.mark.asyncio
+    async def test_database_constraint_violations(mcp_server, db_session: Session):
+        """Test database constraint violation handling"""
+        # Test duplicate entity name
+>       result = await mcp_server.call_tool(
+            "create_entity", arguments={"name": "unique_entity", "entity_type": "test"}
+        )
+E       AttributeError: 'coroutine' object has no attribute 'call_tool'
+
+tests/error_scenarios/test_error_scenarios.py:54: AttributeError
+---------------------------- Captured stderr setup -----------------------------
+/home/herman/Documents/vscode/optimized-memory-mcp-serverv2/src/db/connection.py:146: RuntimeWarning: coroutine 'create_server' was never awaited
+  gc.collect()
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+______________________ test_invalid_relationship_creation ______________________
+
+mcp_server = <coroutine object create_server at 0x7cdcb18d1a20>
+db_session = <sqlalchemy.orm.session.Session object at 0x7cdcb1830410>
+
+    @pytest.mark.asyncio
+    async def test_invalid_relationship_creation(mcp_server, db_session: Session):
+        """Test invalid relationship handling"""
+        # Create test entity
+>       result = await mcp_server.call_tool(
+            "create_entity", arguments={"name": "test_entity", "entity_type": "test"}
+        )
+E       AttributeError: 'coroutine' object has no attribute 'call_tool'
+
+tests/error_scenarios/test_error_scenarios.py:71: AttributeError
+________________________ test_invalid_observation_data _________________________
+
+mcp_server = <coroutine object create_server at 0x7cdcb18d1000>
+db_session = <sqlalchemy.orm.session.Session object at 0x7cdcb1832f30>
+
+    @pytest.mark.asyncio
+    async def test_invalid_observation_data(mcp_server, db_session: Session):
+        """Test invalid observation data handling"""
+        # Create test entity
+>       result = await mcp_server.call_tool(
+            "create_entity", arguments={"name": "obs_test_entity", "entity_type": "test"}
+        )
+E       AttributeError: 'coroutine' object has no attribute 'call_tool'
+
+tests/error_scenarios/test_error_scenarios.py:93: AttributeError
+---------------------------- Captured stderr setup -----------------------------
+/home/herman/Documents/vscode/optimized-memory-mcp-serverv2/src/db/connection.py:146: RuntimeWarning: coroutine 'create_server' was never awaited
+  gc.collect()
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+____________________ test_concurrent_modification_conflicts ____________________
+
+mcp_server = <coroutine object create_server at 0x7cdcb18d1d80>
+db_session = <sqlalchemy.orm.session.Session object at 0x7cdcb1831400>
+
+    @pytest.mark.asyncio
+    async def test_concurrent_modification_conflicts(mcp_server, db_session: Session):
+        """Test concurrent modification handling"""
+        # Create test entity
+>       result = await mcp_server.call_tool(
+            "create_entity", arguments={"name": "concurrent_test", "entity_type": "test"}
+        )
+E       AttributeError: 'coroutine' object has no attribute 'call_tool'
+
+tests/error_scenarios/test_error_scenarios.py:115: AttributeError
+---------------------------- Captured stderr setup -----------------------------
+/home/herman/Documents/vscode/optimized-memory-mcp-serverv2/src/db/connection.py:146: RuntimeWarning: coroutine 'create_server' was never awaited
+  gc.collect()
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+__________________________ test_full_entity_workflow ___________________________
+
+mcp_server = <coroutine object create_server at 0x7cdcb18d1ea0>
+db_session = <sqlalchemy.orm.session.Session object at 0x7cdcb1833020>
+
+    @pytest.mark.asyncio
+    async def test_full_entity_workflow(mcp_server, db_session: Session):
+        """Test complete entity lifecycle including relationships and observations"""
+        # Create initial entity
+>       entity1_result = await mcp_server.call_tool(
+            "create_entity", arguments={"name": "test_entity_1", "entity_type": "test_type"}
+        )
+E       AttributeError: 'coroutine' object has no attribute 'call_tool'
+
+tests/integration/test_mcp_integration.py:45: AttributeError
+---------------------------- Captured stderr setup -----------------------------
+/home/herman/Documents/vscode/optimized-memory-mcp-serverv2/src/db/connection.py:146: RuntimeWarning: coroutine 'create_server' was never awaited
+  gc.collect()
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+______________________ test_search_and_analysis_workflow _______________________
+
+mcp_server = <coroutine object create_server at 0x7cdcb18d1360>
+db_session = <sqlalchemy.orm.session.Session object at 0x7cdcb1833890>
+
+    @pytest.mark.asyncio
+    async def test_search_and_analysis_workflow(mcp_server, db_session: Session):
+        """Test search functionality with analysis tools"""
+        # Create test entity
+>       entity_result = await mcp_server.call_tool(
+            "create_entity",
+            arguments={"name": "searchable_entity", "entity_type": "test_type"},
+        )
+E       AttributeError: 'coroutine' object has no attribute 'call_tool'
+
+tests/integration/test_mcp_integration.py:92: AttributeError
 =========================== short test summary info ============================
 FAILED tests/claude/test_claude_compatibility.py::test_resource_protocol - AttributeError: Server does not implement read_resource
 FAILED tests/claude/test_claude_compatibility.py::test_tool_execution - AttributeError: Server does not implement call_tool or start_async_operation
@@ -8,7 +279,7 @@ FAILED tests/error_scenarios/test_error_scenarios.py::test_invalid_observation_d
 FAILED tests/error_scenarios/test_error_scenarios.py::test_concurrent_modification_conflicts - AttributeError: 'coroutine' object has no attribute 'call_tool'
 FAILED tests/integration/test_mcp_integration.py::test_full_entity_workflow - AttributeError: 'coroutine' object has no attribute 'call_tool'
 FAILED tests/integration/test_mcp_integration.py::test_search_and_analysis_workflow - AttributeError: 'coroutine' object has no attribute 'call_tool'
-FAILED tests/models/test_validation.py::test_observation_required_fields - ValueError: entity_id is required
-FAILED tests/models/test_validation.py::test_relationship_foreign_keys - Failed: DID NOT RAISE <class 'sqlalchemy.exc.IntegrityError'>
-FAILED tests/models/test_validation.py::test_observation_foreign_keys - Failed: DID NOT RAISE <class 'sqlalchemy.exc.IntegrityError'>
-================== 12 failed, 20 passed, 21 skipped in 1.58s ===================
+=================== 9 failed, 23 passed, 21 skipped in 0.97s ===================
+<sys>:0: RuntimeWarning: coroutine 'mcp_server' was never awaited
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+Added 285 lines of output to the chat.

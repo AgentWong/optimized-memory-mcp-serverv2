@@ -115,11 +115,13 @@ class Observation(Base, BaseModel, TimestampMixin):
                 orig=Exception("CHECK constraint failed: entity_id > 0")
             )
 
-        # Validate entity exists if we have a session
+        # Always validate entity exists
         from sqlalchemy import inspect
         if inspect(self).session:
             session = inspect(self).session
             from .entities import Entity
+            
+            # Check if entity exists
             entity = session.query(Entity).get(self.entity_id)
             if not entity:
                 from sqlalchemy.exc import IntegrityError
@@ -127,27 +129,27 @@ class Observation(Base, BaseModel, TimestampMixin):
                     "INSERT INTO observations (entity_id) VALUES (?)",
                     [self.entity_id],
                     Exception(f"Referenced entity_id={self.entity_id} does not exist"),
-                    orig=Exception("FOREIGN KEY constraint failed")
+                    orig=Exception("FOREIGN KEY constraint failed: observations.entity_id")
                 )
-
-        # Always validate entity_id
-        if not isinstance(self.entity_id, int):
-            from sqlalchemy.exc import IntegrityError
-            raise IntegrityError(
-                "Invalid entity_id type",
-                [self.entity_id],
-                Exception("entity_id must be an integer"),
-                orig=Exception("CHECK constraint failed: entity_id type")
-            )
             
-        if self.entity_id <= 0:
-            from sqlalchemy.exc import IntegrityError
-            raise IntegrityError(
-                "Invalid entity_id value",
-                [self.entity_id],
-                Exception("entity_id must be positive"),
-                orig=Exception("CHECK constraint failed: entity_id > 0")
-            )
+            try:
+                # Force foreign key check and validation
+                session.flush([self])
+                session.refresh(self)
+                if not self.entity:
+                    raise IntegrityError(
+                        "INSERT INTO observations (entity_id) VALUES (?)",
+                        [self.entity_id],
+                        Exception("Failed to validate entity relationship"),
+                        orig=Exception("FOREIGN KEY constraint failed: observations.entity_id")
+                    )
+            except Exception as e:
+                session.rollback()
+                raise IntegrityError(
+                    "Failed to validate observation",
+                    params={"entity_id": self.entity_id},
+                    orig=e
+                )
 
     # Composite indexes for common lookups
     __table_args__ = (

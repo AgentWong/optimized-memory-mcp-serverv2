@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fastMCPImplementationRules>
+    <metadata>
+        <name>FastMCP Implementation Guide</name>
+        <description>Rules for implementing MCP servers using FastMCP class</description>
+        <version>1.0</version>
+    </metadata>
+
+    <coreRules>
+        <serverCreation>
+            <rule id="SC1">ALWAYS use FastMCP class from mcp.server.fastmcp</rule>
+            <rule id="SC2">NEVER use low-level Server class from mcp.server.lowlevel</rule>
+            <rule id="SC3">ALWAYS specify required dependencies when creating FastMCP instance</rule>
+            
+            <template>
+                <code>
+                from mcp.server.fastmcp import FastMCP
+
+                mcp = FastMCP(
+                    "Your Server Name",
+                    dependencies=["required-packages"]
+                )
+                </code>
+            </template>
+        </serverCreation>
+
+        <toolImplementation>
+            <rule id="TI1">ALWAYS use @mcp.tool() decorator for tools</rule>
+            <rule id="TI2">NEVER implement custom tool handling</rule>
+            <rule id="TI3">ALWAYS include type hints and docstrings</rule>
+            
+            <template>
+                <code>
+                @mcp.tool()
+                async def your_tool(param1: type1, param2: type2) -> return_type:
+                    """Tool docstring with description.
+                    
+                    Args:
+                        param1: Description
+                        param2: Description
+                        
+                    Returns:
+                        Description of return value
+                    """
+                    # Implementation
+                    pass
+                </code>
+            </template>
+        </toolImplementation>
+
+        <resourceImplementation>
+            <rule id="RI1">ALWAYS use @mcp.resource() decorator for resources</rule>
+            <rule id="RI2">NEVER implement custom resource handling</rule>
+            <rule id="RI3">ALWAYS use URL-like patterns for resource paths</rule>
+            
+            <template>
+                <code>
+                @mcp.resource("category://{parameter}")
+                async def your_resource(parameter: str) -> return_type:
+                    """Resource docstring with description.
+                    
+                    Args:
+                        parameter: Description
+                        
+                    Returns:
+                        Description of return value
+                    """
+                    # Implementation
+                    pass
+                </code>
+            </template>
+        </resourceImplementation>
+
+        <testingRules>
+            <rule id="TR1">NEVER mock FastMCP methods</rule>
+            <rule id="TR2">ALWAYS use FastMCP's built-in testing support</rule>
+            <rule id="TR3">ALWAYS use async test patterns with FastMCP</rule>
+            
+            <template>
+                <code>
+                @pytest.fixture
+                async def mcp_server():
+                    mcp = FastMCP("Test Server")
+                    return mcp
+
+                @pytest.mark.asyncio
+                async def test_your_feature(mcp_server):
+                    # Test implementation using FastMCP methods
+                    pass
+                </code>
+            </template>
+        </testingRules>
+    </coreRules>
+
+    <prohibitedPatterns>
+        <pattern id="PP1">
+            <name>Low-Level Server Usage</name>
+            <detection>Import or use of mcp.server.lowlevel.Server</detection>
+            <replacement>Use FastMCP from mcp.server.fastmcp</replacement>
+        </pattern>
+        
+        <pattern id="PP2">
+            <name>Custom Tool Implementation</name>
+            <detection>Direct implementation of call_tool or similar methods</detection>
+            <replacement>Use @mcp.tool() decorator</replacement>
+        </pattern>
+        
+        <pattern id="PP3">
+            <name>Custom Resource Implementation</name>
+            <detection>Direct implementation of read_resource or similar methods</detection>
+            <replacement>Use @mcp.resource() decorator</replacement>
+        </pattern>
+        
+        <pattern id="PP4">
+            <name>Manual Async Operation Tracking</name>
+            <detection>Custom implementation of async operation status tracking</detection>
+            <replacement>Use FastMCP's built-in async support</replacement>
+        </pattern>
+    </prohibitedPatterns>
+
+    <requiredPatterns>
+        <pattern id="RP1">
+            <name>FastMCP Initialization</name>
+            <requirement>Create FastMCP instance with proper server name and dependencies</requirement>
+            <example>
+                mcp = FastMCP("Server Name", dependencies=["dep1", "dep2"])
+            </example>
+        </pattern>
+        
+        <pattern id="RP2">
+            <name>Tool Registration</name>
+            <requirement>Use tool decorator with proper type hints</requirement>
+            <example>
+                @mcp.tool()
+                async def tool(param: type) -> return_type:
+                    pass
+            </example>
+        </pattern>
+        
+        <pattern id="RP3">
+            <name>Resource Registration</name>
+            <requirement>Use resource decorator with URL-like paths</requirement>
+            <example>
+                @mcp.resource("path://{param}")
+                async def resource(param: str) -> return_type:
+                    pass
+            </example>
+        </pattern>
+        
+        <pattern id="RP4">
+            <name>Async Testing</name>
+            <requirement>Use async test patterns with FastMCP</requirement>
+            <example>
+                @pytest.mark.asyncio
+                async def test_feature(mcp_server):
+                    pass
+            </example>
+        </pattern>
+    </requiredPatterns>
+
+    <errorHandling>
+        <rule id="EH1">Use FastMCP's error handling mechanisms</rule>
+        <rule id="EH2">Let FastMCP handle protocol errors</rule>
+        <rule id="EH3">Use proper exception types for business logic</rule>
+        
+        <pattern>
+            <code>
+            from mcp.types import MCPError
+
+            @mcp.tool()
+            async def your_tool():
+                try:
+                    # Implementation
+                    pass
+                except Exception as e:
+                    raise MCPError(str(e))
+            </code>
+        </pattern>
+    </errorHandling>
+
+    <validationChecks>
+        <check id="VC1">No imports from mcp.server.lowlevel</check>
+        <check id="VC2">All tools use @mcp.tool() decorator</check>
+        <check id="VC3">All resources use @mcp.resource() decorator</check>
+        <check id="VC4">No custom implementations of MCP protocol methods</check>
+        <check id="VC5">Proper async patterns used throughout</check>
+    </validationChecks>
+</fastMCPImplementationRules>

@@ -34,31 +34,31 @@ async def create_server() -> Server:
         server = Server("Infrastructure Memory Server")
 
         # Configure server with all components
-        server = await configure_server(server)
-        if inspect.iscoroutine(server):
-            server = await server
+        configured_server = await configure_server(server)
+        if inspect.iscoroutine(configured_server):
+            configured_server = await configured_server
 
         # Initialize the server
         init_options = InitializationOptions(
             server_name="Infrastructure Memory Server",
             server_version="1.0.0",
-            capabilities=server.get_capabilities(
+            capabilities=configured_server.get_capabilities(
                 notification_options=NotificationOptions(),
                 experimental_capabilities={}
             )
         )
 
-        await server.initialize(init_options)
+        await configured_server.initialize(init_options)
         
         # Verify server has required methods and they are callable
         required_methods = ['read_resource', 'call_tool', 'start_async_operation']
         for method in required_methods:
-            if not hasattr(server, method):
+            if not hasattr(configured_server, method):
                 raise ConfigurationError(f"Server missing {method} method")
-            if not callable(getattr(server, method)):
+            if not callable(getattr(configured_server, method)):
                 raise ConfigurationError(f"Server {method} is not callable")
                 
-        return server
+        return configured_server
 
     except Exception as e:
         logger.error(f"Failed to create server: {str(e)}")
