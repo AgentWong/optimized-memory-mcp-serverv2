@@ -157,11 +157,11 @@ def test_ansible_collection_relationships(db_session: Session):
 
 def test_concurrent_transactions(mcp_server):
     """Test concurrent database operations"""
-    if not hasattr(mcp_server, "start_async_operation"):
-        pytest.skip("Server does not implement start_async_operation")
+    if not hasattr(mcp_server, "start_operation"):
+        pytest.skip("Server does not implement start_operation")
 
     # Create initial entity through first operation
-    result = mcp_server.execute_tool(
+    result = mcp_server.call_tool(
         "create_entity", {"name": "concurrent_test", "entity_type": "test"}
     )
     assert result is not None, "Operation failed"
@@ -172,7 +172,7 @@ def test_concurrent_transactions(mcp_server):
     operations = []
     for i in range(3):  # Try multiple concurrent updates
         operations.append(
-            mcp_server.start_async_operation(
+            mcp_server.start_operation(
                 "update_entity", {"id": entity_id, "name": f"modified_concurrent_{i}"}
             )
         )
@@ -182,6 +182,7 @@ def test_concurrent_transactions(mcp_server):
         while op["status"] not in ["completed", "failed"]:
             op_status = mcp_server.get_operation_status(op["id"])
             op.update(op_status)
+            time.sleep(0.1)  # Add small delay to prevent tight loop
 
     # At least one operation should fail with a concurrent modification error
     failed_ops = [op for op in operations if op["status"] == "failed"]

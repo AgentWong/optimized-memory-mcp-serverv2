@@ -121,34 +121,36 @@ class SyncMCPServer:
     def __init__(self, server):
         self._server = server
         
-    def call_tool(self, name, arguments=None):
-        """Synchronously call a tool."""
+    def call_tool(self, name: str, arguments: dict | None = None):
+        """Call a tool synchronously."""
         try:
-            import asyncio
-            import json
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            result = loop.run_until_complete(self._server.call_tool(name, arguments))
-            loop.close()
+            tool = self._server._tool_manager.get_tool(name)
+            if not tool:
+                raise MCPError(f"Unknown tool: {name}", code="tool_not_found")
+            
+            if arguments is None:
+                arguments = {}
+                
+            result = tool.run(arguments, context=None)
             
             # Handle TextContent wrapper
             if isinstance(result, list) and len(result) == 1:
                 content = result[0]
                 if hasattr(content, 'text'):
-                    return json.loads(content.text)
+                    try:
+                        return json.loads(content.text)
+                    except json.JSONDecodeError:
+                        return content.text
             return result
+        except MCPError:
+            raise
         except Exception as e:
-            raise MCPError(str(e))
+            raise MCPError(str(e), code="tool_execution_error")
             
     def read_resource(self, uri):
         """Synchronously read a resource."""
         try:
-            import asyncio
-            import json
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            result = loop.run_until_complete(self._server.read_resource(uri))
-            loop.close()
+            result = self._server.read_resource(uri)
             
             # Convert string result to dict if it's JSON
             if isinstance(result, str):
@@ -211,8 +213,13 @@ def client():
         def call_tool(self, name, arguments=None):
             try:
                 if name == "invalid_tool" or name == "nonexistent_tool":
-                    raise MCPError("Unknown tool", code="TOOL_NOT_FOUND")
+                    raise MCPError("Unknown tool", code="tool_not_found", 
+                                 details={"tool_name": name})
                 if name == "create_entity":
+                    if not arguments or "name" not in arguments:
+                        raise MCPError("Missing required argument: name",
+                                     code="invalid_arguments",
+                                     details={"missing_field": "name"})
                     return {
                         "id": "test-id",
                         "name": arguments.get("name"),
@@ -221,8 +228,10 @@ def client():
                         "updated_at": "2025-01-04T00:00:00Z"
                     }
                 return {"result": "success"}
+            except MCPError:
+                raise
             except Exception as e:
-                raise MCPError(str(e))
+                raise MCPError(str(e), code="internal_error")
             
         def send_progress_notification(self, token, progress, total=None):
             return None

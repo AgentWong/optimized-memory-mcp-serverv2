@@ -84,7 +84,7 @@ auto-commits: false
 auto-lint: false
 
 ## Specify command to run tests
-test-cmd: .venv/bin/python -m pytest -v
+test-cmd: CI=true .venv/bin/python -m pytest -q --color=no
 
 ## Enable/disable automatic testing after changes (default: False)
 auto-test: false # Do NOT use with lots of errors (thousands of lines in chat)

@@ -86,63 +86,43 @@ def cache_query(ttl_seconds: int = 300):
     return decorator
 
 
-@contextmanager
-def get_db() -> Generator[Session, None, None]:
-    """Get a database session as a context manager.
+def get_db() -> Session:
+    """Get a database session with proper error handling.
     
-    Yields:
-        Session: An active database session that will be automatically closed
+    Returns:
+        Session: An active database session that must be closed by the caller
         
     Raises:
-        DatabaseError: If database operations fail
+        DatabaseError: With standardized error codes for:
+            - db_constraint_error: Database constraint violations
+            - db_timeout_error: Query timeout errors  
+            - db_error: General database errors
+            - internal_error: Unexpected errors
     """
     db = SessionLocal()
+    # Set timeouts if not SQLite
+    if not db.bind.dialect.name == "sqlite":
+        db.execute(text("SET statement_timeout = :timeout"), 
+                  {"timeout": STATEMENT_TIMEOUT})
+        db.execute(text("SET idle_in_transaction_session_timeout = :timeout"),
+                  {"timeout": IDLE_IN_TRANSACTION_TIMEOUT})
     try:
-        # Set timeouts if not SQLite
-        if not db.bind.dialect.name == "sqlite":
-            db.execute(text("SET statement_timeout = :timeout"), 
-                      {"timeout": STATEMENT_TIMEOUT})
-            db.execute(text("SET idle_in_transaction_session_timeout = :timeout"),
-                      {"timeout": IDLE_IN_TRANSACTION_TIMEOUT})
-        yield db
-        db.commit()
+        return db
     except IntegrityError as e:
         db.rollback()
-        raise DatabaseError(
-            f"Database constraint violation: {str(e)}",
-            details={
-                "error": str(e),
-                "constraint_type": "integrity"
-            }
-        )
+        raise DatabaseError(f"Database constraint violation: {str(e)}", 
+                          code="db_constraint_error")
     except TimeoutError as e:
         db.rollback()
-        raise DatabaseError(
-            f"Database operation timed out: {str(e)}",
-            details={
-                "error": str(e),
-                "timeout_type": "operation"
-            }
-        )
+        raise DatabaseError(f"Database operation timed out: {str(e)}", 
+                          code="db_timeout_error")
     except SQLAlchemyError as e:
         db.rollback()
-        raise DatabaseError(
-            f"Database operation failed: {str(e)}",
-            details={
-                "error": str(e),
-                "error_type": "sqlalchemy"
-            }
-        )
+        raise DatabaseError(f"Database operation failed: {str(e)}", 
+                          code="db_error")
     except Exception as e:
         db.rollback()
-        raise DatabaseError(
-            f"Unexpected database error: {str(e)}",
-            details={
-                "error": str(e),
-                "error_type": "unexpected"
-            }
-        )
-    finally:
-        db.close()
+        raise DatabaseError(f"Unexpected database error: {str(e)}", 
+                          code="internal_error")
 
 

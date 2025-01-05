@@ -165,8 +165,10 @@ def test_invalid_tool_requests(mcp_server):
     # Test invalid tool name
     with pytest.raises(MCPError) as exc:
         mcp_server.call_tool("nonexistent_tool", {})
-    assert exc.value.code == "TOOL_NOT_FOUND"
-    assert "tool not found" in str(exc.value).lower()
+    assert exc.value.code == "tool_not_found"
+    assert "unknown tool" in str(exc.value).lower()
+    assert exc.value.details is not None
+    assert "tool_name" in exc.value.details
 
     # Test missing required arguments
     with pytest.raises(MCPError) as exc:
