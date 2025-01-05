@@ -101,8 +101,8 @@ def create_server() -> FastMCP:
 
         for module in tool_modules:
             tools = module.register_tools(mcp)  # Store returned tools
-            if isinstance(tools, (asyncio.Future, asyncio.coroutine)):
-                tools = await tools
+            if asyncio.iscoroutine(tools):
+                tools = asyncio.get_event_loop().run_until_complete(tools)
 
         # Return the configured server
         return mcp

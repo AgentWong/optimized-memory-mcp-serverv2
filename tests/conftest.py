@@ -23,7 +23,7 @@ def setup_test_env():
     os.environ.pop("LOG_LEVEL", None)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="function", autouse=True)
 def db_session():
     """Create a new database session for each test function."""
     # Use in-memory SQLite for tests
@@ -145,12 +145,14 @@ def test_observation(db_session, test_entity):
 def mcp_server():
     """Create MCP server instance for testing."""
     server = create_server()
+    server.run()  # Initialize without dev mode
     return server
 
 @pytest.fixture
 def client(mcp_server):
     """Create MCP client connected to test server."""
-    # Create client using stdio transport synchronously
+    # Create client using stdio transport synchronously 
     server_params = StdioServerParameters(command="python", args=["-m", "mcp", "run"])
-    client = ClientSession(None, None)  # Create without streams for testing
-    return client
+    with stdio_client(server_params) as (read, write):
+        client = ClientSession(read, write)
+        return client
