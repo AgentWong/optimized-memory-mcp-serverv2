@@ -35,8 +35,15 @@ signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
 
-async def create_server():
-    """Create and configure the MCP server instance."""
+async def create_server() -> FastMCP:
+    """Create and configure the MCP server instance.
+    
+    Returns:
+        FastMCP: Configured server instance with all resources and tools registered
+        
+    Raises:
+        MCPError: If server initialization fails
+    """
     # Create FastMCP instance with capabilities
     mcp = FastMCP(
         "Infrastructure Memory Server",

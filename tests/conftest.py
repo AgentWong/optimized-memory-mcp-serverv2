@@ -43,7 +43,7 @@ def db_session():
         ansible,
         parameters,
     )
-
+    
     # Create all tables first
     Base.metadata.create_all(bind=engine)
 
@@ -332,10 +332,6 @@ async def mcp_server():
     try:
         # Create and initialize server
         server = await create_server()
-
-        # Handle nested coroutines
-        while inspect.iscoroutine(server):
-            server = await server
 
         # Initialize if needed
         if not getattr(server, "_initialized", False):

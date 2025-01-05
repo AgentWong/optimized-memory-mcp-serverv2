@@ -57,8 +57,11 @@ def init_db(force: bool = False):
     Args:
         force: If True, drop existing tables before creation.
               Only use in development/testing!
+              
+    Raises:
+        DatabaseError: If database initialization fails
     """
-    # Import all models to ensure they're registered with Base
+    # Import all models at module level to ensure they're registered with Base
     from .models import (
         entities,
         relationships,
@@ -68,6 +71,18 @@ def init_db(force: bool = False):
         ansible,
         parameters,
     )
+    
+    # Verify all models are imported
+    required_models = {
+        'Entity', 'Relationship', 'Observation', 
+        'Provider', 'Argument', 'AnsibleCollection',
+        'Parameter'
+    }
+    registered_models = set(Base.metadata.tables.keys())
+    missing_models = required_models - registered_models
+    
+    if missing_models:
+        raise DatabaseError(f"Missing required models: {missing_models}")
 
     try:
         if force:
