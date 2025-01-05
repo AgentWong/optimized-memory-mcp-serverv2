@@ -210,17 +210,12 @@ async def configure_server(server: Server) -> Server:
             result = await tool(ctx, **(arguments or {}))
             return {"status": "completed", "result": result}
 
-        # Attach handlers as methods to the server instance
+        # Attach handlers to server instance
         server.read_resource = handle_read_resource
         server.call_tool = handle_call_tool
         server.start_async_operation = handle_start_async_operation
 
-        # Attach handlers directly to server instance
-        server.read_resource = handle_read_resource
-        server.call_tool = handle_call_tool
-        server.start_async_operation = handle_start_async_operation
-
-        # Ensure handlers are properly bound
+        # Verify handlers are properly bound
         if not hasattr(server, 'read_resource'):
             raise ConfigurationError("Failed to attach read_resource handler")
         if not hasattr(server, 'call_tool'):

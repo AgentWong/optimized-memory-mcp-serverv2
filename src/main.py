@@ -33,29 +33,37 @@ async def create_server() -> Server:
         server = Server("Infrastructure Memory Server")
 
         # Configure server with all components
-        configured_server = await configure_server(server)
+        server = await configure_server(server)
 
         # Initialize the server
         init_options = InitializationOptions(
             server_name="Infrastructure Memory Server",
             server_version="1.0.0",
-            capabilities=configured_server.get_capabilities(
+            capabilities=server.get_capabilities(
                 notification_options=NotificationOptions(),
                 experimental_capabilities={}
             )
         )
 
-        await configured_server.initialize(init_options)
+        await server.initialize(init_options)
         
         # Verify server has required methods
-        if not hasattr(configured_server, 'read_resource'):
+        if not hasattr(server, 'read_resource'):
             raise ConfigurationError("Server missing read_resource method")
-        if not hasattr(configured_server, 'call_tool'):
+        if not hasattr(server, 'call_tool'):
             raise ConfigurationError("Server missing call_tool method")
-        if not hasattr(configured_server, 'start_async_operation'):
+        if not hasattr(server, 'start_async_operation'):
+            raise ConfigurationError("Server missing start_async_operation method")
+        
+        # Verify server has required methods
+        if not hasattr(server, 'read_resource'):
+            raise ConfigurationError("Server missing read_resource method")
+        if not hasattr(server, 'call_tool'):
+            raise ConfigurationError("Server missing call_tool method")
+        if not hasattr(server, 'start_async_operation'):
             raise ConfigurationError("Server missing start_async_operation method")
             
-        return configured_server
+        return server
 
     except Exception as e:
         logger.error(f"Failed to create server: {str(e)}")

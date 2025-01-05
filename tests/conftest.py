@@ -55,8 +55,11 @@ def db_session():
     # Create all tables
     Base.metadata.create_all(bind=engine)
 
-    # Create session
+    # Create session and enable foreign key constraints
     session = TestingSessionLocal()
+    from sqlalchemy import text
+    session.execute(text("PRAGMA foreign_keys = ON"))
+    session.commit()
 
     try:
         yield session
@@ -294,10 +297,13 @@ async def mcp_server(db_session):
     server = await create_server()
     
     # Verify server has required methods
-    assert hasattr(server, 'read_resource'), "Server missing read_resource"
-    assert hasattr(server, 'call_tool'), "Server missing call_tool"
-    assert hasattr(server, 'start_async_operation'), "Server missing start_async_operation"
-
+    if not hasattr(server, 'read_resource'):
+        raise AttributeError("Server missing read_resource method")
+    if not hasattr(server, 'call_tool'):
+        raise AttributeError("Server missing call_tool method")
+    if not hasattr(server, 'start_async_operation'):
+        raise AttributeError("Server missing start_async_operation method")
+        
     try:
         yield server
     finally:

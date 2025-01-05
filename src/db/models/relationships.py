@@ -52,6 +52,27 @@ class Relationship(Base, BaseModel, TimestampMixin):
                     orig=None
                 )
 
+        # Initialize base class first to get session
+        super().__init__(**kwargs)
+
+        # Validate entity references exist
+        from sqlalchemy import inspect
+        if inspect(self).session:
+            session = inspect(self).session
+            from .entities import Entity
+            
+            for field, value in [
+                ('entity_id', self.entity_id),
+                ('source_id', self.source_id), 
+                ('target_id', self.target_id)
+            ]:
+                if not session.query(Entity).get(value):
+                    raise IntegrityError(
+                        f"Referenced entity {field}={value} does not exist",
+                        params={field: value},
+                        orig=None
+                    )
+
         # Initialize base class
         super().__init__(**kwargs)
 
