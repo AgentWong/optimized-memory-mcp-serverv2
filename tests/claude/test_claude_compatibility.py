@@ -19,28 +19,27 @@ from src.utils.errors import MCPError
 
 def test_server_info_endpoint(client):
     """Test server info matches Claude Desktop requirements"""
-    # Get server info directly since initialize was called in fixture
-    result = client._mcp_server.get_server_info()
-
-    # Verify required fields from initialize result
-    assert result.serverInfo.name, "Server info missing 'name' field"
-    assert result.serverInfo.version, "Server info missing 'version' field"
-    assert result.capabilities, "Server info missing 'capabilities' field"
+    # Get initialization result which contains server info
+    result = client.initialize()
+    
+    assert result.serverInfo.name == "Infrastructure Memory Server"
+    assert result.serverInfo.version is not None
+    assert result.capabilities is not None
 
 
 def test_resource_protocol(client):
     """Test resource URL protocol handling"""
-    # Test valid resource with parameters
-    resources = client._mcp_server.get_resources()
-    assert len(resources) > 0, "No resources found"
+    # List resources using SDK method
+    result = client.list_resources()
+    assert len(result.resources) > 0, "No resources found"
 
     # Test reading a valid resource
-    first_resource = resources.resources[0]
-    result = client._mcp_server.get_resource(first_resource.uri)
-    assert result["contents"], "Resource read returned no content"
+    first_resource = result.resources[0]
+    result = client.read_resource(first_resource.uri)
+    assert result.contents, "Resource read returned no content"
 
     # Test invalid resource
-    with pytest.raises(Exception) as exc:
+    with pytest.raises(MCPError) as exc:
         client.read_resource("invalid://test")
     assert "invalid resource" in str(exc.value).lower()
 
@@ -48,42 +47,41 @@ def test_resource_protocol(client):
 def test_tool_execution(client):
     """Test tool execution protocol"""
     # List available tools
-    tools = client._mcp_server.get_tools()
-    assert len(tools) > 0, "No tools found"
+    result = client.list_tools()
+    assert len(result.tools) > 0, "No tools found"
 
-    # Test tool invocation with create_entity tool
-    result = client.execute_tool(
+    # Test tool invocation
+    result = client.call_tool(
         "create_entity",
         {
             "name": "test-entity",
-            "entity_type": "test",
+            "entity_type": "test", 
             "observations": ["Initial observation"]
         }
     )
-    assert isinstance(result, dict), "Tool execution failed"
-    assert result["content"], "Tool returned no content"
+    assert result.content, "Tool returned no content"
+    assert not result.isError, "Tool execution failed"
 
     # Test invalid tool
-    with pytest.raises(Exception) as exc:
+    with pytest.raises(MCPError) as exc:
         client.call_tool("invalid-tool", {"param": "test"})
-    assert "tool not found" in str(exc.value).lower()
+    assert "unknown tool" in str(exc.value).lower()
 
 
 def test_error_response_format(client):
     """Test error responses match Claude Desktop expectations"""
-    # Test with invalid resource path
-    with pytest.raises(Exception) as exc:
+    with pytest.raises(MCPError) as exc:
         client.read_resource("nonexistent://resource")
     
     error = exc.value
-    assert str(error), "Error missing message"
+    assert error.message, "Error missing message"
+    assert error.code == "RESOURCE_NOT_FOUND"
 
 
 def test_progress_notification(client):
     """Test progress notification handling"""
     # Send a progress notification
     client.send_progress_notification("test-progress", 50, 100)
-
     # No assertion needed - just verifying it doesn't raise an exception
 
 

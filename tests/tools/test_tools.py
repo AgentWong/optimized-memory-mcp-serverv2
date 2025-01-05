@@ -29,7 +29,7 @@ def db_session():
 def test_create_entity_tool(mcp_server):
     """Test create_entity tool"""
     
-    result = mcp_server._tool_manager.execute_tool(
+    result = mcp_server.call_tool(
         "create_entity",
         {
             "name": "test_entity",
@@ -48,7 +48,7 @@ def test_create_entity_tool(mcp_server):
 def test_add_observation_tool(mcp_server):
     """Test add_observation tool"""
     # Create entity first
-    entity_result = mcp_server.execute_tool(
+    entity_result = mcp_server.call_tool(
         "create_entity", {"name": "obs_test_entity", "entity_type": "test"}
     )
     entity_id = entity_result.get("id")
@@ -213,7 +213,7 @@ def test_tool_error_handling(mcp_server):
 def test_tool_operation_status(mcp_server):
     """Test operation status handling"""
     # Execute tool
-    result = mcp_server.execute_tool(
+    result = mcp_server.call_tool(
         "create_entity",
         {"name": "status_test", "entity_type": "test"}
     )

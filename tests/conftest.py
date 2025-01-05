@@ -141,6 +141,30 @@ def test_observation(db_session, test_entity):
 
 
 
+@pytest.fixture(autouse=True)
+def sync_mcp_server(mcp_server):
+    """Wrap MCP server methods to return synchronous results."""
+    # Store original async methods
+    orig_call_tool = mcp_server.call_tool
+    orig_read_resource = mcp_server.read_resource
+    
+    # Replace with sync versions
+    def sync_call_tool(*args, **kwargs):
+        import asyncio
+        return asyncio.run(orig_call_tool(*args, **kwargs))
+        
+    def sync_read_resource(*args, **kwargs):
+        import asyncio
+        return asyncio.run(orig_read_resource(*args, **kwargs))
+        
+    # Patch the server
+    mcp_server.call_tool = sync_call_tool
+    mcp_server.read_resource = sync_read_resource
+    mcp_server.execute_tool = sync_call_tool  # Alias for compatibility
+    mcp_server.get_resource = sync_read_resource  # Alias for compatibility
+    
+    return mcp_server
+
 @pytest.fixture
 def mcp_server():
     """Create MCP server instance for testing."""
@@ -150,4 +174,14 @@ def mcp_server():
 @pytest.fixture
 def client(mcp_server):
     """Create MCP client connected to test server."""
-    return mcp_server
+    # Create client parameters
+    params = StdioServerParameters(
+        command="python",
+        args=["-m", "src.main"],
+        env={"TESTING": "true", "LOG_LEVEL": "ERROR"}
+    )
+    
+    # Create synchronous client session
+    session = ClientSession.create_sync(params)
+    
+    return session

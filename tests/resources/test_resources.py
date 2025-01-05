@@ -41,7 +41,7 @@ def db_session():
 
 def test_entities_list_resource(mcp_server):
     """Test entities://list resource using FastMCP"""
-    result = mcp_server.get_resource("entities://list")
+    result = mcp_server.read_resource("entities://list")
     assert isinstance(result, dict), "Result should be a dictionary"
     assert "data" in result, "Result missing 'data' field"
     assert isinstance(result["data"], list), "Data should be a list"
@@ -62,7 +62,7 @@ def test_entity_detail_resource(mcp_server, db_session):
     assert entity_id, "No entity ID returned"
 
     # Test resource
-    result = mcp_server.get_resource(f"entities://{entity_id}")
+    result = mcp_server.read_resource(f"entities://{entity_id}")
     assert isinstance(result, dict), "Result should be a dictionary"
     assert "data" in result, "Result missing 'data' field"
     assert result["data"]["name"] == "test_entity", "Entity name mismatch"
@@ -166,10 +166,8 @@ def test_resource_pagination(mcp_server):
             "create_entity", {"name": f"test_entity_{i}", "entity_type": "test"}
         )
 
-    # Test first page
-    result = mcp_server.read_resource(
-        "entities://list", {"page": 1, "per_page": 2}
-    )
+    # Test pagination using query parameters
+    result = mcp_server.read_resource("entities://list?page=1&per_page=2")
     assert isinstance(result["data"], list)
     assert len(result["data"]) <= 2, "Page size exceeded"
     assert "total" in result, "Missing total count"
@@ -177,9 +175,7 @@ def test_resource_pagination(mcp_server):
 
     # Verify next page
     if len(result["data"]) == 2:
-        next_page = mcp_server.read_resource(
-            "entities://list", {"page": 2, "per_page": 2}
-        )
+        next_page = mcp_server.read_resource("entities://list", page=2, per_page=2)
         assert isinstance(next_page["data"], list)
         assert next_page["data"] != result["data"], "Pages should be different"
         assert len(next_page["data"]) <= 2, "Page size exceeded"
