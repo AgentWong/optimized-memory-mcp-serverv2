@@ -41,7 +41,7 @@ def db_session():
 
 def test_entities_list_resource(mcp_server):
     """Test entities://list resource using FastMCP"""
-    result = mcp_server.read_resource("entities://list")
+    result = mcp_server.get_resource("entities://list")
     assert isinstance(result, dict), "Result should be a dictionary"
     assert "data" in result, "Result missing 'data' field"
     assert isinstance(result["data"], list), "Data should be a list"
@@ -62,7 +62,7 @@ def test_entity_detail_resource(mcp_server, db_session):
     assert entity_id, "No entity ID returned"
 
     # Test resource
-    result = mcp_server.read_resource(f"entities://{entity_id}")
+    result = mcp_server.get_resource(f"entities://{entity_id}")
     assert isinstance(result, dict), "Result should be a dictionary"
     assert "data" in result, "Result missing 'data' field"
     assert result["data"]["name"] == "test_entity", "Entity name mismatch"
@@ -74,9 +74,7 @@ def test_providers_resource(mcp_server):
     if not hasattr(mcp_server, "read_resource"):
         pytest.skip("Server does not implement read_resource")
 
-    result = mcp_server.read_resource(
-        "providers://test/resources", {"version": "latest"}
-    )
+    result = mcp_server.get_resource("providers://test/resources", version="latest")
     assert isinstance(result, dict), "Result should be a dictionary"
     assert "data" in result, "Result missing 'data' field"
     assert isinstance(result["data"], list), "Provider resources should be a list"

@@ -161,12 +161,12 @@ def test_concurrent_transactions(mcp_server):
         pytest.skip("Server does not implement start_async_operation")
 
     # Create initial entity through first operation
-    operation1 = mcp_server.start_async_operation(
+    result = mcp_server.execute_tool(
         "create_entity", {"name": "concurrent_test", "entity_type": "test"}
     )
-    assert operation1["status"] == "completed", "First operation failed"
-    assert "result" in operation1, "Missing operation result"
-    entity_id = operation1["result"]["id"]
+    assert result is not None, "Operation failed"
+    assert "id" in result, "Missing operation result"
+    entity_id = result["id"]
 
     # Try concurrent modifications
     operations = []

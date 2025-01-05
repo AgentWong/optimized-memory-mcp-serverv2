@@ -29,7 +29,7 @@ def db_session():
 def test_create_entity_tool(mcp_server):
     """Test create_entity tool"""
     
-    result = mcp_server._tool_manager.call_tool(
+    result = mcp_server._tool_manager.execute_tool(
         "create_entity",
         {
             "name": "test_entity",
@@ -37,8 +37,6 @@ def test_create_entity_tool(mcp_server):
             "observations": ["Initial observation"],
         }
     )
-    if isinstance(result, type(lambda: None)):
-        result = result()
     
     assert isinstance(result, dict), "Result should be a dictionary"
     assert result["name"] == "test_entity", "Entity name mismatch"
@@ -50,10 +48,10 @@ def test_create_entity_tool(mcp_server):
 def test_add_observation_tool(mcp_server):
     """Test add_observation tool"""
     # Create entity first
-    entity_result = mcp_server.call_tool(
+    entity_result = mcp_server.execute_tool(
         "create_entity", {"name": "obs_test_entity", "entity_type": "test"}
     )
-    entity_id = entity_result["id"]
+    entity_id = entity_result.get("id")
 
     # Test add_observation
     obs_result = mcp_server.call_tool(
@@ -215,9 +213,9 @@ def test_tool_error_handling(mcp_server):
 def test_tool_operation_status(mcp_server):
     """Test operation status handling"""
     # Execute tool
-    result = mcp_server.call_tool(
+    result = mcp_server.execute_tool(
         "create_entity",
-        arguments={"name": "status_test", "entity_type": "test"}
+        {"name": "status_test", "entity_type": "test"}
     )
 
     # Verify result structure

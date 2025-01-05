@@ -42,9 +42,9 @@ def db_session():
 def test_full_entity_workflow(mcp_server, db_session: Session):
     """Test complete entity lifecycle including relationships and observations"""
     # Create initial entity
-    entity1_result = mcp_server.call_tool(
+    entity1_result = mcp_server.execute_tool(
         "create_entity", {"name": "test_entity_1", "entity_type": "test_type"}
-    ).result()
+    )
     assert entity1_result is not None
     entity1_id = entity1_result["id"]
 
@@ -88,10 +88,10 @@ def test_full_entity_workflow(mcp_server, db_session: Session):
 def test_search_and_analysis_workflow(mcp_server, db_session: Session):
     """Test search functionality with analysis tools"""
     # Create test entity
-    entity_result = mcp_server.call_tool(
+    entity_result = mcp_server.execute_tool(
         "create_entity",
-        {"name": "searchable_entity", "entity_type": "test_type"},
-    ).result()
+        {"name": "searchable_entity", "entity_type": "test_type"}
+    )
     assert entity_result is not None
 
     # Search for entity
