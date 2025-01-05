@@ -12,7 +12,7 @@ from typing import Optional, Dict, Any
 from datetime import datetime
 from mcp.server.lowlevel import Server
 import mcp.types as types
-from mcp.server.models import Context
+from mcp.server.fastmcp import Context
 from .utils.logging import configure_logging
 from .utils.errors import MCPError, ConfigurationError, DatabaseError
 from .db.init_db import init_db, get_db
