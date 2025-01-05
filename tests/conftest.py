@@ -1,5 +1,6 @@
 import os
 import inspect
+import asyncio
 import pytest
 from sqlalchemy import create_engine
 from src.utils.errors import MCPError
@@ -26,7 +27,10 @@ def db_session():
     # Use in-memory SQLite for tests
     engine = create_engine(
         "sqlite:///:memory:",
-        connect_args={"check_same_thread": False},
+        connect_args={
+            "check_same_thread": False,
+            "foreign_keys": True  # Enable foreign key support
+        },
         poolclass=StaticPool,
         echo=True,  # Enable SQL logging for tests
     )
@@ -191,8 +195,14 @@ class TestClient:
             raise AttributeError("Server does not implement get_operation_status")
             
         operation = await self.server.start_async_operation(tool_name, arguments or {})
+        max_retries = 10
+        retry_count = 0
         while operation['status'] not in ['completed', 'failed']:
+            await asyncio.sleep(0.1)  # Prevent tight loop
             operation = await self.server.get_operation_status(operation['id'])
+            retry_count += 1
+            if retry_count >= max_retries:
+                raise MCPError("Operation timed out", code="OPERATION_TIMEOUT")
         
         if operation['status'] == 'failed':
             raise MCPError(operation.get('error', 'Tool execution failed'), code="TOOL_ERROR")
@@ -272,43 +282,16 @@ async def mcp_server(db_session):
     os.environ["DATABASE_URL"] = "sqlite:///:memory:"
     os.environ["TESTING"] = "true"
 
-    # Enable SQLite foreign key enforcement
-    from sqlalchemy import text
-    db_session.execute(text("PRAGMA foreign_keys=ON"))
-    db_session.commit()
-
     # Create and configure server
     server = await create_server()
     
-    # Handle different types of server objects
-    if inspect.isawaitable(server):
-        server = await server
-    elif hasattr(server, "__anext__"):
-        server = await server.__anext__()
-    elif inspect.isasyncgen(server):
-        async for s in server:
-            server = s
-            break
-            
-    # Ensure we have a valid server object
-    if not server or not hasattr(server, "initialize"):
-        raise RuntimeError("Failed to create valid server instance")
-
+    # Initialize the server
+    await server.initialize()
+    
     try:
-        # Ensure server is initialized
-        if hasattr(server, "initialize"):
-            await server.initialize()
         yield server
     finally:
-        # Cleanup
-        try:
-            if hasattr(server, "cleanup"):
-                await server.cleanup()
-            if hasattr(server, "close"):
-                await server.close()
-        except Exception as e:
-            # Log but don't raise to ensure cleanup continues
-            print(f"Error during cleanup: {e}")
+        await server.cleanup()
 
 
 @pytest.fixture

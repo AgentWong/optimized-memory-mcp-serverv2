@@ -150,7 +150,10 @@ async def configure_server(server: FastMCP) -> FastMCP:
             
             try:
                 # Start tool execution asynchronously
-                result = await tool(ctx, **(arguments or {}))
+                if inspect.iscoroutinefunction(tool):
+                    result = await tool(ctx, **(arguments or {}))
+                else:
+                    result = tool(ctx, **(arguments or {}))
                 
                 # Store operation state
                 server._operations[op_id] = {

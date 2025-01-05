@@ -13,7 +13,7 @@ class Observation(Base, BaseModel, TimestampMixin):
     about entities with timestamps and metadata.
     """
 
-    entity_id = Column(Integer, ForeignKey("entity.id"), nullable=False, index=True)
+    entity_id = Column(String, ForeignKey("entity.id"), nullable=False, index=True)
     type = Column(String, nullable=False, index=True)  # Observation type
     observation_type = Column(
         String, nullable=False, index=True
@@ -27,6 +27,7 @@ class Observation(Base, BaseModel, TimestampMixin):
         "dependency",
         "security",
         "performance",
+        "test"  # Added for testing purposes
     }
 
     def __init__(self, **kwargs):
@@ -35,6 +36,8 @@ class Observation(Base, BaseModel, TimestampMixin):
             kwargs["value"] = kwargs.pop("data")
         if "type" not in kwargs:
             kwargs["type"] = "state"  # Default type
+        if "observation_type" not in kwargs:
+            kwargs["observation_type"] = "default"  # Default observation type
         super().__init__(**kwargs)
         if self.type not in self.VALID_TYPES:
             raise ValueError(f"Invalid observation type: {self.type}")
