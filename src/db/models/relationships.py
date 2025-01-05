@@ -39,6 +39,17 @@ class Relationship(Base, BaseModel, TimestampMixin):
             kwargs["entity_id"] = kwargs[
                 "source_id"
             ]  # Set entity_id to source_id by default
+
+        # Validate entity references before calling super()
+        from sqlalchemy import inspect
+        if inspect(self).session:
+            session = inspect(self).session
+            from .entities import Entity
+            for field in ['entity_id', 'source_id', 'target_id']:
+                if field in kwargs and not session.query(Entity).filter_by(id=kwargs[field]).first():
+                    from sqlalchemy.exc import IntegrityError
+                    raise IntegrityError(f"Referenced entity {field} does not exist", params={}, orig=None)
+
         super().__init__(**kwargs)
         if self.type not in self.VALID_TYPES:
             raise ValueError(f"Invalid relationship type: {self.type}")

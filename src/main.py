@@ -31,22 +31,23 @@ async def create_server() -> FastMCP:
             "Infrastructure Memory Server",
             dependencies=[
                 "SQLAlchemy>=2.0.0",
-                "alembic>=1.13.0",
+                "alembic>=1.13.0", 
                 "cachetools>=5.0.0",
             ],
         )
 
         # Configure server with all components
-        configured_server = await configure_server(server)
+        server = await configure_server(server)
         
         # Initialize the server
-        await configured_server.initialize()
-        
-        # Add standard tool methods
-        configured_server.call_tool = configured_server.start_async_operation
+        await server.initialize()
+
+        # Add required methods
+        server.read_resource = server.get_resource
+        server.call_tool = server.start_async_operation
         
         logger.info("MCP server created and configured successfully")
-        return configured_server
+        return server
 
     except Exception as e:
         logger.error(f"Failed to create server: {str(e)}")

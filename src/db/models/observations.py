@@ -38,11 +38,20 @@ class Observation(Base, BaseModel, TimestampMixin):
             kwargs["type"] = "state"  # Default type
         if "observation_type" not in kwargs:
             kwargs["observation_type"] = "default"  # Default observation type
-            
+
         # Validate entity_id before calling super()
         if "entity_id" not in kwargs or not kwargs["entity_id"]:
             raise ValueError("entity_id is required")
-            
+
+        # Validate entity exists
+        from sqlalchemy import inspect
+        if inspect(self).session:
+            session = inspect(self).session
+            from .entities import Entity
+            if not session.query(Entity).filter_by(id=kwargs["entity_id"]).first():
+                from sqlalchemy.exc import IntegrityError
+                raise IntegrityError("Entity does not exist", params={}, orig=None)
+
         super().__init__(**kwargs)
         
         if self.type not in self.VALID_TYPES:
