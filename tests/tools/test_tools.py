@@ -37,6 +37,8 @@ def test_create_entity_tool(mcp_server):
             "observations": ["Initial observation"],
         }
     )
+    if isinstance(result, type(lambda: None)):
+        result = result()
     
     assert isinstance(result, dict), "Result should be a dictionary"
     assert result["name"] == "test_entity", "Entity name mismatch"

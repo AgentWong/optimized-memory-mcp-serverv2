@@ -20,7 +20,7 @@ from src.utils.errors import MCPError
 def test_server_info_endpoint(client):
     """Test server info matches Claude Desktop requirements"""
     # Get server info directly since initialize was called in fixture
-    result = client._mcp_server.get_server_info()
+    result = client._mcp_server.server_info
 
     # Verify required fields from initialize result
     assert result.serverInfo.name, "Server info missing 'name' field"
@@ -32,7 +32,7 @@ def test_resource_protocol(client):
     """Test resource URL protocol handling"""
     # Test valid resource with parameters
     resources = client._mcp_server.list_resources()
-    assert len(resources.resources) > 0, "No resources found"
+    assert len(resources) > 0, "No resources found"
 
     # Test reading a valid resource
     first_resource = resources.resources[0]
@@ -49,7 +49,7 @@ def test_tool_execution(client):
     """Test tool execution protocol"""
     # List available tools
     tools = client._mcp_server.list_tools()
-    assert len(tools.tools) > 0, "No tools found"
+    assert len(tools) > 0, "No tools found"
 
     # Test tool invocation with create_entity tool
     result = client.call_tool(
