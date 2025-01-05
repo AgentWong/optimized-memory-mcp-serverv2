@@ -163,19 +163,25 @@ def test_resource_pagination(mcp_server):
     # Create multiple test entities
     for i in range(5):
         mcp_server.call_tool(
-            "create_entity", {"name": f"test_entity_{i}", "entity_type": "test"}
+            "create_entity", 
+            {"name": f"test_entity_{i}", "entity_type": "test"}
         )
 
-    # Test pagination using query parameters
+    # Test pagination using query string
     result = mcp_server.read_resource("entities://list?page=1&per_page=2")
-    assert isinstance(result["data"], list)
-    assert len(result["data"]) <= 2, "Page size exceeded"
+    assert isinstance(result, dict)
+    assert isinstance(result.get("data"), list)
+    assert len(result.get("data", [])) <= 2, "Page size exceeded"
     assert "total" in result, "Missing total count"
     assert "pages" in result, "Missing total pages"
 
     # Verify next page
-    if len(result["data"]) == 2:
-        next_page = mcp_server.read_resource("entities://list", page=2, per_page=2)
-        assert isinstance(next_page["data"], list)
-        assert next_page["data"] != result["data"], "Pages should be different"
-        assert len(next_page["data"]) <= 2, "Page size exceeded"
+    if len(result.get("data", [])) == 2:
+        next_page = mcp_server.read_resource("entities://list", params={
+            "page": 2,
+            "per_page": 2
+        })
+        assert isinstance(next_page, dict)
+        assert isinstance(next_page.get("data"), list)
+        assert next_page.get("data") != result.get("data"), "Pages should be different"
+        assert len(next_page.get("data", [])) <= 2, "Page size exceeded"

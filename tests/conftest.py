@@ -144,24 +144,47 @@ def test_observation(db_session, test_entity):
 @pytest.fixture(autouse=True)
 def sync_mcp_server(mcp_server):
     """Wrap MCP server methods to return synchronous results."""
+    import asyncio
+    import json
+    from functools import wraps
+    
+    def make_sync(async_func):
+        def sync_wrapper(*args, **kwargs):
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                return loop.run_until_complete(async_func(*args, **kwargs))
+            finally:
+                loop.close()
+        return sync_wrapper
+
     # Store original async methods
     orig_call_tool = mcp_server.call_tool
     orig_read_resource = mcp_server.read_resource
     
-    # Replace with sync versions
+    # Replace with sync versions that handle results properly
     def sync_call_tool(*args, **kwargs):
-        import asyncio
-        return asyncio.run(orig_call_tool(*args, **kwargs))
+        result = make_sync(orig_call_tool)(*args, **kwargs)
+        if isinstance(result, (list, tuple)):
+            # Handle list of content objects
+            if len(result) == 1 and hasattr(result[0], 'text'):
+                return json.loads(result[0].text)
+            return result
+        return result
         
     def sync_read_resource(*args, **kwargs):
-        import asyncio
-        return asyncio.run(orig_read_resource(*args, **kwargs))
+        result = make_sync(orig_read_resource)(*args, **kwargs)
+        if isinstance(result, str):
+            try:
+                return json.loads(result)
+            except json.JSONDecodeError:
+                return result
+        return result
         
     # Patch the server
     mcp_server.call_tool = sync_call_tool
     mcp_server.read_resource = sync_read_resource
     mcp_server.execute_tool = sync_call_tool  # Alias for compatibility
-    mcp_server.get_resource = sync_read_resource  # Alias for compatibility
     
     return mcp_server
 
@@ -174,14 +197,30 @@ def mcp_server():
 @pytest.fixture
 def client(mcp_server):
     """Create MCP client connected to test server."""
-    # Create client parameters
+    import asyncio
+    
+    # Create synchronous client
     params = StdioServerParameters(
         command="python",
         args=["-m", "src.main"],
         env={"TESTING": "true", "LOG_LEVEL": "ERROR"}
     )
     
-    # Create synchronous client session
-    session = ClientSession.create_sync(params)
+    # Create sync client session
+    session = ClientSession(None, None)
+    
+    # Initialize synchronously using the make_sync helper
+    def make_sync(async_func):
+        def sync_wrapper(*args, **kwargs):
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                return loop.run_until_complete(async_func(*args, **kwargs))
+            finally:
+                loop.close()
+        return sync_wrapper
+    
+    # Initialize client synchronously
+    init_result = make_sync(session.initialize)()
     
     return session
