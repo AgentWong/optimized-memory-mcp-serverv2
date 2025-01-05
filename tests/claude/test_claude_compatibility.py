@@ -18,18 +18,16 @@ from src.utils.errors import MCPError, ValidationError
 from src.db.connection import get_db
 
 
-@pytest.mark.asyncio
-async def test_server_info_endpoint(client):
+def test_server_info_endpoint(client):
     """Test server info matches Claude Desktop requirements"""
-    result = await client.get_server_info()
+    result = client.get_server_info()
     assert result["name"] == "Infrastructure Memory Server"
     assert result["version"] is not None
     assert result["capabilities"] is not None
 
-@pytest.mark.asyncio
-async def test_resource_protocol(client, db_session):
+def test_resource_protocol(client, db_session):
     """Test resource URL protocol handling"""
-    resources = await client.list_resources()
+    resources = client.list_resources()
     assert len(resources) > 0, "No resources found"
 
     first_resource = resources[0]

@@ -55,11 +55,7 @@ def test_create_entity_tool(mcp_server):
     
     result = mcp_server.call_tool(
         "create_entity",
-        arguments={
-            "name": "test_entity",
-            "entity_type": "test",
-            "observations": ["Initial observation"]
-        }
+        {"name": "test_entity", "entity_type": "test", "observations": ["Initial observation"]}
     )
     
     assert isinstance(result, dict), "Result should be a dictionary"
@@ -74,8 +70,8 @@ def test_add_observation_tool(mcp_server):
     # Create entity first
     entity_result = mcp_server.call_tool(
         "create_entity", 
-        arguments={"name": "obs_test_entity", "entity_type": "test"}
-    )
+        {"name": "obs_test_entity", "entity_type": "test"}
+    ).__await__()
     entity_id = entity_result.get("id")
 
     # Test add_observation
@@ -98,12 +94,12 @@ def test_register_provider_tool(mcp_server):
     """Test register_provider_resource tool"""
     result = mcp_server.call_tool(
         "register_provider_resource",
-        arguments={
+        {
             "provider": "test_provider",
-            "resource_type": "test_resource",
+            "resource_type": "test_resource", 
             "schema_version": "1.0",
             "doc_url": "https://example.com/docs",
-        },
+        }
     )
 
     assert isinstance(result, dict), "Result should be a dictionary"
@@ -117,12 +113,12 @@ def test_register_ansible_module_tool(mcp_server):
     """Test register_ansible_module tool"""
     result = mcp_server.call_tool(
         "register_ansible_module",
-        arguments={
+        {
             "collection": "test.collection",
             "module": "test_module",
             "version": "1.0.0",
             "doc_url": "https://example.com/docs",
-        },
+        }
     )
 
     assert isinstance(result, dict), "Result should be a dictionary"
@@ -199,7 +195,7 @@ def test_tool_error_handling(mcp_server):
 
     # Test validation error - comprehensive field validation
     with pytest.raises(MCPError) as exc:
-        await mcp_server.call_tool(
+        mcp_server.call_tool(
             "create_entity", 
             arguments={"name": "a" * 256, "entity_type": "test"}  # Name too long
         )
