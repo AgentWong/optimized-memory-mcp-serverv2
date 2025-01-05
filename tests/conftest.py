@@ -1,4 +1,5 @@
 import os
+import inspect
 import pytest
 from sqlalchemy import create_engine
 from src.utils.errors import MCPError
@@ -271,16 +272,18 @@ async def mcp_server(db_session):
     server = await create_server()
     
     # Handle different types of server objects
-    if hasattr(server, "__anext__"):
-        server = await server.__anext__()
-    elif asyncio.iscoroutine(server):
+    if inspect.isawaitable(server):
         server = await server
-    elif asyncio.iscoroutinefunction(server):
-        server = await server()
-    elif asyncio.isasyncgen(server):
+    elif hasattr(server, "__anext__"):
+        server = await server.__anext__()
+    elif inspect.isasyncgen(server):
         async for s in server:
             server = s
             break
+            
+    # Ensure we have a valid server object
+    if not server or not hasattr(server, "initialize"):
+        raise RuntimeError("Failed to create valid server instance")
 
     try:
         # Ensure server is initialized

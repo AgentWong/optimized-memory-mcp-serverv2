@@ -41,17 +41,27 @@ async def create_server() -> FastMCP:
         # Configure server with all components
         server = await configure_server(server)
         
-        # Initialize server if needed
-        if hasattr(server, "initialize"):
-            await server.initialize()
-        
-        # Ensure we have a fully initialized server object
-        if asyncio.isasyncgen(server):
+        # Handle different server types and ensure initialization
+        if asyncio.iscoroutine(server):
+            server = await server
+        elif hasattr(server, "__anext__"):
+            server = await server.__anext__()
+        elif asyncio.isasyncgen(server):
             async for s in server:
                 server = s
                 break
-        elif asyncio.iscoroutine(server):
-            server = await server
+        elif inspect.isasyncgen(server):
+            async for s in server:
+                server = s
+                break
+
+        # Initialize server
+        if hasattr(server, "initialize"):
+            await server.initialize()
+        
+        # Verify we have a valid server
+        if not server or not hasattr(server, "read_resource"):
+            raise ConfigurationError("Failed to create valid server instance")
             
         logger.info("MCP server created and configured successfully")
         return server
