@@ -20,6 +20,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from src.main import create_server
+from src.utils.errors import MCPError
 from src.db.connection import get_db
 from src.db.models.base import Base
 
@@ -78,8 +79,8 @@ def test_entity_detail_resource(mcp_server, db_session):
 
     # Create test entity first
     result = mcp_server.call_tool(
-        "create_entity", {"name": "test_entity", "entity_type": "test"},
-        sync=True
+        "create_entity",
+        {"name": "test_entity", "entity_type": "test"}
     )
     entity_id = result["id"]
     assert entity_id, "No entity ID returned"

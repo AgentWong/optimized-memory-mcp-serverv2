@@ -53,14 +53,14 @@ def db_session():
 def test_create_entity_tool(mcp_server):
     """Test create_entity tool"""
     
-    result = mcp_server.send_request_sync("tools/call", {
-        "name": "create_entity",
-        "arguments": {
+    result = mcp_server.call_tool(
+        "create_entity",
+        arguments={
             "name": "test_entity",
             "entity_type": "test",
             "observations": ["Initial observation"]
         }
-    })
+    )
     
     assert isinstance(result, dict), "Result should be a dictionary"
     assert result["name"] == "test_entity", "Entity name mismatch"
@@ -73,14 +73,15 @@ def test_add_observation_tool(mcp_server):
     """Test add_observation tool"""
     # Create entity first
     entity_result = mcp_server.call_tool(
-        "create_entity", {"name": "obs_test_entity", "entity_type": "test"}
+        "create_entity", 
+        arguments={"name": "obs_test_entity", "entity_type": "test"}
     )
     entity_id = entity_result.get("id")
 
     # Test add_observation
     obs_result = mcp_server.call_tool(
         "add_observation",
-        {
+        arguments={
             "entity_id": entity_id,
             "type": "test",
             "observation_type": "test",
@@ -97,7 +98,7 @@ def test_register_provider_tool(mcp_server):
     """Test register_provider_resource tool"""
     result = mcp_server.call_tool(
         "register_provider_resource",
-        {
+        arguments={
             "provider": "test_provider",
             "resource_type": "test_resource",
             "schema_version": "1.0",
@@ -116,7 +117,7 @@ def test_register_ansible_module_tool(mcp_server):
     """Test register_ansible_module tool"""
     result = mcp_server.call_tool(
         "register_ansible_module",
-        {
+        arguments={
             "collection": "test.collection",
             "module": "test_module",
             "version": "1.0.0",
@@ -135,7 +136,7 @@ def test_tool_error_handling(mcp_server):
     """Test tool error handling"""
     # Test invalid tool
     with pytest.raises(MCPError) as exc:
-        mcp_server.call_tool("invalid_tool", {})
+        mcp_server.call_tool("invalid_tool", arguments={})
     assert exc.value.code == "TOOL_NOT_FOUND"
     assert "tool not found" in str(exc.value).lower()
     assert exc.value.details is not None
@@ -143,7 +144,8 @@ def test_tool_error_handling(mcp_server):
     # Test missing required arguments - comprehensive validation
     with pytest.raises(MCPError) as exc:
         mcp_server.call_tool(
-            "create_entity", {"invalid_arg": "value"}  # Missing required args
+            "create_entity", 
+            arguments={"invalid_arg": "value"}  # Missing required args
         )
     error = exc.value
     # Validate error code and message
@@ -155,11 +157,11 @@ def test_tool_error_handling(mcp_server):
     assert isinstance(error.details, dict), "Details should be a dictionary"
 
     # Validate missing fields
-    assert "missing_fields" in error.details, "Should list missing fields"
-    missing_fields = error.details["missing_fields"]
-    assert isinstance(missing_fields, list), "Missing fields should be a list"
-    assert "name" in missing_fields, "Should specify missing name field"
-    assert "entity_type" in missing_fields, "Should specify missing entity_type field"
+    assert "fields" in error.details, "Should include field details"
+    fields = error.details["fields"]
+    assert isinstance(fields, dict), "Fields should be a dictionary"
+    assert "name" in fields, "Should specify name field"
+    assert "entity_type" in fields, "Should specify entity_type field"
 
     # Validate error context
     assert "context" in error.details, "Should include error context"
@@ -197,8 +199,9 @@ def test_tool_error_handling(mcp_server):
 
     # Test validation error - comprehensive field validation
     with pytest.raises(MCPError) as exc:
-        mcp_server.call_tool(
-            "create_entity", {"name": "a" * 256, "entity_type": "test"}  # Name too long
+        await mcp_server.call_tool(
+            "create_entity", 
+            arguments={"name": "a" * 256, "entity_type": "test"}  # Name too long
         )
     error = exc.value
     # Validate error code and message
@@ -239,7 +242,7 @@ def test_tool_operation_status(mcp_server):
     # Execute tool
     result = mcp_server.call_tool(
         "create_entity",
-        {"name": "status_test", "entity_type": "test"}
+        arguments={"name": "status_test", "entity_type": "test"}
     )
 
     # Verify result structure

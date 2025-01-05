@@ -4,7 +4,7 @@ import anyio
 from sqlalchemy.exc import IntegrityError
 from src.db.models.base import Base
 import pytest
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from src.utils.errors import MCPError
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
@@ -46,8 +46,11 @@ def db_session():
     session = TestSession()
     session.execute(text("PRAGMA foreign_keys=ON"))
     
-    # Return session directly instead of yielding
-    return session
+    try:
+        yield session
+    finally:
+        session.rollback()
+        session.close()
 
 
 @pytest.fixture
@@ -119,30 +122,20 @@ def test_observation(db_session, test_entity):
 
 
 @pytest.fixture
-def mcp_server(db_session):
+def mcp_server():
     """Create MCP server instance for testing."""
-    server = create_server()
-    # Ensure server uses test db session
-    server._db_session = db_session
-    return server
+    return create_server()
 
 @pytest.fixture
-def client(mcp_server, db_session):
+async def client():
     """Create MCP client connected to test server."""
-    # Create test client using stdio parameters
-    params = StdioServerParameters(
+    server_params = StdioServerParameters(
         command="python",
         args=["-m", "src.main"],
-        env={"TESTING": "true", "LOG_LEVEL": "ERROR"}
+        env={"TESTING": "true"}
     )
     
-    # Create memory streams for testing
-    read_stream, write_stream = anyio.create_memory_object_stream(0)
-    
-    # Create client session
-    session = ClientSession(read_stream, write_stream)
-    session.send_request("initialize", {
-        "protocolVersion": "1.0",
-        "capabilities": {}
-    })
-    return session
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            yield session

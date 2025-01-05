@@ -53,7 +53,7 @@ def register_tools(mcp: FastMCP) -> None:
                     name=name,
                     entity_type=entity_type,
                     meta_data={},
-                    tags={}
+                    tags=[]
                 )
                 db.add(entity)
                 db.commit()

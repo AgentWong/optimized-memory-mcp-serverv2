@@ -118,7 +118,7 @@ def test_concurrent_modification_conflicts(mcp_server, db_session: Session):
     entity_id = result["id"]
 
     # Simulate concurrent modifications
-    session2 = next(get_db())
+    session2 = get_db()
     try:
         # Modify in first session
         entity = db_session.query(Entity).get(entity_id)
