@@ -31,17 +31,16 @@ def test_resource_protocol(client, db_session):
     assert len(resources) > 0, "No resources found"
 
     first_resource = resources[0]
-    content = await client.read_resource(first_resource.uri)
+    content = client.read_resource(first_resource.uri)
     assert content, "Resource read returned no content"
 
     with pytest.raises(MCPError) as exc:
         client.read_resource("invalid://test")
     assert "invalid resource" in str(exc.value).lower()
 
-@pytest.mark.asyncio
-async def test_tool_execution(client, db_session):
+def test_tool_execution(client, db_session):
     """Test tool execution protocol"""
-    tools = await client.list_tools()
+    tools = client.list_tools()
     assert len(tools) > 0, "No tools found"
 
     result = client.call_tool(
@@ -59,23 +58,20 @@ async def test_tool_execution(client, db_session):
         client.call_tool("invalid-tool", {"param": "test"})
     assert "unknown tool" in str(exc.value).lower()
 
-@pytest.mark.asyncio
-async def test_error_response_format(client):
+def test_error_response_format(client):
     """Test error responses match Claude Desktop expectations"""
     with pytest.raises(MCPError) as exc:
-        await client.read_resource("nonexistent://resource")
+        client.read_resource("nonexistent://resource")
     
     error = exc.value
     assert error.message, "Error missing message"
     assert error.code == "RESOURCE_NOT_FOUND"
 
-@pytest.mark.asyncio
-async def test_progress_notification(client):
+def test_progress_notification(client):
     """Test progress notification handling"""
-    await client.send_progress_notification("test-progress", 50, 100)
+    client.send_progress_notification("test-progress", 50, 100)
 
-@pytest.mark.asyncio
-async def test_ping(client):
+def test_ping(client):
     """Test ping functionality"""
-    result = await client.send_ping()
+    result = client.send_ping()
     assert result is not None
