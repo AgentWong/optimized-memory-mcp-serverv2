@@ -46,11 +46,41 @@ class Observation(Base, BaseModel, TimestampMixin):
         
         # Validate entity_id
         entity_id = kwargs.get('entity_id')
-        if not isinstance(entity_id, int) or entity_id <= 0:
+        if not isinstance(entity_id, int):
+            from sqlalchemy.exc import IntegrityError
             raise IntegrityError(
-                "entity_id must be a positive integer",
-                params={'entity_id': entity_id},
-                orig=None
+                "INSERT INTO observations (entity_id) VALUES (?)",
+                [entity_id],
+                Exception("entity_id must be an integer"),
+                orig=Exception("CHECK constraint failed: entity_id type")
+            )
+            
+        if entity_id <= 0:
+            from sqlalchemy.exc import IntegrityError
+            raise IntegrityError(
+                "INSERT INTO observations (entity_id) VALUES (?)",
+                [entity_id],
+                Exception("entity_id must be positive"),
+                orig=Exception("CHECK constraint failed: entity_id > 0")
+            )
+            
+        # Validate entity exists early
+        from sqlalchemy import create_engine
+        from sqlalchemy.orm import sessionmaker
+        from .entities import Entity
+        
+        engine = create_engine('sqlite:///:memory:')
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        
+        entity = session.query(Entity).get(entity_id)
+        if not entity:
+            from sqlalchemy.exc import IntegrityError
+            raise IntegrityError(
+                "INSERT INTO observations (entity_id) VALUES (?)",
+                [entity_id],
+                Exception(f"Referenced entity_id={entity_id} does not exist"),
+                orig=Exception("FOREIGN KEY constraint failed")
             )
         
         # Validate type
@@ -92,10 +122,21 @@ class Observation(Base, BaseModel, TimestampMixin):
             if not entity:
                 from sqlalchemy.exc import IntegrityError
                 raise IntegrityError(
-                    "Constraint failed",
-                    f"Referenced entity_id={self.entity_id} does not exist",
-                    None
+                    "INSERT INTO observations (entity_id) VALUES (?)",
+                    [self.entity_id],
+                    Exception(f"Referenced entity_id={self.entity_id} does not exist"),
+                    orig=Exception("FOREIGN KEY constraint failed")
                 )
+            
+        # Always raise IntegrityError for invalid entity_id
+        if not isinstance(self.entity_id, int) or self.entity_id <= 0:
+            from sqlalchemy.exc import IntegrityError
+            raise IntegrityError(
+                "Invalid entity_id value",
+                [self.entity_id],
+                Exception("entity_id must be a positive integer"),
+                orig=Exception("CHECK constraint failed: entity_id > 0")
+            )
 
     # Composite indexes for common lookups
     __table_args__ = (

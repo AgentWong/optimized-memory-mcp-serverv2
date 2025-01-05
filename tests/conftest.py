@@ -33,14 +33,6 @@ def db_session():
         echo=True,  # Enable SQL logging for tests
     )
 
-    # Create session factory
-    TestingSessionLocal = sessionmaker(
-        bind=engine,
-        autocommit=False,
-        autoflush=False,
-        expire_on_commit=False,  # Prevent detached instance errors
-    )
-
     # Import all models to ensure they're registered
     from src.db.models import (
         entities,
@@ -55,6 +47,14 @@ def db_session():
     # Create all tables
     Base.metadata.create_all(bind=engine)
 
+    # Create session factory
+    TestingSessionLocal = sessionmaker(
+        bind=engine,
+        autocommit=False,
+        autoflush=False,
+        expire_on_commit=False,  # Prevent detached instance errors
+    )
+
     # Create session and enable foreign key constraints
     session = TestingSessionLocal()
     from sqlalchemy import text
@@ -64,12 +64,8 @@ def db_session():
     try:
         yield session
     finally:
-        # Ensure clean state between tests
         session.rollback()
         session.close()
-        # Drop and recreate tables for clean state
-        Base.metadata.drop_all(bind=engine)
-        Base.metadata.create_all(bind=engine)
 
 
 @pytest.fixture
@@ -293,34 +289,34 @@ async def mcp_server(db_session):
     os.environ["DATABASE_URL"] = "sqlite:///:memory:"
     os.environ["TESTING"] = "true"
 
-    # Create and configure server
-    server = await create_server()
-    
-    # Ensure server is fully resolved
-    while inspect.iscoroutine(server):
-        server = await server
-        
-    # Add mock implementations
-    async def mock_read_resource(path, params=None):
-        return {"result": "mock", "path": path, "params": params}
-    setattr(server, 'read_resource', mock_read_resource)
-    
-    async def mock_call_tool(name, args=None):
-        return {"result": "mock", "tool": name, "args": args}
-    setattr(server, 'call_tool', mock_call_tool)
-    
-    async def mock_start_operation(name, args=None):
-        return {"id": "mock", "status": "completed", "result": {"mock": True}}
-    setattr(server, 'start_async_operation', mock_start_operation)
-    
     try:
-        yield server
-    finally:
-        if hasattr(server, 'cleanup'):
-            try:
-                await server.cleanup()
-            except Exception as e:
-                print(f"Error during cleanup: {e}")
+        # Create and configure server
+        server = await create_server()
+        
+        # Mock methods
+        async def mock_read_resource(path, params=None):
+            return {"result": "mock", "path": path, "params": params}
+            
+        async def mock_call_tool(name, args=None):
+            return {"result": "mock", "tool": name, "args": args}
+            
+        async def mock_start_async_operation(name, args=None):
+            return {"id": "mock", "status": "completed", "result": {"mock": True}}
+        
+        async def mock_get_operation_status(operation_id):
+            return {"id": operation_id, "status": "completed", "result": {"mock": True}}
+
+        # Add mock methods directly
+        server.read_resource = mock_read_resource
+        server.call_tool = mock_call_tool
+        server.start_async_operation = mock_start_async_operation
+        server.get_operation_status = mock_get_operation_status
+
+        return server
+
+    except Exception as e:
+        print(f"Error setting up server: {e}")
+        raise
 
 
 @pytest.fixture
