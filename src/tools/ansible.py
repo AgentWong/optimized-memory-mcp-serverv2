@@ -51,7 +51,6 @@ async def register_tools(mcp: FastMCP) -> list:
     """
 
     @mcp.tool()
-    @mcp.tool()
     def register_collection(
         namespace: str,
         name: str,
@@ -99,7 +98,6 @@ async def register_tools(mcp: FastMCP) -> list:
             db.rollback()
             raise DatabaseError(f"Failed to register collection: {str(e)}")
 
-    @mcp.tool()
     @mcp.tool()
     def add_version(
         collection_name: str,
