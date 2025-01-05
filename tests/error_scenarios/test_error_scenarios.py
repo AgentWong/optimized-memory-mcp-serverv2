@@ -55,13 +55,17 @@ async def test_database_constraint_violations(mcp_server, db_session: Session):
         "create_entity", arguments={"name": "unique_entity", "entity_type": "test"}
     )
     assert result is not None
+    assert "id" in result, "Result missing entity ID"
+    assert result["name"] == "unique_entity"
 
     # Attempt duplicate
     with pytest.raises(ValidationError) as exc:
         await mcp_server.call_tool(
             "create_entity", arguments={"name": "unique_entity", "entity_type": "test"}
         )
+    assert exc.value.code == "VALIDATION_ERROR"
     assert "already exists" in str(exc.value).lower()
+    assert "name" in exc.value.details, "Error details should specify field"
 
 
 @pytest.mark.asyncio
@@ -143,15 +147,47 @@ async def test_concurrent_modification_conflicts(mcp_server, db_session: Session
 @pytest.mark.asyncio
 async def test_invalid_tool_requests(mcp_server):
     """Test invalid tool request handling"""
-    if not hasattr(mcp_server, 'start_async_operation'):
-        pytest.skip("Server does not implement start_async_operation")
-        
+    # Test invalid tool name
     with pytest.raises(MCPError) as exc:
-        await mcp_server.start_async_operation(
+        await mcp_server.call_tool("nonexistent_tool", {})
+    assert exc.value.code == "TOOL_NOT_FOUND"
+    assert "tool not found" in str(exc.value).lower()
+
+    # Test missing required arguments
+    with pytest.raises(MCPError) as exc:
+        await mcp_server.call_tool(
             "create_entity",
             {"invalid": "data"}
         )
-    assert "invalid arguments" in str(exc.value).lower()
+    assert exc.value.code == "INVALID_ARGUMENTS"
+    assert "missing required argument" in str(exc.value).lower()
+
+    # Test malformed arguments
+    with pytest.raises(MCPError) as exc:
+        await mcp_server.call_tool(
+            "create_entity",
+            "not_a_dict"  # Invalid argument type
+        )
+    assert exc.value.code == "INVALID_ARGUMENTS" 
+    assert "invalid argument type" in str(exc.value).lower()
+
+    # Test invalid argument values
+    with pytest.raises(MCPError) as exc:
+        await mcp_server.call_tool(
+            "create_entity",
+            {"name": "", "entity_type": "test"}  # Empty name
+        )
+    assert exc.value.code == "VALIDATION_ERROR"
+    assert "invalid name" in str(exc.value).lower()
+
+    # Test argument type validation
+    with pytest.raises(MCPError) as exc:
+        await mcp_server.call_tool(
+            "create_entity",
+            {"name": 123, "entity_type": "test"}  # Name should be string
+        )
+    assert exc.value.code == "VALIDATION_ERROR"
+    assert "invalid argument type" in str(exc.value).lower()
 
 
 @pytest.mark.asyncio

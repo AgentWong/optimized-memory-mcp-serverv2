@@ -41,18 +41,14 @@ def db_session():
 
 @pytest.mark.asyncio
 async def test_entities_list_resource(mcp_server):
-    """Test entities://list resource"""
-    if not hasattr(mcp_server, 'read_resource'):
-        pytest.skip("Server does not implement read_resource")
-        
+    """Test entities://list resource using FastMCP"""
     result = await mcp_server.read_resource(
         "entities://list",
         {
             "page": 1,
             "per_page": 10,
             "type": None,
-            "created_after": None,
-            "ctx": {}
+            "created_after": None
         }
     )
     assert isinstance(result, dict), "Result should be a dictionary"
@@ -118,20 +114,54 @@ async def test_resource_error_handling(mcp_server):
     if not hasattr(mcp_server, 'read_resource'):
         pytest.skip("Server does not implement read_resource")
         
-    # Test invalid resource path
+    # Test invalid resource path - comprehensive validation
     with pytest.raises(MCPError) as exc:
         await mcp_server.read_resource("invalid://resource")
-    assert "not found" in str(exc.value).lower()
-    assert hasattr(exc.value, "code")
-    assert exc.value.code in ["RESOURCE_NOT_FOUND", "INVALID_RESOURCE"]
+    error = exc.value
+    # Validate error code and message
+    assert error.code in ["RESOURCE_NOT_FOUND", "INVALID_RESOURCE"], "Incorrect error code"
+    assert "not found" in str(error).lower(), "Wrong error message"
+    
+    # Validate error details structure
+    assert error.details is not None, "Error should include details"
+    assert isinstance(error.details, dict), "Details should be a dictionary"
+    
+    # Validate error context
+    assert "context" in error.details, "Should include error context"
+    assert "timestamp" in error.details["context"], "Should include error timestamp"
+    assert "resource_path" in error.details["context"], "Should specify resource path"
+    assert "request_id" in error.details["context"], "Should include request ID"
 
-    # Test invalid parameters
+    # Test invalid parameters - comprehensive validation
     with pytest.raises(MCPError) as exc:
         await mcp_server.read_resource(
             "entities://list",
             {"invalid_param": "value"}
         )
-    assert "invalid" in str(exc.value).lower()
+    error = exc.value
+    # Validate error code and message
+    assert error.code == "INVALID_PARAMETERS", "Incorrect error code"
+    assert "invalid" in str(error).lower(), "Wrong error message"
+    
+    # Validate error details structure
+    assert error.details is not None, "Error should include details"
+    assert isinstance(error.details, dict), "Details should be a dictionary"
+    
+    # Validate invalid parameters
+    assert "invalid_parameters" in error.details, "Should list invalid parameters"
+    invalid_params = error.details["invalid_parameters"]
+    assert isinstance(invalid_params, list), "Invalid parameters should be a list"
+    assert "invalid_param" in invalid_params, "Should specify invalid parameter"
+    
+    # Validate allowed parameters
+    assert "allowed_parameters" in error.details, "Should list allowed parameters"
+    assert isinstance(error.details["allowed_parameters"], list), "Allowed parameters should be a list"
+    
+    # Validate error context
+    assert "context" in error.details, "Should include error context"
+    assert "timestamp" in error.details["context"], "Should include error timestamp"
+    assert "resource_path" in error.details["context"], "Should specify resource path"
+    assert "provided_params" in error.details["context"], "Should list provided parameters"
 
 
 @pytest.mark.asyncio

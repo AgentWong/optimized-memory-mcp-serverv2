@@ -167,6 +167,7 @@ async def test_concurrent_transactions(mcp_server):
         {"name": "concurrent_test", "entity_type": "test"}
     )
     assert operation1["status"] == "completed", "First operation failed"
+    assert "result" in operation1, "Missing operation result"
     entity_id = operation1["result"]["id"]
     
     # Try concurrent modifications
@@ -179,13 +180,23 @@ async def test_concurrent_transactions(mcp_server):
             )
         )
     
+    # Wait for all operations to complete
+    for op in operations:
+        while op["status"] not in ["completed", "failed"]:
+            op_status = await mcp_server.get_operation_status(op["id"])
+            op.update(op_status)
+            await asyncio.sleep(0.1)  # Prevent tight loop
+    
     # At least one operation should fail with a concurrent modification error
     failed_ops = [op for op in operations if op["status"] == "failed"]
     assert len(failed_ops) > 0, "Expected at least one operation to fail due to concurrency"
     
     # Verify error contains concurrency information
     failed_op = failed_ops[0]
-    assert "concurrent modification" in str(failed_op.get("error", "")).lower()
+    assert "error" in failed_op, "Failed operation missing error details"
+    assert "concurrent modification" in str(failed_op["error"]).lower()
+    assert "details" in failed_op, "Failed operation missing error details"
+    assert "timestamp" in failed_op["details"], "Missing conflict timestamp"
 
 
 @pytest.mark.asyncio

@@ -141,7 +141,10 @@ class TestClient:
     """Test client for MCP server."""
 
     def __init__(self, server):
-        """Initialize test client with MCP server instance."""
+        """Initialize test client with FastMCP server instance."""
+        from mcp.server.fastmcp import FastMCP
+        if not isinstance(server, FastMCP):
+            raise TypeError("Server must be a FastMCP instance")
         self.server = server
 
     async def __aenter__(self):
@@ -288,24 +291,6 @@ class TestClient:
         return await self.server.end_session(session_id)
 
 
-# Mock async functions
-async def async_mock_create_session():
-    return {"id": "mock-session", "status": "active"}
-
-async def async_mock_end_session(session_id):
-    return True
-
-async def async_mock_read_resource(path, params=None):
-    return {"result": "mock", "path": path, "params": params}
-    
-async def async_mock_call_tool(name, args=None):
-    return {"result": "mock", "tool": name, "args": args}
-    
-async def async_mock_start_async_operation(name, args=None):
-    return {"id": "mock", "status": "completed", "result": {"mock": True}}
-
-async def async_mock_get_operation_status(operation_id):
-    return {"id": operation_id, "status": "completed", "result": {"mock": True}}
 
 @pytest.fixture
 async def mcp_server():
@@ -322,19 +307,10 @@ async def mcp_server():
         if inspect.iscoroutine(server):
             server = await server
             
-        # Add mock methods
-        mock_methods = {
-            'read_resource': async_mock_read_resource,
-            'call_tool': async_mock_call_tool,
-            'start_async_operation': async_mock_start_async_operation,
-            'get_operation_status': async_mock_get_operation_status,
-            'create_session': async_mock_create_session,
-            'end_session': async_mock_end_session
-        }
-        
-        # Force attach all mock methods
-        for name, method in mock_methods.items():
-            setattr(server, name, method)
+        # Verify server is FastMCP instance
+        from mcp.server.fastmcp import FastMCP
+        if not isinstance(server, FastMCP):
+            raise TypeError("Server must be a FastMCP instance")
             
         init_options = server.get_initialization_options()
         if inspect.iscoroutine(init_options):

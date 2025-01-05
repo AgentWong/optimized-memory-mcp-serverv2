@@ -53,18 +53,46 @@ def test_base_model_to_dict(db_session: Session):
 
 
 def test_model_validation(db_session: Session):
-    """Test model field validation"""
-    # Test required fields
-    with pytest.raises(Exception):
-        entity = Entity(type="test_type")  # Missing name
+    """Test comprehensive model field validation"""
+    # Test required fields with detailed validation
+    with pytest.raises(IntegrityError) as exc:
+        entity = Entity(entity_type="test_type")  # Missing name
         db_session.add(entity)
         db_session.commit()
+    error = str(exc.value)
+    assert "NOT NULL constraint failed" in error, "Wrong error message"
+    assert "name" in error.lower(), "Error should mention missing field"
+    db_session.rollback()
 
-    # Test field length limits
-    with pytest.raises(Exception):
-        entity = Entity(name="x" * 256, type="test_type")  # Exceeds max length
+    # Test field length limits with comprehensive validation
+    with pytest.raises(ValidationError) as exc:
+        entity = Entity(name="x" * 256, entity_type="test_type")  # Exceeds max length
         db_session.add(entity)
         db_session.commit()
+    error = exc.value
+    # Validate error code and message
+    assert error.code == "VALIDATION_ERROR", "Incorrect error code"
+    assert "length" in str(error).lower(), "Error should mention length"
+    
+    # Validate error details structure
+    assert error.details is not None, "Error should include details"
+    assert isinstance(error.details, dict), "Details should be a dictionary"
+    
+    # Validate field-specific details
+    assert "name" in error.details, "Should specify invalid field"
+    field_error = error.details["name"]
+    assert isinstance(field_error, dict), "Field error should be a dictionary"
+    assert "max_length" in field_error, "Should specify length limit"
+    assert field_error["max_length"] == 255, "Should specify correct length limit"
+    assert "current_length" in field_error, "Should specify current length"
+    assert field_error["current_length"] == 256, "Should specify correct current length"
+    
+    # Validate error context
+    assert "context" in error.details, "Should include error context"
+    assert "timestamp" in error.details["context"], "Should include error timestamp"
+    assert "field" in error.details["context"], "Should specify affected field"
+    assert "constraint" in error.details["context"], "Should specify violated constraint"
+    db_session.rollback()
 
     # Test JSON field validation
     with pytest.raises(Exception):
@@ -161,17 +189,29 @@ from src.db.models.entities import Entity
 from src.db.connection import get_db
 
 
-def test_entity_creation():
+@pytest.mark.asyncio
+async def test_entity_creation(db_session, mcp_server):
     """Test basic entity creation and validation."""
-    with next(get_db()) as db:
-        entity = Entity(name="test_entity", entity_type="test_type", meta_data={})
-        db.add(entity)
-        db.commit()
-
-        assert entity.id is not None
-        assert entity.name == "test_entity"
-        assert entity.entity_type == "test_type"
-        assert entity.meta_data == {}
+    # Create entity through MCP tool
+    result = await mcp_server.call_tool(
+        "create_entity",
+        {
+            "name": "test_entity",
+            "entity_type": "test_type",
+            "meta_data": {}
+        }
+    )
+    
+    # Verify result
+    assert result["id"] is not None
+    assert result["name"] == "test_entity"
+    assert result["entity_type"] == "test_type"
+    assert result["meta_data"] == {}
+    
+    # Verify database state
+    entity = db_session.query(Entity).filter_by(id=result["id"]).first()
+    assert entity is not None
+    assert entity.name == "test_entity"
 
 
 def test_entity_required_fields():
@@ -186,12 +226,32 @@ def test_entity_required_fields():
         assert entity.tags == []
 
 
-def test_entity_timestamps():
+@pytest.mark.asyncio
+async def test_entity_timestamps(db_session, mcp_server):
     """Test that timestamps are automatically set."""
-    with next(get_db()) as db:
-        entity = Entity(name="test_entity", entity_type="test_type")
-        db.add(entity)
-        db.commit()
-
-        assert entity.created_at is not None
-        assert entity.updated_at is not None
+    # Create entity
+    result = await mcp_server.call_tool(
+        "create_entity",
+        {"name": "test_entity", "entity_type": "test_type"}
+    )
+    
+    # Verify timestamps in result
+    assert "created_at" in result
+    assert "updated_at" in result
+    assert result["created_at"] is not None
+    assert result["updated_at"] is not None
+    
+    # Verify database timestamps
+    entity = db_session.query(Entity).filter_by(id=result["id"]).first()
+    assert entity.created_at is not None
+    assert entity.updated_at is not None
+    
+    # Update entity
+    await mcp_server.call_tool(
+        "update_entity",
+        {"id": result["id"], "name": "updated_name"}
+    )
+    
+    # Verify updated_at changed
+    updated_entity = db_session.query(Entity).filter_by(id=result["id"]).first()
+    assert updated_entity.updated_at > entity.updated_at
