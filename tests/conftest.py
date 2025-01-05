@@ -323,15 +323,28 @@ async def mcp_server():
         # Create and initialize server
         server = await create_server()
         
-        # Initialize with options if needed
+        # Handle nested coroutines
+        while inspect.iscoroutine(server):
+            server = await server
+            
+        # Initialize if needed
         if not getattr(server, '_initialized', False):
             init_options = server.get_initialization_options()
             await server.initialize(init_options)
             
+        # Verify we have a proper FastMCP instance
+        if not isinstance(server, FastMCP):
+            raise TypeError(f"Expected FastMCP instance, got {type(server)}")
+            
+        # Return the initialized server
         return server
-    finally:
+    except Exception as e:
         if server:
-            await server.cleanup()
+            try:
+                await server.cleanup()
+            except Exception as cleanup_error:
+                print(f"Error during cleanup after error: {cleanup_error}")
+        raise
 
 
 @pytest.fixture
