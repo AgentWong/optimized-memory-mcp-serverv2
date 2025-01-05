@@ -232,7 +232,7 @@ def test_entity_required_fields():
 async def test_entity_timestamps(db_session, mcp_server):
     """Test that timestamps are automatically set."""
     # Create entity
-    result = await mcp_server.call_tool(
+    result = mcp_server.call_tool(
         "create_entity", {"name": "test_entity", "entity_type": "test_type"}
     )
 
@@ -248,7 +248,7 @@ async def test_entity_timestamps(db_session, mcp_server):
     assert entity.updated_at is not None
 
     # Update entity
-    await mcp_server.call_tool(
+    mcp_server.call_tool(
         "update_entity", {"id": result["id"], "name": "updated_name"}
     )
 

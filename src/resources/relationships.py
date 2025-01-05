@@ -56,7 +56,7 @@ def register_resources(mcp: FastMCP) -> None:
                 query = query.filter(Relationship.type == relationship_type)
 
             relationships = query.all()
-            await ctx.info(f"Listed {len(relationships)} relationships")
+            ctx.info(f"Listed {len(relationships)} relationships")
             return [
                 {
                     "id": r.id,

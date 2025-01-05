@@ -9,6 +9,7 @@ import logging
 import signal
 import time
 from typing import Optional
+import asyncio
 from mcp.server.fastmcp import FastMCP
 from .utils.logging import configure_logging
 from .db.init_db import init_db
@@ -100,10 +101,10 @@ def create_server() -> FastMCP:
 
         for module in tool_modules:
             tools = module.register_tools(mcp)  # Store returned tools
+            if isinstance(tools, (asyncio.Future, asyncio.coroutine)):
+                tools = await tools
 
-        # Return the configured server without running it
-        if isinstance(mcp, (asyncio.Future, asyncio.coroutine)):
-            return FastMCP("Infrastructure Memory Server")
+        # Return the configured server
         return mcp
     except Exception as e:
         raise MCPError(f"Failed to create server: {str(e)}")
@@ -208,8 +209,8 @@ def main() -> None:
                     f"Registering tools from {module.__name__} ({i}/{len(tool_modules)})"
                 )
                 tools = module.register_tools(mcp)
-                if isinstance(tools, (asyncio.Future, asyncio.coroutine)):
-                    tools = []  # Skip async results
+                if not tools:
+                    tools = []  # Handle empty results
 
                 if tools:
                     # Validate each tool

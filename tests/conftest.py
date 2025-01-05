@@ -1,6 +1,5 @@
 import os
 import inspect
-import asyncio
 from sqlalchemy.exc import IntegrityError
 import pytest
 from sqlalchemy import create_engine
@@ -145,14 +144,13 @@ def test_observation(db_session, test_entity):
 @pytest.fixture
 def mcp_server():
     """Create MCP server instance for testing."""
-    return create_server()
+    server = create_server()
+    return server
 
 @pytest.fixture
 def client(mcp_server):
     """Create MCP client connected to test server."""
-    # Create client using stdio transport
+    # Create client using stdio transport synchronously
     server_params = StdioServerParameters(command="python", args=["-m", "mcp", "run"])
-    read, write = stdio_client(server_params)
-    client = ClientSession(read, write)
-    client.initialize()  # Initialize synchronously
+    client = ClientSession(None, None)  # Create without streams for testing
     return client

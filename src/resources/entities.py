@@ -28,7 +28,7 @@ def register_resources(mcp: FastMCP) -> None:
     @mcp.resource(
         "entities://list?page={page}&per_page={per_page}&type={type}&created_after={created_after}&ctx={ctx}"
     )
-    def list_entities(
+    async def list_entities(
         ctx: Context,
         page: str = "null",
         per_page: str = "null",
@@ -92,7 +92,7 @@ def register_resources(mcp: FastMCP) -> None:
             # Check cache
             cached_result = get_cached(cache_key)
             if cached_result:
-                await ctx.info(
+                ctx.info(
                     "Retrieved entity list from cache",
                     details={"cache_key": cache_key, "params": cache_params},
                 )
@@ -123,7 +123,7 @@ def register_resources(mcp: FastMCP) -> None:
             total_pages = (total + items_per_page - 1) // items_per_page
 
             # Log via MCP context with query details
-            await ctx.info(
+            ctx.info(
                 f"Listed {len(entities)} entities (page {page}/{total_pages})",
                 details={
                     "type_filter": type,
@@ -147,7 +147,7 @@ def register_resources(mcp: FastMCP) -> None:
         except ValidationError:
             raise
         except Exception as e:
-            await ctx.error(f"Database error while listing entities: {str(e)}")
+            ctx.error(f"Database error while listing entities: {str(e)}")
             raise DatabaseError(
                 "Failed to list entities",
                 details={
@@ -157,7 +157,7 @@ def register_resources(mcp: FastMCP) -> None:
             )
 
     @mcp.resource("entities://{id}?include={include}&ctx={ctx}")
-    def get_entity(
+    async def get_entity(
         ctx: Context, id: str, include: str = "null"
     ) -> Dict[str, Any]:
         """Get details for a specific entity with optional related data.
@@ -206,7 +206,7 @@ def register_resources(mcp: FastMCP) -> None:
         cache_key = generate_cache_key("entity", id, include=include)
         cached_result = get_cached(cache_key)
         if cached_result:
-            await ctx.info(f"Retrieved entity {id} from cache")
+            ctx.info(f"Retrieved entity {id} from cache")
             return cached_result
 
         # Get database session
@@ -235,7 +235,7 @@ def register_resources(mcp: FastMCP) -> None:
             result["observation_count"] = len(entity.observations)
 
             # Log access via MCP context with details
-            await ctx.info(
+            ctx.info(
                 f"Retrieved entity {id}",
                 details={
                     "type": entity.entity_type,
