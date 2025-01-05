@@ -50,7 +50,7 @@ class Observation(Base, BaseModel, TimestampMixin):
             from .entities import Entity
             if not session.query(Entity).filter_by(id=kwargs["entity_id"]).first():
                 from sqlalchemy.exc import IntegrityError
-                raise IntegrityError("Entity does not exist", params={}, orig=None)
+                raise IntegrityError("Referenced entity does not exist", params={"entity_id": kwargs["entity_id"]}, orig=None)
 
         super().__init__(**kwargs)
         

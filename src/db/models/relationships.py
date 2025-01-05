@@ -48,7 +48,9 @@ class Relationship(Base, BaseModel, TimestampMixin):
             for field in ['entity_id', 'source_id', 'target_id']:
                 if field in kwargs and not session.query(Entity).filter_by(id=kwargs[field]).first():
                     from sqlalchemy.exc import IntegrityError
-                    raise IntegrityError(f"Referenced entity {field} does not exist", params={}, orig=None)
+                    raise IntegrityError(f"Referenced entity {field} does not exist", 
+                                       params={field: kwargs[field]}, 
+                                       orig=None)
 
         super().__init__(**kwargs)
         if self.type not in self.VALID_TYPES:
