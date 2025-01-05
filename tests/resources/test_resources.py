@@ -41,10 +41,7 @@ def db_session():
 
 def test_entities_list_resource(mcp_server):
     """Test entities://list resource using FastMCP"""
-    result = mcp_server.read_resource(
-        "entities://list",
-        {"page": 1, "per_page": 10, "type": None, "created_after": None},
-    )
+    result = mcp_server.read_resource("entities://list")
     assert isinstance(result, dict), "Result should be a dictionary"
     assert "data" in result, "Result missing 'data' field"
     assert isinstance(result["data"], list), "Data should be a list"

@@ -28,9 +28,6 @@ def db_session():
 
 def test_create_entity_tool(mcp_server):
     """Test create_entity tool"""
-    # Ensure server is initialized
-    if not hasattr(mcp_server, "_initialized") or not mcp_server._initialized:
-        mcp_server.initialize()
     
     result = mcp_server.call_tool(
         "create_entity",

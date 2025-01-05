@@ -150,5 +150,4 @@ def mcp_server():
 @pytest.fixture
 def client(mcp_server):
     """Create MCP client connected to test server."""
-    mcp_server.initialize()  # Initialize synchronously
     return mcp_server

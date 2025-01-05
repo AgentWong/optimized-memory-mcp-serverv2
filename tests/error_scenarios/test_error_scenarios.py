@@ -51,7 +51,7 @@ def test_database_constraint_violations(mcp_server, db_session: Session):
     """Test database constraint violation handling"""
     # Test duplicate entity name
     result = mcp_server.call_tool(
-        "create_entity", arguments={"name": "unique_entity", "entity_type": "test"}
+        "create_entity", {"name": "unique_entity", "entity_type": "test"}
     )
     assert result is not None
     assert "id" in result, "Result missing entity ID"
