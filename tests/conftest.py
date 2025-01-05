@@ -145,16 +145,6 @@ class TestClient:
         """Initialize test client with FastMCP server instance."""
         from mcp.server.fastmcp import FastMCP
 
-        # If we got a coroutine, we need to await it
-        if inspect.iscoroutine(server):
-            raise TypeError(
-                "Server must be an initialized FastMCP instance, not a coroutine"
-            )
-        if inspect.isasyncgen(server):
-            raise TypeError(
-                "Server must be an initialized FastMCP instance, not an async generator"
-            )
-
         if not isinstance(server, FastMCP):
             raise TypeError(f"Server must be a FastMCP instance, got {type(server)}")
 
@@ -332,17 +322,29 @@ async def mcp_server():
     try:
         # Create and initialize server
         server = await create_server()
+        if not isinstance(server, FastMCP):
+            raise TypeError(f"Expected FastMCP instance, got {type(server)}")
 
         # Initialize if needed
         if not getattr(server, "_initialized", False):
             init_options = server.get_initialization_options()
             await server.initialize(init_options)
 
-        # Verify we have a proper FastMCP instance
-        if not isinstance(server, FastMCP):
-            raise TypeError(f"Expected FastMCP instance, got {type(server)}")
+        yield server
 
-        return server
+        # Cleanup
+        if server:
+            try:
+                await server.cleanup()
+            except Exception as e:
+                print(f"Error during server cleanup: {e}")
+    except Exception as e:
+        if server:
+            try:
+                await server.cleanup()
+            except Exception as cleanup_error:
+                print(f"Error during cleanup after error: {cleanup_error}")
+        raise
     except Exception as e:
         if server:
             try:
