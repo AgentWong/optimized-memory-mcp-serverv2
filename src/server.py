@@ -113,9 +113,6 @@ async def configure_server(server: FastMCP) -> FastMCP:
             except Exception as e:
                 logger.error(f"Failed to register tools from {module.__name__}: {str(e)}")
                 raise ConfigurationError(f"Tool registration failed: {str(e)}")
-        except Exception as e:
-            logger.error(f"Failed to register tools: {str(e)}")
-            raise ConfigurationError(f"Tool registration failed: {str(e)}")
 
         # Verify tool registration
         tools = await server.list_tools()
