@@ -64,6 +64,7 @@ class Relationship(Base, BaseModel, TimestampMixin):
                         params={field: value},
                         orig=None
                     )
+            session.flush()  # Ensure integrity check is performed
 
     # Composite indexes for common lookups and traversals
     __table_args__ = (

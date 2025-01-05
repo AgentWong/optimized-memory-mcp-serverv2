@@ -58,6 +58,7 @@ class Observation(Base, BaseModel, TimestampMixin):
                     params={"entity_id": self.entity_id},
                     orig=None
                 )
+            session.flush()  # Ensure integrity check is performed
         
         if self.type not in self.VALID_TYPES:
             raise ValueError(f"Invalid observation type: {self.type}")

@@ -33,23 +33,23 @@ async def create_server() -> Server:
         server = Server("Infrastructure Memory Server")
 
         # Configure server with all components
-        server = await configure_server(server)
+        configured_server = await configure_server(server)
 
         # Set up initialization options
         init_options = InitializationOptions(
             server_name="Infrastructure Memory Server",
             server_version="1.0.0",
-            capabilities=server.get_capabilities(
+            capabilities=configured_server.get_capabilities(
                 notification_options=NotificationOptions(),
                 experimental_capabilities={}
             )
         )
 
         # Initialize the server
-        await server.initialize(init_options)
+        await configured_server.initialize(init_options)
             
         logger.info("MCP server created and configured successfully")
-        return server
+        return configured_server
 
     except Exception as e:
         logger.error(f"Failed to create server: {str(e)}")
