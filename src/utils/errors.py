@@ -4,17 +4,17 @@ from datetime import datetime
 from typing import Any
 
 # Standard MCP error codes
-RESOURCE_NOT_FOUND = "resource_not_found"
-TOOL_NOT_FOUND = "tool_not_found"
-INVALID_RESOURCE = "invalid_resource" 
-INVALID_ARGUMENTS = "invalid_arguments"
-ENTITY_CREATE_ERROR = "entity_create_error"
-DB_CONSTRAINT_ERROR = "db_constraint_error"
-DB_TIMEOUT_ERROR = "db_timeout_error"
-VALIDATION_ERROR = "validation_error"
-CONFIGURATION_ERROR = "configuration_error"
-INTERNAL_ERROR = "internal_error"
-CONCURRENT_MODIFICATION = "concurrent_modification"
+RESOURCE_NOT_FOUND = "RESOURCE_NOT_FOUND"
+TOOL_NOT_FOUND = "TOOL_NOT_FOUND"
+INVALID_RESOURCE = "INVALID_RESOURCE" 
+INVALID_ARGUMENTS = "INVALID_ARGUMENTS"
+ENTITY_CREATE_ERROR = "ENTITY_CREATE_ERROR"
+DB_CONSTRAINT_ERROR = "DB_CONSTRAINT_ERROR"
+DB_TIMEOUT_ERROR = "DB_TIMEOUT_ERROR"
+VALIDATION_ERROR = "VALIDATION_ERROR"
+CONFIGURATION_ERROR = "CONFIGURATION_ERROR"
+INTERNAL_ERROR = "INTERNAL_ERROR"
+CONCURRENT_MODIFICATION = "CONCURRENT_MODIFICATION"
 
 class MCPError(Exception):
     """Base exception for MCP server errors."""

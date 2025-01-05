@@ -86,11 +86,12 @@ def cache_query(ttl_seconds: int = 300):
     return decorator
 
 
-def get_db() -> Session:
+@contextmanager
+def get_db() -> Generator[Session, None, None]:
     """Get a database session with proper error handling.
     
     Returns:
-        Session: An active database session that must be closed by the caller
+        Session: An active database session that will be automatically closed
         
     Raises:
         DatabaseError: With standardized error codes for:
@@ -107,7 +108,7 @@ def get_db() -> Session:
         db.execute(text("SET idle_in_transaction_session_timeout = :timeout"),
                   {"timeout": IDLE_IN_TRANSACTION_TIMEOUT})
     try:
-        return db
+        yield db
     except IntegrityError as e:
         db.rollback()
         raise DatabaseError(f"Database constraint violation: {str(e)}", 

@@ -126,11 +126,12 @@ class SyncMCPServer:
         try:
             tool = self._server._tool_manager.get_tool(name)
             if not tool:
-                raise MCPError(f"Unknown tool: {name}", code="tool_not_found")
+                raise MCPError(f"Unknown tool: {name}", code="TOOL_NOT_FOUND")
             
             if arguments is None:
                 arguments = {}
-                
+            
+            # Run synchronously
             result = tool.run(arguments, context=None)
             
             # Handle TextContent wrapper

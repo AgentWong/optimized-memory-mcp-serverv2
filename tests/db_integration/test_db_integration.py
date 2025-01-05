@@ -155,12 +155,9 @@ def test_ansible_collection_relationships(db_session: Session):
     )
 
 
-def test_concurrent_transactions(mcp_server):
+def test_concurrent_transactions(mcp_server, db_session):
     """Test concurrent database operations"""
-    if not hasattr(mcp_server, "start_operation"):
-        pytest.skip("Server does not implement start_operation")
-
-    # Create initial entity through first operation
+    # Create initial entity
     result = mcp_server.call_tool(
         "create_entity", {"name": "concurrent_test", "entity_type": "test"}
     )
@@ -168,34 +165,32 @@ def test_concurrent_transactions(mcp_server):
     assert "id" in result, "Missing operation result"
     entity_id = result["id"]
 
-    # Try concurrent modifications
-    operations = []
-    for i in range(3):  # Try multiple concurrent updates
-        operations.append(
-            mcp_server.start_operation(
-                "update_entity", {"id": entity_id, "name": f"modified_concurrent_{i}"}
-            )
-        )
-
-    # Wait for all operations to complete
-    for op in operations:
-        while op["status"] not in ["completed", "failed"]:
-            op_status = mcp_server.get_operation_status(op["id"])
-            op.update(op_status)
-            time.sleep(0.1)  # Add small delay to prevent tight loop
-
-    # At least one operation should fail with a concurrent modification error
-    failed_ops = [op for op in operations if op["status"] == "failed"]
-    assert (
-        len(failed_ops) > 0
-    ), "Expected at least one operation to fail due to concurrency"
-
-    # Verify error contains concurrency information
-    failed_op = failed_ops[0]
-    assert "error" in failed_op, "Failed operation missing error details"
-    assert "concurrent modification" in str(failed_op["error"]).lower()
-    assert "details" in failed_op, "Failed operation missing error details"
-    assert "timestamp" in failed_op["details"], "Missing conflict timestamp"
+    # Create second session for concurrent access
+    session2 = next(get_db())
+    try:
+        # Modify in first session
+        entity1 = db_session.query(Entity).get(entity_id)
+        entity1.name = "modified_1"
+        
+        # Modify in second session
+        entity2 = session2.query(Entity).get(entity_id)
+        entity2.name = "modified_2"
+        
+        # Commit first session
+        db_session.commit()
+        
+        # Second commit should fail
+        with pytest.raises(DatabaseError) as exc:
+            session2.commit()
+        
+        error = exc.value
+        assert error.code == "CONCURRENT_MODIFICATION"
+        assert "concurrent modification" in str(error).lower()
+        assert error.details is not None
+        assert "timestamp" in error.details
+    finally:
+        session2.rollback()
+        session2.close()
 
 
 def test_database_cleanup(mcp_server, db_session):
