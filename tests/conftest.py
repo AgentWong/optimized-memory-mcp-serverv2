@@ -283,14 +283,10 @@ async def mcp_server(db_session):
     # Create and configure server
     server = await create_server()
     
-    # Initialize if needed
-    if hasattr(server, 'initialize'):
-        await server.initialize()
-    
     # Verify required methods exist
     required_methods = [
         'read_resource',
-        'call_tool',
+        'call_tool', 
         'start_async_operation',
         'get_operation_status'
     ]
@@ -298,7 +294,7 @@ async def mcp_server(db_session):
     for method in required_methods:
         if not hasattr(server, method):
             raise RuntimeError(f"Server missing required method: {method}")
-    
+
     try:
         yield server
     finally:
