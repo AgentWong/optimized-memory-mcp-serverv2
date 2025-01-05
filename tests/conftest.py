@@ -27,10 +27,7 @@ def db_session():
     # Use in-memory SQLite for tests
     engine = create_engine(
         "sqlite:///:memory:",
-        connect_args={
-            "check_same_thread": False,
-            "foreign_keys": True  # Enable foreign key support
-        },
+        connect_args={"check_same_thread": False},
         poolclass=StaticPool,
         echo=True,  # Enable SQL logging for tests
     )
@@ -284,6 +281,8 @@ async def mcp_server(db_session):
 
     # Create and configure server
     server = await create_server()
+    if hasattr(server, 'initialize'):
+        await server.initialize()
     
     # Initialize the server
     await server.initialize()
