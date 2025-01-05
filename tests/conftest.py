@@ -269,12 +269,23 @@ async def mcp_server(db_session):
 
     # Create and configure server
     server = await create_server()
+    
+    # Handle different types of server objects
     if hasattr(server, "__anext__"):
         server = await server.__anext__()
     elif asyncio.iscoroutine(server):
         server = await server
+    elif asyncio.iscoroutinefunction(server):
+        server = await server()
+    elif asyncio.isasyncgen(server):
+        async for s in server:
+            server = s
+            break
 
     try:
+        # Ensure server is initialized
+        if hasattr(server, "initialize"):
+            await server.initialize()
         yield server
     finally:
         # Cleanup
