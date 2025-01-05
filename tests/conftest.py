@@ -309,20 +309,44 @@ class TestClient:
 
 
 @pytest.fixture(scope="function")
-async def mcp_server(event_loop):
-    """Create MCP server instance for testing using FastMCP's test support."""
+async def mcp_server():
+    """Create MCP server instance for testing."""
     from src.main import create_server
     from mcp.server.fastmcp import FastMCP
-    from mcp.testing import create_test_server
 
     # Use in-memory database for tests
     os.environ["DATABASE_URL"] = "sqlite:///:memory:"
     os.environ["TESTING"] = "true"
 
-    async with create_test_server(create_server) as server:
+    server = None
+    try:
+        # Create and initialize server
+        server = await create_server()
         if not isinstance(server, FastMCP):
             raise TypeError(f"Expected FastMCP instance, got {type(server)}")
+
+        # Initialize if needed
+        if not getattr(server, "_initialized", False):
+            init_options = server.get_initialization_options()
+            await server.initialize(init_options)
+            setattr(server, "_initialized", True)
+
         yield server
+
+        # Cleanup after yield
+        if server:
+            try:
+                await server.cleanup()
+            except Exception as e:
+                print(f"Error during cleanup: {e}")
+
+    except Exception as e:
+        if server:
+            try:
+                await server.cleanup()
+            except Exception as cleanup_error:
+                print(f"Error during cleanup after error: {cleanup_error}")
+        raise
 
 
 @pytest.fixture
