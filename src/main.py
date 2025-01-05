@@ -43,38 +43,49 @@ def register_tools(mcp: FastMCP) -> None:
     @mcp.tool()
     def create_entity(name: str, entity_type: str, observations: list[str] = None) -> dict:
         """Create a new entity."""
-        with get_db() as db:
-            entity = Entity(
-                name=name,
-                entity_type=entity_type,
-                meta_data={},
-                tags={}
-            )
-            db.add(entity)
-            db.commit()
-            db.refresh(entity)
-            
-            # Add initial observations if provided
-            if observations:
-                for obs in observations:
-                    observation = Observation(
-                        entity_id=entity.id,
-                        type="initial",
-                        observation_type="note", 
-                        value={"text": obs},
-                        meta_data={}
-                    )
-                    db.add(observation)
+        try:
+            with get_db() as db:
+                entity = Entity(
+                    name=name,
+                    entity_type=entity_type,
+                    meta_data={},
+                    tags={}
+                )
+                db.add(entity)
                 db.commit()
-            
-            return {
-                "id": str(entity.id),  # Convert to string to match test expectations
-                "name": entity.name,
-                "entity_type": entity.entity_type,
-                "created_at": entity.created_at.isoformat(),
-                "updated_at": entity.updated_at.isoformat(),
-                "meta_data": entity.meta_data
-            }
+                db.refresh(entity)
+                
+                # Add initial observations if provided
+                if observations:
+                    for obs in observations:
+                        observation = Observation(
+                            entity_id=entity.id,
+                            type="initial",
+                            observation_type="note", 
+                            value={"text": obs},
+                            meta_data={}
+                        )
+                        db.add(observation)
+                    db.commit()
+                
+                return {
+                    "id": str(entity.id),
+                    "name": entity.name,
+                    "entity_type": entity.entity_type,
+                    "created_at": entity.created_at.isoformat(),
+                    "updated_at": entity.updated_at.isoformat(),
+                    "meta_data": entity.meta_data
+                }
+        except Exception as e:
+            raise MCPError(
+                message=f"Failed to create entity: {str(e)}",
+                code="ENTITY_CREATE_ERROR",
+                details={
+                    "name": name,
+                    "entity_type": entity_type,
+                    "error": str(e)
+                }
+            )
 
     @mcp.tool()
     def create_relationship(
@@ -139,21 +150,6 @@ def create_server() -> FastMCP:
             "Infrastructure Memory Server",
             dependencies=["sqlalchemy", "alembic", "redis", "asyncio", "aiohttp"]
         )
-
-        # Register error handlers
-        @mcp.exception_handler(MCPError)
-        def handle_mcp_error(error: MCPError) -> dict:
-            """Handle MCP-specific errors."""
-            return error.to_dict()
-
-        @mcp.exception_handler(Exception)
-        def handle_general_error(error: Exception) -> dict:
-            """Handle unexpected errors."""
-            return MCPError(
-                message=str(error),
-                code="INTERNAL_ERROR",
-                details={"error_type": error.__class__.__name__}
-            ).to_dict()
 
         # Register core functionality
         register_tools(mcp)

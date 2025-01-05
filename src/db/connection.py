@@ -146,7 +146,17 @@ def get_db_connection() -> Generator[Session, None, None]:
         gc.collect()
 
 
-def get_db() -> Generator[Session, None, None]:
+def get_db() -> Session:
     """Get a database session."""
-    with get_db_connection() as db:
-        yield db
+    db = SessionLocal()
+    try:
+        # Set timeouts if not SQLite
+        if not db.bind.dialect.name == "sqlite":
+            db.execute(text("SET statement_timeout = :timeout"), 
+                      {"timeout": STATEMENT_TIMEOUT})
+            db.execute(text("SET idle_in_transaction_session_timeout = :timeout"),
+                      {"timeout": IDLE_IN_TRANSACTION_TIMEOUT})
+        return db
+    except Exception as e:
+        db.close()
+        raise DatabaseError(f"Database connection failed: {str(e)}")

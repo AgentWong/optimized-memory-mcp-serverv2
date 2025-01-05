@@ -149,42 +149,34 @@ def sync_mcp_server(mcp_server):
     from functools import wraps
     
     def make_sync(async_func):
+        @wraps(async_func)
         def sync_wrapper(*args, **kwargs):
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             try:
-                return loop.run_until_complete(async_func(*args, **kwargs))
+                result = loop.run_until_complete(async_func(*args, **kwargs))
+                # Handle result conversion
+                if isinstance(result, (list, tuple)):
+                    # Convert content objects
+                    return [
+                        json.loads(item.text) if hasattr(item, 'text') else item 
+                        for item in result
+                    ]
+                elif hasattr(result, 'text'):
+                    return json.loads(result.text)
+                return result
             finally:
                 loop.close()
         return sync_wrapper
 
-    # Store original async methods
-    orig_call_tool = mcp_server.call_tool
-    orig_read_resource = mcp_server.read_resource
+    # Patch server methods
+    for method_name in ['call_tool', 'read_resource', 'list_resources']:
+        if hasattr(mcp_server, method_name):
+            orig_method = getattr(mcp_server, method_name)
+            setattr(mcp_server, method_name, make_sync(orig_method))
     
-    # Replace with sync versions that handle results properly
-    def sync_call_tool(*args, **kwargs):
-        result = make_sync(orig_call_tool)(*args, **kwargs)
-        if isinstance(result, (list, tuple)):
-            # Handle list of content objects
-            if len(result) == 1 and hasattr(result[0], 'text'):
-                return json.loads(result[0].text)
-            return result
-        return result
-        
-    def sync_read_resource(*args, **kwargs):
-        result = make_sync(orig_read_resource)(*args, **kwargs)
-        if isinstance(result, str):
-            try:
-                return json.loads(result)
-            except json.JSONDecodeError:
-                return result
-        return result
-        
-    # Patch the server
-    mcp_server.call_tool = sync_call_tool
-    mcp_server.read_resource = sync_read_resource
-    mcp_server.execute_tool = sync_call_tool  # Alias for compatibility
+    # Add execute_tool alias for compatibility
+    mcp_server.execute_tool = mcp_server.call_tool
     
     return mcp_server
 
@@ -197,30 +189,17 @@ def mcp_server():
 @pytest.fixture
 def client(mcp_server):
     """Create MCP client connected to test server."""
-    import asyncio
+    from mcp.client.stdio import StdioServerParameters, stdio_client
+    from mcp.client.session import ClientSession
     
-    # Create synchronous client
+    # Create client session with synchronous initialization
     params = StdioServerParameters(
         command="python",
         args=["-m", "src.main"],
         env={"TESTING": "true", "LOG_LEVEL": "ERROR"}
     )
     
-    # Create sync client session
-    session = ClientSession(None, None)
-    
-    # Initialize synchronously using the make_sync helper
-    def make_sync(async_func):
-        def sync_wrapper(*args, **kwargs):
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            try:
-                return loop.run_until_complete(async_func(*args, **kwargs))
-            finally:
-                loop.close()
-        return sync_wrapper
-    
-    # Initialize client synchronously
-    init_result = make_sync(session.initialize)()
-    
-    return session
+    with stdio_client(params) as (read_stream, write_stream):
+        session = ClientSession(read_stream, write_stream)
+        session.initialize()  # Synchronous initialization
+        yield session

@@ -61,43 +61,48 @@ def init_db(force: bool = False):
     Raises:
         DatabaseError: If database initialization fails
     """
-    # Import all models at module level to ensure they're registered with Base
-    from .models import (
-        entities,
-        relationships,
-        observations,
-        providers,
-        arguments,
-        ansible,
-        parameters,
-    )
-    
-    # Verify all models are imported
-    required_models = {
-        'Entity', 'Relationship', 'Observation', 
-        'Provider', 'Argument', 'AnsibleCollection',
-        'Parameter'
-    }
-    registered_models = set(Base.metadata.tables.keys())
-    missing_models = required_models - registered_models
-    
-    if missing_models:
-        raise DatabaseError(f"Missing required models: {missing_models}")
-
     try:
+        # Import all models to ensure they're registered
+        from .models import (
+            entities,
+            relationships,
+            observations,
+            providers,
+            arguments,
+            ansible,
+            parameters,
+        )
+        
+        # Verify all models are imported
+        required_models = {
+            'Entity', 'Relationship', 'Observation', 
+            'Provider', 'Argument', 'AnsibleCollection',
+            'Parameter'
+        }
+        registered_models = set(Base.metadata.tables.keys())
+        missing_models = required_models - registered_models
+        
+        if missing_models:
+            raise DatabaseError(
+                message="Missing required models",
+                details={"missing_models": list(missing_models)}
+            )
+
         if force:
-            # Only drop tables if explicitly requested
             if os.getenv("TESTING", "").lower() == "true":
                 Base.metadata.drop_all(bind=engine)
             else:
                 raise DatabaseError(
-                    "Cannot force drop tables outside of testing environment"
+                    message="Cannot force drop tables outside of testing environment"
                 )
 
-        # Create any missing tables
         Base.metadata.create_all(bind=engine)
+        
     except Exception as e:
-        raise DatabaseError(f"Failed to initialize database: {str(e)}")
+        raise DatabaseError(
+            message=f"Failed to initialize database: {str(e)}",
+            details={"error": str(e)}
+        )
 
 
 def get_db():
