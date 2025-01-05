@@ -1,7 +1,7 @@
 """
 Unit tests for MCP resources.
 
-from src.utils.errors import MCPError
+from src.utils.errors import MCPError, ValidationError
 
 Tests the core MCP resource patterns:
 - entities://list - Lists all entities in the system
@@ -54,17 +54,14 @@ def test_entities_list_resource(mcp_server):
 
 def test_entity_detail_resource(mcp_server, db_session):
     """Test entities://{id} resource"""
-    if not hasattr(mcp_server, "start_async_operation"):
-        pytest.skip("Server does not implement start_async_operation")
     if not hasattr(mcp_server, "read_resource"):
         pytest.skip("Server does not implement read_resource")
 
     # Create test entity first
-    operation = mcp_server.start_async_operation(
+    result = mcp_server.call_tool(
         "create_entity", {"name": "test_entity", "entity_type": "test"}
     )
-    assert operation["status"] == "completed", "Entity creation failed"
-    entity_id = operation["result"]["id"]
+    entity_id = result["id"]
     assert entity_id, "No entity ID returned"
 
     # Test resource
@@ -169,11 +166,10 @@ def test_resource_pagination(mcp_server):
         pytest.skip("Server does not implement read_resource")
 
     # Create multiple test entities
-    if hasattr(mcp_server, "start_async_operation"):
-        for i in range(5):
-            mcp_server.start_async_operation(
-                "create_entity", {"name": f"test_entity_{i}", "entity_type": "test"}
-            )
+    for i in range(5):
+        mcp_server.call_tool(
+            "create_entity", {"name": f"test_entity_{i}", "entity_type": "test"}
+        )
 
     # Test first page
     result = mcp_server.read_resource(

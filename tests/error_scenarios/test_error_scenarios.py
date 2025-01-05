@@ -192,24 +192,21 @@ def test_resource_not_found_handling(mcp_server):
 
 def test_transaction_rollback(mcp_server, db_session):
     """Test transaction rollback on errors"""
-    if not hasattr(mcp_server, "start_async_operation"):
-        pytest.skip("Server does not implement start_async_operation")
-
     # Create initial entity
-    operation = mcp_server.start_async_operation(
+    result = mcp_server.call_tool(
         "create_entity", {"name": "rollback_test", "entity_type": "test"}
     )
-    entity_id = operation["result"]["id"]
+    entity_id = result["id"]
 
     # Attempt invalid operation that should trigger rollback
     try:
-        mcp_server.start_async_operation(
+        mcp_server.call_tool(
             "add_observation",
             {
                 "entity_id": entity_id,
                 "type": "test",
                 "value": {"data": "x" * 1000000},  # Too large
-            },
+            }
         )
     except ValidationError:
         pass

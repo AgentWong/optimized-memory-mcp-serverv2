@@ -214,13 +214,11 @@ def test_tool_error_handling(mcp_server):
 
 
 def test_tool_operation_status(mcp_server):
-    """Test async operation status handling"""
-    # Execute tool with tracking and timeout
+    """Test operation status handling"""
+    # Execute tool
     result = mcp_server.call_tool(
         "create_entity",
-        arguments={"name": "status_test", "entity_type": "test"},
-        track_status=True,
-        timeout=5.0  # 5 second timeout
+        arguments={"name": "status_test", "entity_type": "test"}
     )
 
     # Verify result structure

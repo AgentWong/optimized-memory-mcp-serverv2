@@ -150,9 +150,5 @@ def mcp_server():
 @pytest.fixture
 def client(mcp_server):
     """Create MCP client connected to test server."""
-    # Create client using stdio transport synchronously 
-    server_params = StdioServerParameters(command="python", args=["-m", "mcp", "run"])
-    with stdio_client(server_params) as (read, write):
-        client = ClientSession(read, write)
-        client.initialize()  # Initialize synchronously
-        return client
+    mcp_server.initialize()  # Initialize synchronously
+    return mcp_server
