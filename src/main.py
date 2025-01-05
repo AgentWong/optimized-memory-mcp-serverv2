@@ -22,10 +22,10 @@ logger = logging.getLogger(__name__)
 
 async def create_server() -> Server:
     """Create and configure the MCP server instance."""
-    # Configure logging first
-    configure_logging()
-
     try:
+        # Configure logging first
+        configure_logging()
+
         # Initialize database
         init_db()
 
@@ -35,7 +35,7 @@ async def create_server() -> Server:
         # Configure server with all components
         configured_server = await configure_server(server)
 
-        # Set up initialization options
+        # Initialize the server
         init_options = InitializationOptions(
             server_name="Infrastructure Memory Server",
             server_version="1.0.0",
@@ -45,10 +45,16 @@ async def create_server() -> Server:
             )
         )
 
-        # Initialize the server
         await configured_server.initialize(init_options)
+        
+        # Verify server has required methods
+        if not hasattr(configured_server, 'read_resource'):
+            raise ConfigurationError("Server missing read_resource method")
+        if not hasattr(configured_server, 'call_tool'):
+            raise ConfigurationError("Server missing call_tool method")
+        if not hasattr(configured_server, 'start_async_operation'):
+            raise ConfigurationError("Server missing start_async_operation method")
             
-        logger.info("MCP server created and configured successfully")
         return configured_server
 
     except Exception as e:

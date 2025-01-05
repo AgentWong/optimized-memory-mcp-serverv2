@@ -21,22 +21,94 @@ logger = logging.getLogger(__name__)
 
 
 async def configure_server(server: Server) -> Server:
-    """
-    Configure the MCP server with resources and tools.
+    """Configure the MCP server with resources and tools."""
+    try:
+        # Initialize server state
+        server._sessions = {}
+        server._operations = {}
+        server._tools = {}
+        server._resources = {}
 
-    Sets up:
-    - Logging configuration
-    - Database initialization
-    - Error handling
-    - Resource cleanup
-    - Session management
-    - Async operation tracking
-    """
-    # Initialize server state
-    server._sessions = {}
-    server._operations = {}
-    server._tools = {}  # Track registered tools
-    server._resources = {}  # Track registered resources
+        # Configure logging
+        configure_logging()
+
+        # Initialize database
+        init_db()
+
+        # Import and register resources/tools
+        from .resources import (
+            entities, relationships, observations,
+            providers, ansible, versions
+        )
+        from .tools import (
+            entities as entity_tools,
+            relationships as relationship_tools, 
+            observations as observation_tools,
+            providers as provider_tools,
+            ansible as ansible_tools,
+            analysis as analysis_tools
+        )
+
+        # Register resources
+        for module in [entities, relationships, observations, providers, ansible, versions]:
+            resources = await module.register_resources(server)
+            if resources:
+                for resource in resources:
+                    if callable(resource):
+                        server._resources[resource.__name__] = resource
+            logger.info(f"Registered resources from {module.__name__}")
+
+        # Register tools
+        for module in [entity_tools, relationship_tools, observation_tools,
+                      provider_tools, ansible_tools, analysis_tools]:
+            tools = await module.register_tools(server)
+            if tools:
+                for tool in tools:
+                    if callable(tool):
+                        server._tools[tool.__name__] = tool
+            logger.info(f"Registered tools from {module.__name__}")
+
+        # Define protocol handlers
+        async def handle_read_resource(resource_path: str, params: dict = None) -> types.ReadResourceResult:
+            if not resource_path:
+                raise MCPError("Resource path required", code="INVALID_RESOURCE")
+            handler = server._resources.get(resource_path)
+            if not handler:
+                raise MCPError(f"Resource {resource_path} not found", code="RESOURCE_NOT_FOUND")
+            ctx = Context()
+            result = await handler(ctx, **(params or {}))
+            return types.ReadResourceResult(data=result, resource_path=resource_path)
+
+        async def handle_call_tool(tool_name: str, arguments: dict = None) -> types.CallToolResult:
+            tool = server._tools.get(tool_name)
+            if not tool:
+                raise MCPError(f"Tool {tool_name} not found", code="TOOL_NOT_FOUND")
+            ctx = Context()
+            result = await tool(ctx, **(arguments or {}))
+            if inspect.iscoroutine(result):
+                result = await result
+            return types.CallToolResult(result=result)
+
+        async def handle_start_async_operation(tool_name: str, arguments: dict = None) -> dict:
+            tool = server._tools.get(tool_name)
+            if not tool:
+                raise MCPError(f"Tool {tool_name} not found", code="TOOL_NOT_FOUND")
+            ctx = Context()
+            result = await tool(ctx, **(arguments or {}))
+            if inspect.iscoroutine(result):
+                result = await result
+            return {"status": "completed", "result": result}
+
+        # Attach handlers directly to server instance
+        server.read_resource = handle_read_resource
+        server.call_tool = handle_call_tool
+        server.start_async_operation = handle_start_async_operation
+
+        return server
+
+    except Exception as e:
+        logger.error(f"Failed to configure server: {str(e)}")
+        raise ConfigurationError(f"Server configuration failed: {str(e)}")
     try:
         # Configure logging
         configure_logging()
@@ -138,35 +210,10 @@ async def configure_server(server: Server) -> Server:
             result = await tool(ctx, **(arguments or {}))
             return {"status": "completed", "result": result}
 
-        # Register protocol handlers
-        async def handle_read_resource(resource_path: str, params: dict = None) -> types.ReadResourceResult:
-            """Handle resource reading requests."""
-            if not resource_path:
-                raise MCPError("Resource path required", code="INVALID_RESOURCE")
-            handler = server._resources.get(resource_path)
-            if not handler:
-                raise MCPError(f"Resource {resource_path} not found", code="RESOURCE_NOT_FOUND")
-            ctx = Context()
-            result = await handler(ctx, **(params or {}))
-            return types.ReadResourceResult(data=result, resource_path=resource_path)
-
-        async def handle_call_tool(tool_name: str, arguments: dict = None) -> types.CallToolResult:
-            """Handle tool execution requests."""
-            tool = server._tools.get(tool_name)
-            if not tool:
-                raise MCPError(f"Tool {tool_name} not found", code="TOOL_NOT_FOUND")
-            ctx = Context()
-            result = await tool(ctx, **(arguments or {}))
-            return types.CallToolResult(result=result)
-
-        async def handle_start_async_operation(tool_name: str, arguments: dict = None) -> dict:
-            """Handle async operation requests."""
-            tool = server._tools.get(tool_name)
-            if not tool:
-                raise MCPError(f"Tool {tool_name} not found", code="TOOL_NOT_FOUND")
-            ctx = Context()
-            result = await tool(ctx, **(arguments or {}))
-            return {"status": "completed", "result": result}
+        # Attach handlers as methods to the server instance
+        server.read_resource = handle_read_resource
+        server.call_tool = handle_call_tool
+        server.start_async_operation = handle_start_async_operation
 
         # Attach handlers directly to server instance
         server.read_resource = handle_read_resource

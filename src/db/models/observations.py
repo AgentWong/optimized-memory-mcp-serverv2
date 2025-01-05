@@ -32,16 +32,23 @@ class Observation(Base, BaseModel, TimestampMixin):
 
     def __init__(self, **kwargs):
         """Initialize an Observation with validation."""
-        if "data" in kwargs:
-            kwargs["value"] = kwargs.pop("data")
-        if "type" not in kwargs:
-            kwargs["type"] = "state"  # Default type
-        if "observation_type" not in kwargs:
-            kwargs["observation_type"] = "default"  # Default observation type
-
         # Validate entity_id before calling super()
         if "entity_id" not in kwargs or not kwargs["entity_id"]:
-            raise ValueError("entity_id is required")
+            from sqlalchemy.exc import IntegrityError
+            raise IntegrityError(
+                "entity_id is required",
+                params={"entity_id": None},
+                orig=None
+            )
+
+        # Validate observation_type
+        if "observation_type" not in kwargs or not kwargs.get("observation_type"):
+            from sqlalchemy.exc import IntegrityError
+            raise IntegrityError(
+                "observation_type is required",
+                params={"observation_type": None},
+                orig=None
+            )
 
         # Initialize base class
         super().__init__(**kwargs)
@@ -58,14 +65,9 @@ class Observation(Base, BaseModel, TimestampMixin):
                     params={"entity_id": self.entity_id},
                     orig=None
                 )
-            session.flush()  # Ensure integrity check is performed
-        
-        if self.type not in self.VALID_TYPES:
+
+        if not self.type or self.type not in self.VALID_TYPES:
             raise ValueError(f"Invalid observation type: {self.type}")
-        if not self.observation_type or not self.observation_type.strip():
-            raise ValueError("Observation type cannot be empty")
-        if not isinstance(self.value, (dict, list)):
-            raise ValueError("Value must be a JSON-serializable object")
 
     # Composite indexes for common lookups
     __table_args__ = (

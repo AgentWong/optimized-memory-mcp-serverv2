@@ -292,12 +292,20 @@ async def mcp_server(db_session):
 
     # Create and configure server
     server = await create_server()
+    
+    # Verify server has required methods
+    assert hasattr(server, 'read_resource'), "Server missing read_resource"
+    assert hasattr(server, 'call_tool'), "Server missing call_tool"
+    assert hasattr(server, 'start_async_operation'), "Server missing start_async_operation"
 
     try:
         yield server
     finally:
         if hasattr(server, 'cleanup'):
-            await server.cleanup()
+            try:
+                await server.cleanup()
+            except Exception as e:
+                print(f"Error during cleanup: {e}")
 
 
 @pytest.fixture

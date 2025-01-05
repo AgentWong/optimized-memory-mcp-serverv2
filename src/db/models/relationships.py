@@ -33,21 +33,27 @@ class Relationship(Base, BaseModel, TimestampMixin):
 
     def __init__(self, **kwargs):
         """Initialize a Relationship with validation."""
-        if "type" not in kwargs:
-            kwargs["type"] = "depends_on"  # Default type
-        if "entity_id" not in kwargs and "source_id" in kwargs:
-            kwargs["entity_id"] = kwargs["source_id"]
+        # Set default entity_id if not provided
+        if 'entity_id' not in kwargs:
+            kwargs['entity_id'] = kwargs.get('source_id')
+            
+        # Set default type if not provided
+        if 'type' not in kwargs and 'relationship_type' in kwargs:
+            kwargs['type'] = kwargs['relationship_type']
+
+        # Validate required fields
+        required_fields = ['source_id', 'target_id', 'type', 'relationship_type', 'entity_id']
+        for field in required_fields:
+            if field not in kwargs or kwargs[field] is None:
+                from sqlalchemy.exc import IntegrityError
+                raise IntegrityError(
+                    f"{field} is required",
+                    params={field: None},
+                    orig=None
+                )
 
         # Initialize base class
         super().__init__(**kwargs)
-
-        # Validate relationship type
-        if self.type not in self.VALID_TYPES:
-            raise ValueError(f"Invalid relationship type: {self.type}")
-        if not self.relationship_type or not self.relationship_type.strip():
-            raise ValueError("Relationship type cannot be empty")
-        if self.source_id == self.target_id:
-            raise ValueError("Source and target cannot be the same entity")
 
         # Validate entity references
         from sqlalchemy import inspect
@@ -64,7 +70,6 @@ class Relationship(Base, BaseModel, TimestampMixin):
                         params={field: value},
                         orig=None
                     )
-            session.flush()  # Ensure integrity check is performed
 
     # Composite indexes for common lookups and traversals
     __table_args__ = (
