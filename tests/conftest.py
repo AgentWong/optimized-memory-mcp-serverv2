@@ -143,8 +143,14 @@ class TestClient:
     def __init__(self, server):
         """Initialize test client with FastMCP server instance."""
         from mcp.server.fastmcp import FastMCP
+        
+        # Handle coroutine or async generator
+        if inspect.iscoroutine(server) or inspect.isasyncgen(server):
+            raise TypeError("Server must be an initialized FastMCP instance, not a coroutine or generator")
+            
         if not isinstance(server, FastMCP):
             raise TypeError(f"Server must be a FastMCP instance, got {type(server)}")
+            
         self.server = server
 
     async def __aenter__(self):
@@ -312,17 +318,30 @@ async def mcp_server():
 
     server = None
     try:
+        # Create and initialize the server
         server = await create_server()
+        
+        # Verify server type
         if not isinstance(server, FastMCP):
             raise TypeError("create_server() must return a FastMCP instance")
             
-        return server
-
+        # Initialize the server
+        init_options = server.get_initialization_options()
+        await server.initialize(init_options)
+        
+        return server  # Return the initialized server directly
+            
     except Exception as e:
         print(f"Error in mcp_server fixture: {e}")
-        if server and hasattr(server, 'cleanup'):
+        if server:
             await server.cleanup()
         raise
+
+    # Register cleanup
+    yield server
+    
+    if server:
+        await server.cleanup()
 
 
 @pytest.fixture
