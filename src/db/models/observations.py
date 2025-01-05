@@ -58,23 +58,11 @@ class Observation(Base, BaseModel, TimestampMixin):
         if inspect(self).session:
             session = inspect(self).session
             from .entities import Entity
-            if not session.query(Entity).get(self.entity_id):
+            entity = session.query(Entity).get(self.entity_id)
+            if not entity:
                 from sqlalchemy.exc import IntegrityError
                 raise IntegrityError(
                     f"Referenced entity_id={self.entity_id} does not exist",
-                    params={"entity_id": self.entity_id},
-                    orig=None
-                )
-
-        # Validate entity exists
-        from sqlalchemy import inspect
-        if inspect(self).session:
-            session = inspect(self).session
-            from .entities import Entity
-            if not session.query(Entity).filter_by(id=self.entity_id).first():
-                from sqlalchemy.exc import IntegrityError
-                raise IntegrityError(
-                    "Referenced entity does not exist",
                     params={"entity_id": self.entity_id},
                     orig=None
                 )

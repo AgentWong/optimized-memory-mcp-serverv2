@@ -295,6 +295,12 @@ async def mcp_server(db_session):
 
     # Create and configure server
     server = await create_server()
+    if inspect.iscoroutine(server):
+        server = await server
+        
+    # Initialize server if needed
+    if hasattr(server, 'initialize') and callable(server.initialize):
+        await server.initialize()
     
     # Verify server has required methods
     if not hasattr(server, 'read_resource'):

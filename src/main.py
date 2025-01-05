@@ -47,22 +47,30 @@ async def create_server() -> Server:
 
         await server.initialize(init_options)
         
-        # Verify server has required methods
-        if not hasattr(server, 'read_resource'):
-            raise ConfigurationError("Server missing read_resource method")
-        if not hasattr(server, 'call_tool'):
-            raise ConfigurationError("Server missing call_tool method")
-        if not hasattr(server, 'start_async_operation'):
-            raise ConfigurationError("Server missing start_async_operation method")
+        # Verify server has required methods and they are callable
+        required_methods = ['read_resource', 'call_tool', 'start_async_operation']
+        for method in required_methods:
+            if not hasattr(server, method):
+                raise ConfigurationError(f"Server missing {method} method")
+            if not callable(getattr(server, method)):
+                raise ConfigurationError(f"Server {method} is not callable")
         
-        # Verify server has required methods
-        if not hasattr(server, 'read_resource'):
-            raise ConfigurationError("Server missing read_resource method")
-        if not hasattr(server, 'call_tool'):
-            raise ConfigurationError("Server missing call_tool method")
-        if not hasattr(server, 'start_async_operation'):
-            raise ConfigurationError("Server missing start_async_operation method")
+        # Verify and await all async configuration
+        if inspect.iscoroutine(server):
+            server = await server
             
+        # Verify server has required methods and they are callable
+        required_methods = ['read_resource', 'call_tool', 'start_async_operation']
+        for method in required_methods:
+            if not hasattr(server, method):
+                raise ConfigurationError(f"Server missing {method} method")
+            if not callable(getattr(server, method)):
+                raise ConfigurationError(f"Server {method} is not callable")
+            
+        # Initialize server if needed
+        if hasattr(server, 'initialize') and callable(server.initialize):
+            await server.initialize()
+                
         return server
 
     except Exception as e:
