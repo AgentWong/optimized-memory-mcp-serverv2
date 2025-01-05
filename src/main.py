@@ -122,12 +122,50 @@ async def main() -> None:
             ansible_tools, analysis_tools
         ]
         
-        for module in tool_modules:
+        logger.info("Registering tool modules...")
+        registered_tools = 0
+        validation_errors = []
+        
+        for i, module in enumerate(tool_modules, 1):
+            if is_shutting_down:
+                logger.info("Shutdown requested, stopping tool registration")
+                break
+                
             try:
-                await module.register_tools(mcp)
+                logger.debug(f"Registering tools from {module.__name__} ({i}/{len(tool_modules)})")
+                tools = await module.register_tools(mcp)
+                
+                if tools:
+                    # Validate each tool
+                    for tool in tools:
+                        try:
+                            if not hasattr(tool, '__doc__') or not tool.__doc__:
+                                validation_errors.append(f"Tool {tool.__name__} missing documentation")
+                            if not hasattr(tool, '__annotations__'):
+                                validation_errors.append(f"Tool {tool.__name__} missing type hints")
+                        except Exception as e:
+                            validation_errors.append(f"Error validating {tool.__name__}: {str(e)}")
+                    
+                    registered_tools += len(tools)
+                    logger.info(f"Successfully registered {len(tools)} tools from {module.__name__}")
+                else:
+                    logger.warning(f"No tools registered from {module.__name__}")
+                    
+            except MCPError as e:
+                logger.error(f"MCP error registering tools from {module.__name__}: {str(e)}")
+                if not is_shutting_down:
+                    raise
             except Exception as e:
-                logger.error(f"Failed to register tools from {module.__name__}: {str(e)}")
-                raise
+                logger.error(f"Unexpected error registering tools from {module.__name__}: {str(e)}", exc_info=True)
+                if not is_shutting_down:
+                    raise
+                    
+        if validation_errors:
+            logger.warning("Tool validation warnings:")
+            for error in validation_errors:
+                logger.warning(f"  - {error}")
+                    
+        logger.info(f"Tool registration complete. Total tools registered: {registered_tools}")
 
         logger.info("Starting MCP server")
         try:
