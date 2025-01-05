@@ -44,12 +44,7 @@ async def test_entities_list_resource(mcp_server):
     """Test entities://list resource using FastMCP"""
     result = await mcp_server.read_resource(
         "entities://list",
-        {
-            "page": 1,
-            "per_page": 10,
-            "type": None,
-            "created_after": None
-        }
+        {"page": 1, "per_page": 10, "type": None, "created_after": None},
     )
     assert isinstance(result, dict), "Result should be a dictionary"
     assert "data" in result, "Result missing 'data' field"
@@ -61,15 +56,14 @@ async def test_entities_list_resource(mcp_server):
 @pytest.mark.asyncio
 async def test_entity_detail_resource(mcp_server, db_session):
     """Test entities://{id} resource"""
-    if not hasattr(mcp_server, 'start_async_operation'):
+    if not hasattr(mcp_server, "start_async_operation"):
         pytest.skip("Server does not implement start_async_operation")
-    if not hasattr(mcp_server, 'read_resource'):
+    if not hasattr(mcp_server, "read_resource"):
         pytest.skip("Server does not implement read_resource")
-        
+
     # Create test entity first
     operation = await mcp_server.start_async_operation(
-        "create_entity", 
-        {"name": "test_entity", "entity_type": "test"}
+        "create_entity", {"name": "test_entity", "entity_type": "test"}
     )
     assert operation["status"] == "completed", "Entity creation failed"
     entity_id = operation["result"]["id"]
@@ -86,12 +80,11 @@ async def test_entity_detail_resource(mcp_server, db_session):
 @pytest.mark.asyncio
 async def test_providers_resource(mcp_server):
     """Test providers://{provider}/resources resource"""
-    if not hasattr(mcp_server, 'read_resource'):
+    if not hasattr(mcp_server, "read_resource"):
         pytest.skip("Server does not implement read_resource")
-        
+
     result = await mcp_server.read_resource(
-        "providers://test/resources",
-        {"version": "latest"}
+        "providers://test/resources", {"version": "latest"}
     )
     assert isinstance(result, dict), "Result should be a dictionary"
     assert "data" in result, "Result missing 'data' field"
@@ -101,36 +94,41 @@ async def test_providers_resource(mcp_server):
 @pytest.mark.asyncio
 async def test_ansible_collections_resource(mcp_server):
     """Test ansible://collections resource"""
-    if not hasattr(mcp_server, 'read_resource'):
+    if not hasattr(mcp_server, "read_resource"):
         pytest.skip("Server does not implement read_resource")
-        
+
     result = await mcp_server.read_resource("ansible://collections")
     assert isinstance(result, dict), "Result should be a dictionary"
     assert "data" in result, "Result missing 'data' field"
     assert isinstance(result["data"], list), "Collections should be a list"
+
+
 @pytest.mark.asyncio
 async def test_resource_error_handling(mcp_server):
     """Test resource error handling"""
-    if not hasattr(mcp_server, 'read_resource'):
+    if not hasattr(mcp_server, "read_resource"):
         pytest.skip("Server does not implement read_resource")
-        
+
     # Test invalid resource path - comprehensive validation
     with pytest.raises(MCPError) as exc:
         await mcp_server.read_resource("invalid://resource")
     error = exc.value
-    
+
     # Additional validation of error structure
-    assert hasattr(error, 'code'), "Error should have code attribute"
-    assert hasattr(error, 'details'), "Error should have details attribute"
+    assert hasattr(error, "code"), "Error should have code attribute"
+    assert hasattr(error, "details"), "Error should have details attribute"
     assert isinstance(error.details, dict), "Error details should be dictionary"
     # Validate error code and message
-    assert error.code in ["RESOURCE_NOT_FOUND", "INVALID_RESOURCE"], "Incorrect error code"
+    assert error.code in [
+        "RESOURCE_NOT_FOUND",
+        "INVALID_RESOURCE",
+    ], "Incorrect error code"
     assert "not found" in str(error).lower(), "Wrong error message"
-    
+
     # Validate error details structure
     assert error.details is not None, "Error should include details"
     assert isinstance(error.details, dict), "Details should be a dictionary"
-    
+
     # Validate error context
     assert "context" in error.details, "Should include error context"
     assert "timestamp" in error.details["context"], "Should include error timestamp"
@@ -139,65 +137,63 @@ async def test_resource_error_handling(mcp_server):
 
     # Test invalid parameters - comprehensive validation
     with pytest.raises(MCPError) as exc:
-        await mcp_server.read_resource(
-            "entities://list",
-            {"invalid_param": "value"}
-        )
+        await mcp_server.read_resource("entities://list", {"invalid_param": "value"})
     error = exc.value
     # Validate error code and message
     assert error.code == "INVALID_PARAMETERS", "Incorrect error code"
     assert "invalid" in str(error).lower(), "Wrong error message"
-    
+
     # Validate error details structure
     assert error.details is not None, "Error should include details"
     assert isinstance(error.details, dict), "Details should be a dictionary"
-    
+
     # Validate invalid parameters
     assert "invalid_parameters" in error.details, "Should list invalid parameters"
     invalid_params = error.details["invalid_parameters"]
     assert isinstance(invalid_params, list), "Invalid parameters should be a list"
     assert "invalid_param" in invalid_params, "Should specify invalid parameter"
-    
+
     # Validate allowed parameters
     assert "allowed_parameters" in error.details, "Should list allowed parameters"
-    assert isinstance(error.details["allowed_parameters"], list), "Allowed parameters should be a list"
-    
+    assert isinstance(
+        error.details["allowed_parameters"], list
+    ), "Allowed parameters should be a list"
+
     # Validate error context
     assert "context" in error.details, "Should include error context"
     assert "timestamp" in error.details["context"], "Should include error timestamp"
     assert "resource_path" in error.details["context"], "Should specify resource path"
-    assert "provided_params" in error.details["context"], "Should list provided parameters"
+    assert (
+        "provided_params" in error.details["context"]
+    ), "Should list provided parameters"
 
 
 @pytest.mark.asyncio
 async def test_resource_pagination(mcp_server):
     """Test resource pagination"""
-    if not hasattr(mcp_server, 'read_resource'):
+    if not hasattr(mcp_server, "read_resource"):
         pytest.skip("Server does not implement read_resource")
-        
+
     # Create multiple test entities
-    if hasattr(mcp_server, 'start_async_operation'):
+    if hasattr(mcp_server, "start_async_operation"):
         for i in range(5):
             await mcp_server.start_async_operation(
-                "create_entity",
-                {"name": f"test_entity_{i}", "entity_type": "test"}
+                "create_entity", {"name": f"test_entity_{i}", "entity_type": "test"}
             )
-    
+
     # Test first page
     result = await mcp_server.read_resource(
-        "entities://list",
-        {"page": 1, "per_page": 2}
+        "entities://list", {"page": 1, "per_page": 2}
     )
     assert isinstance(result["data"], list)
     assert len(result["data"]) <= 2, "Page size exceeded"
     assert "total" in result, "Missing total count"
     assert "pages" in result, "Missing total pages"
-    
+
     # Verify next page
     if len(result["data"]) == 2:
         next_page = await mcp_server.read_resource(
-            "entities://list",
-            {"page": 2, "per_page": 2}
+            "entities://list", {"page": 2, "per_page": 2}
         )
         assert isinstance(next_page["data"], list)
         assert next_page["data"] != result["data"], "Pages should be different"

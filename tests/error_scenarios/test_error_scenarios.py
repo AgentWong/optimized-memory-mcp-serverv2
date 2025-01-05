@@ -155,27 +155,22 @@ async def test_invalid_tool_requests(mcp_server):
 
     # Test missing required arguments
     with pytest.raises(MCPError) as exc:
-        await mcp_server.call_tool(
-            "create_entity",
-            {"invalid": "data"}
-        )
+        await mcp_server.call_tool("create_entity", {"invalid": "data"})
     assert exc.value.code == "INVALID_ARGUMENTS"
     assert "missing required argument" in str(exc.value).lower()
 
     # Test malformed arguments
     with pytest.raises(MCPError) as exc:
         await mcp_server.call_tool(
-            "create_entity",
-            "not_a_dict"  # Invalid argument type
+            "create_entity", "not_a_dict"  # Invalid argument type
         )
-    assert exc.value.code == "INVALID_ARGUMENTS" 
+    assert exc.value.code == "INVALID_ARGUMENTS"
     assert "invalid argument type" in str(exc.value).lower()
 
     # Test invalid argument values
     with pytest.raises(MCPError) as exc:
         await mcp_server.call_tool(
-            "create_entity",
-            {"name": "", "entity_type": "test"}  # Empty name
+            "create_entity", {"name": "", "entity_type": "test"}  # Empty name
         )
     assert exc.value.code == "VALIDATION_ERROR"
     assert "invalid name" in str(exc.value).lower()
@@ -184,7 +179,7 @@ async def test_invalid_tool_requests(mcp_server):
     with pytest.raises(MCPError) as exc:
         await mcp_server.call_tool(
             "create_entity",
-            {"name": 123, "entity_type": "test"}  # Name should be string
+            {"name": 123, "entity_type": "test"},  # Name should be string
         )
     assert exc.value.code == "VALIDATION_ERROR"
     assert "invalid argument type" in str(exc.value).lower()
@@ -193,9 +188,9 @@ async def test_invalid_tool_requests(mcp_server):
 @pytest.mark.asyncio
 async def test_resource_not_found_handling(mcp_server):
     """Test resource not found error handling"""
-    if not hasattr(mcp_server, 'read_resource'):
+    if not hasattr(mcp_server, "read_resource"):
         pytest.skip("Server does not implement read_resource")
-        
+
     with pytest.raises(MCPError) as exc:
         await mcp_server.read_resource("nonexistent://resource")
     assert "not found" in str(exc.value).lower()
@@ -204,16 +199,15 @@ async def test_resource_not_found_handling(mcp_server):
 @pytest.mark.asyncio
 async def test_transaction_rollback(mcp_server, db_session):
     """Test transaction rollback on errors"""
-    if not hasattr(mcp_server, 'start_async_operation'):
+    if not hasattr(mcp_server, "start_async_operation"):
         pytest.skip("Server does not implement start_async_operation")
-        
+
     # Create initial entity
     operation = await mcp_server.start_async_operation(
-        "create_entity",
-        {"name": "rollback_test", "entity_type": "test"}
+        "create_entity", {"name": "rollback_test", "entity_type": "test"}
     )
     entity_id = operation["result"]["id"]
-    
+
     # Attempt invalid operation that should trigger rollback
     try:
         await mcp_server.start_async_operation(
@@ -221,13 +215,14 @@ async def test_transaction_rollback(mcp_server, db_session):
             {
                 "entity_id": entity_id,
                 "type": "test",
-                "value": {"data": "x" * 1000000}  # Too large
-            }
+                "value": {"data": "x" * 1000000},  # Too large
+            },
         )
     except ValidationError:
         pass
-        
+
     # Verify database state rolled back
     from src.db.models.observations import Observation
+
     observations = db_session.query(Observation).filter_by(entity_id=entity_id).all()
     assert len(observations) == 0, "Transaction should have rolled back"

@@ -34,22 +34,27 @@ class Relationship(Base, BaseModel, TimestampMixin):
     def __init__(self, **kwargs):
         """Initialize a Relationship with validation."""
         # Set default entity_id if not provided
-        if 'entity_id' not in kwargs:
-            kwargs['entity_id'] = kwargs.get('source_id')
-            
+        if "entity_id" not in kwargs:
+            kwargs["entity_id"] = kwargs.get("source_id")
+
         # Set default type if not provided
-        if 'type' not in kwargs and 'relationship_type' in kwargs:
-            kwargs['type'] = kwargs['relationship_type']
+        if "type" not in kwargs and "relationship_type" in kwargs:
+            kwargs["type"] = kwargs["relationship_type"]
 
         # Validate required fields
-        required_fields = ['source_id', 'target_id', 'type', 'relationship_type', 'entity_id']
+        required_fields = [
+            "source_id",
+            "target_id",
+            "type",
+            "relationship_type",
+            "entity_id",
+        ]
         for field in required_fields:
             if field not in kwargs or kwargs[field] is None:
                 from sqlalchemy.exc import IntegrityError
+
                 raise IntegrityError(
-                    f"{field} is required",
-                    params={field: None},
-                    orig=None
+                    f"{field} is required", params={field: None}, orig=None
                 )
 
         # Initialize base class first to get session
@@ -57,20 +62,21 @@ class Relationship(Base, BaseModel, TimestampMixin):
 
         # Validate entity references exist
         from sqlalchemy import inspect
+
         if inspect(self).session:
             session = inspect(self).session
             from .entities import Entity
-            
+
             for field, value in [
-                ('entity_id', self.entity_id),
-                ('source_id', self.source_id), 
-                ('target_id', self.target_id)
+                ("entity_id", self.entity_id),
+                ("source_id", self.source_id),
+                ("target_id", self.target_id),
             ]:
                 if not session.query(Entity).get(value):
                     raise IntegrityError(
                         f"Referenced entity {field}={value} does not exist",
                         params={field: value},
-                        orig=None
+                        orig=None,
                     )
 
         # Initialize base class
@@ -78,18 +84,23 @@ class Relationship(Base, BaseModel, TimestampMixin):
 
         # Validate entity references
         from sqlalchemy import inspect
+
         if inspect(self).session:
             session = inspect(self).session
             from .entities import Entity
-            for field, value in [('entity_id', self.entity_id),
-                               ('source_id', self.source_id),
-                               ('target_id', self.target_id)]:
+
+            for field, value in [
+                ("entity_id", self.entity_id),
+                ("source_id", self.source_id),
+                ("target_id", self.target_id),
+            ]:
                 if not session.query(Entity).filter_by(id=value).first():
                     from sqlalchemy.exc import IntegrityError
+
                     raise IntegrityError(
                         f"Referenced entity {field} does not exist",
                         params={field: value},
-                        orig=None
+                        orig=None,
                     )
 
     # Composite indexes for common lookups and traversals

@@ -57,9 +57,10 @@ def db_session():
 
     # Create session
     session = TestingSessionLocal()
-    
+
     # Enable foreign key constraints
     from sqlalchemy import text
+
     session.execute(text("PRAGMA foreign_keys = ON"))
     session.commit()
 
@@ -143,16 +144,20 @@ class TestClient:
     def __init__(self, server):
         """Initialize test client with FastMCP server instance."""
         from mcp.server.fastmcp import FastMCP
-        
+
         # If we got a coroutine, we need to await it
         if inspect.iscoroutine(server):
-            raise TypeError("Server must be an initialized FastMCP instance, not a coroutine")
+            raise TypeError(
+                "Server must be an initialized FastMCP instance, not a coroutine"
+            )
         if inspect.isasyncgen(server):
-            raise TypeError("Server must be an initialized FastMCP instance, not an async generator")
-            
+            raise TypeError(
+                "Server must be an initialized FastMCP instance, not an async generator"
+            )
+
         if not isinstance(server, FastMCP):
             raise TypeError(f"Server must be a FastMCP instance, got {type(server)}")
-            
+
         self.server = server
 
     async def __aenter__(self):
@@ -167,24 +172,24 @@ class TestClient:
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit."""
-        if hasattr(self, 'session'):
-            await self.server.end_session(self.session['id'])
+        if hasattr(self, "session"):
+            await self.server.end_session(self.session["id"])
 
     async def read_resource(self, resource_path: str, params: dict = None) -> dict:
         """Read a resource with proper parameter handling.
-        
+
         Args:
             resource_path: Resource path to read
             params: Optional parameters dictionary
-            
+
         Returns:
             Resource data as dictionary
-            
+
         Raises:
             MCPError: If resource cannot be read
             AttributeError: If server doesn't implement read_resource
         """
-        if not hasattr(self.server, 'read_resource'):
+        if not hasattr(self.server, "read_resource"):
             raise AttributeError("Server does not implement read_resource")
         result = await self.server.read_resource(resource_path, params)
         if result is None:
@@ -193,36 +198,38 @@ class TestClient:
 
     async def call_tool(self, tool_name: str, arguments: dict = None) -> dict:
         """Call a tool.
-        
+
         Args:
             tool_name: Name of tool to call
             arguments: Optional tool arguments
-            
+
         Returns:
             Tool result as dictionary
-            
+
         Raises:
             MCPError: If tool execution fails
             AttributeError: If server doesn't implement required methods
         """
-        if hasattr(self.server, 'call_tool'):
+        if hasattr(self.server, "call_tool"):
             result = await self.server.call_tool(tool_name, arguments or {})
             if inspect.iscoroutine(result):
                 result = await result
             return result
-            
-        if not hasattr(self.server, 'start_async_operation'):
-            raise AttributeError("Server does not implement call_tool or start_async_operation")
-            
+
+        if not hasattr(self.server, "start_async_operation"):
+            raise AttributeError(
+                "Server does not implement call_tool or start_async_operation"
+            )
+
         operation = await self.server.start_async_operation(tool_name, arguments or {})
         if inspect.iscoroutine(operation):
             operation = await operation
-            
+
         max_retries = 10
         retry_count = 0
-        while operation['status'] not in ['completed', 'failed']:
+        while operation["status"] not in ["completed", "failed"]:
             await asyncio.sleep(0.1)  # Prevent tight loop
-            status = await self.server.get_operation_status(operation['id'])
+            status = await self.server.get_operation_status(operation["id"])
             if inspect.iscoroutine(status):
                 status = await status
             operation = status
@@ -232,16 +239,18 @@ class TestClient:
                     "Operation timed out",
                     code="OPERATION_TIMEOUT",
                     details={
-                        "operation_id": operation['id'],
+                        "operation_id": operation["id"],
                         "max_retries": max_retries,
-                        "elapsed_time": retry_count * 0.1
-                    }
+                        "elapsed_time": retry_count * 0.1,
+                    },
                 )
-        
-        if operation['status'] == 'failed':
-            raise MCPError(operation.get('error', 'Tool execution failed'), code="TOOL_ERROR")
-            
-        return operation.get('result', {})
+
+        if operation["status"] == "failed":
+            raise MCPError(
+                operation.get("error", "Tool execution failed"), code="TOOL_ERROR"
+            )
+
+        return operation.get("result", {})
 
     async def close(self):
         """Clean up resources."""
@@ -268,26 +277,28 @@ class TestClient:
 
     async def with_session(self, session_id: str, callback: callable):
         """Execute callback within a session context.
-        
+
         Args:
             session_id: The session ID to use
             callback: Async callback function to execute within session
-            
+
         Returns:
             Result of callback execution
-            
+
         Raises:
             MCPError: If session is invalid or callback fails
         """
         if not callable(callback):
             raise ValueError("Callback must be callable")
-            
+
         # Verify session exists and is active
-        sessions = getattr(self.server, '_sessions', {})
+        sessions = getattr(self.server, "_sessions", {})
         session = sessions.get(session_id)
-        if not session or session.get('status') != 'active':
-            raise MCPError(f"Session {session_id} not found or inactive", code="SESSION_NOT_FOUND")
-            
+        if not session or session.get("status") != "active":
+            raise MCPError(
+                f"Session {session_id} not found or inactive", code="SESSION_NOT_FOUND"
+            )
+
         try:
             return await callback()
         except Exception as e:
@@ -295,17 +306,16 @@ class TestClient:
 
     async def end_session(self, session_id: str) -> None:
         """End a session.
-        
+
         Args:
             session_id: The session ID to end
-            
+
         Raises:
             MCPError: If session not found or invalid
         """
         if not session_id:
             raise ValueError("Session ID required")
         return await self.server.end_session(session_id)
-
 
 
 @pytest.fixture
@@ -322,21 +332,20 @@ async def mcp_server():
     try:
         # Create and initialize server
         server = await create_server()
-        
+
         # Handle nested coroutines
         while inspect.iscoroutine(server):
             server = await server
-            
+
         # Initialize if needed
-        if not getattr(server, '_initialized', False):
+        if not getattr(server, "_initialized", False):
             init_options = server.get_initialization_options()
             await server.initialize(init_options)
-            
+
         # Verify we have a proper FastMCP instance
         if not isinstance(server, FastMCP):
             raise TypeError(f"Expected FastMCP instance, got {type(server)}")
-            
-        # Return the initialized server
+
         return server
     except Exception as e:
         if server:

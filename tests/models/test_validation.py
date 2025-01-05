@@ -73,7 +73,7 @@ def test_observation_required_fields(db_session, mcp_server):
             type="test",
             observation_type="test_obs",
             value={"test": "data"},
-            meta_data={}
+            meta_data={},
         )
         db_session.add(obs)
         db_session.commit()  # This should raise IntegrityError
@@ -82,10 +82,7 @@ def test_observation_required_fields(db_session, mcp_server):
     # Test missing observation_type
     with pytest.raises(IntegrityError):
         obs = Observation(
-            entity_id=entity.id,
-            type="test",
-            value={"test": "data"},
-            meta_data={}
+            entity_id=entity.id, type="test", value={"test": "data"}, meta_data={}
         )
         db_session.add(obs)
         db_session.commit()
@@ -106,7 +103,7 @@ def test_relationship_foreign_keys(db_session, mcp_server):
             target_id=99999,  # Non-existent ID
             type="depends_on",
             relationship_type="test_rel",
-            meta_data={}
+            meta_data={},
         )
         db_session.add(rel)
         db_session.commit()  # This should raise IntegrityError
@@ -122,7 +119,7 @@ def test_observation_foreign_keys(db_session, mcp_server):
             type="test",
             observation_type="test_obs",
             value={"test": "data"},
-            meta_data={}
+            meta_data={},
         )
         db_session.add(obs)
         db_session.commit()  # This should raise IntegrityError

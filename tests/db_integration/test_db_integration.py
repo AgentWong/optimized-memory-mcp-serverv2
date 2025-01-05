@@ -75,7 +75,7 @@ def test_observation_entity_integrity(db_session):
     """Test observation foreign key constraints"""
     from src.db.models.entities import Entity
     from src.db.models.observations import Observation
-    
+
     # Create entity
     entity = Entity(name="test_entity", entity_type="test")
     db_session.add(entity)
@@ -87,7 +87,7 @@ def test_observation_entity_integrity(db_session):
         type="test",
         observation_type="test_obs",
         value={"test": "data"},
-        meta_data={}
+        meta_data={},
     )
     db_session.add(obs)
     db_session.commit()
@@ -99,7 +99,7 @@ def test_observation_entity_integrity(db_session):
             type="test",
             observation_type="test",
             value={},
-            meta_data={}
+            meta_data={},
         )
         db_session.add(invalid_obs)
         db_session.commit()
@@ -158,39 +158,39 @@ def test_ansible_collection_relationships(db_session: Session):
 @pytest.mark.asyncio
 async def test_concurrent_transactions(mcp_server):
     """Test concurrent database operations"""
-    if not hasattr(mcp_server, 'start_async_operation'):
+    if not hasattr(mcp_server, "start_async_operation"):
         pytest.skip("Server does not implement start_async_operation")
-        
+
     # Create initial entity through first operation
     operation1 = await mcp_server.start_async_operation(
-        "create_entity",
-        {"name": "concurrent_test", "entity_type": "test"}
+        "create_entity", {"name": "concurrent_test", "entity_type": "test"}
     )
     assert operation1["status"] == "completed", "First operation failed"
     assert "result" in operation1, "Missing operation result"
     entity_id = operation1["result"]["id"]
-    
+
     # Try concurrent modifications
     operations = []
     for i in range(3):  # Try multiple concurrent updates
         operations.append(
             await mcp_server.start_async_operation(
-                "update_entity",
-                {"id": entity_id, "name": f"modified_concurrent_{i}"}
+                "update_entity", {"id": entity_id, "name": f"modified_concurrent_{i}"}
             )
         )
-    
+
     # Wait for all operations to complete
     for op in operations:
         while op["status"] not in ["completed", "failed"]:
             op_status = await mcp_server.get_operation_status(op["id"])
             op.update(op_status)
             await asyncio.sleep(0.1)  # Prevent tight loop
-    
+
     # At least one operation should fail with a concurrent modification error
     failed_ops = [op for op in operations if op["status"] == "failed"]
-    assert len(failed_ops) > 0, "Expected at least one operation to fail due to concurrency"
-    
+    assert (
+        len(failed_ops) > 0
+    ), "Expected at least one operation to fail due to concurrency"
+
     # Verify error contains concurrency information
     failed_op = failed_ops[0]
     assert "error" in failed_op, "Failed operation missing error details"
@@ -202,35 +202,35 @@ async def test_concurrent_transactions(mcp_server):
 @pytest.mark.asyncio
 async def test_database_cleanup(mcp_server, db_session):
     """Verify database cleanup between tests"""
-    if not hasattr(mcp_server, 'start_async_operation'):
+    if not hasattr(mcp_server, "start_async_operation"):
         pytest.skip("Server does not implement start_async_operation")
-        
+
     # Create test entity
     operation = await mcp_server.start_async_operation(
-        "create_entity",
-        {"name": "cleanup_test", "entity_type": "test"}
+        "create_entity", {"name": "cleanup_test", "entity_type": "test"}
     )
     assert operation["status"] == "completed", "Entity creation failed"
     entity_id = operation["result"]["id"]
-    
+
     # Verify entity exists
     from src.db.models.entities import Entity
+
     entity = db_session.query(Entity).filter_by(id=entity_id).first()
     assert entity is not None, "Entity should exist"
-    
+
     # Close session and create new one
     db_session.close()
     new_session = next(get_db())
-    
+
     try:
         # Verify entity persists in new session
         entity = new_session.query(Entity).filter_by(id=entity_id).first()
         assert entity is not None, "Entity should persist across sessions"
-        
+
         # Clean up
-        if hasattr(mcp_server, 'cleanup'):
+        if hasattr(mcp_server, "cleanup"):
             await mcp_server.cleanup()
-            
+
         # Verify cleanup worked
         entity = new_session.query(Entity).filter_by(id=entity_id).first()
         assert entity is None, "Entity should be cleaned up"

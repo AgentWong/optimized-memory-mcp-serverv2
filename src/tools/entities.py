@@ -59,7 +59,7 @@ async def register_tools(mcp: FastMCP) -> list:
         entity_type: str,
         metadata: Optional[Dict[str, Any]] = None,
         observations: Optional[List[str]] = None,
-        ctx: Context = None
+        ctx: Context = None,
     ) -> Dict[str, Any]:
         """Create a new entity in the system.
 
@@ -92,23 +92,34 @@ async def register_tools(mcp: FastMCP) -> list:
         """
         if not name or not name.strip():
             raise ValidationError("Entity name cannot be empty")
-            
+
         if metadata is not None and not isinstance(metadata, dict):
             raise ValidationError("Metadata must be a dictionary")
-            
+
         # Allow test types in non-production environments
-        valid_types = {'instance', 'database', 'network', 'storage', 'security', 'test', 'test_type'}
+        valid_types = {
+            "instance",
+            "database",
+            "network",
+            "storage",
+            "security",
+            "test",
+            "test_type",
+        }
         if entity_type.lower() not in valid_types:
-            raise ValidationError(f"Invalid entity type. Must be one of: {', '.join(sorted(valid_types))}")
+            raise ValidationError(
+                f"Invalid entity type. Must be one of: {', '.join(sorted(valid_types))}"
+            )
 
         from ..db.connection import get_db
+
         db = next(get_db())
         try:
             entity = Entity(
                 name=name.strip(),
                 entity_type=entity_type.lower(),
                 meta_data=metadata or {},
-                tags={}
+                tags={},
             )
             db.add(entity)
             db.commit()
@@ -127,7 +138,7 @@ async def register_tools(mcp: FastMCP) -> list:
                             observation_type="initial",
                             type="state",
                             value={"content": str(obs_content).strip()},
-                            meta_data={}
+                            meta_data={},
                         )
                         db.add(observation)
                     except Exception as e:
@@ -139,7 +150,7 @@ async def register_tools(mcp: FastMCP) -> list:
                 "id": entity.id,
                 "name": entity.name,
                 "type": entity.entity_type,
-                "metadata": entity.meta_data
+                "metadata": entity.meta_data,
             }
             return result  # Return dict directly for consistency
         except Exception as e:
@@ -153,7 +164,7 @@ async def register_tools(mcp: FastMCP) -> list:
         entity_id: int,
         name: str = None,
         metadata: Dict[str, Any] = None,
-        ctx: Context = None
+        ctx: Context = None,
     ) -> Dict[str, Any]:
         """Update an existing entity's properties.
 
@@ -187,6 +198,7 @@ async def register_tools(mcp: FastMCP) -> list:
             }
         """
         from ..db.connection import get_db
+
         db = next(get_db())
         try:
             entity = db.query(Entity).filter(Entity.id == entity_id).first()
@@ -238,6 +250,7 @@ async def register_tools(mcp: FastMCP) -> list:
             }
         """
         from ..db.connection import get_db
+
         db = next(get_db())
         try:
             entity = db.query(Entity).filter(Entity.id == entity_id).first()
@@ -253,7 +266,7 @@ async def register_tools(mcp: FastMCP) -> list:
             raise DatabaseError(f"Failed to delete entity {str(entity_id)}: {str(e)}")
         finally:
             db.close()
-            
+
     # Return list of registered tools
     tools.extend([create_entity, update_entity, delete_entity])
     return tools

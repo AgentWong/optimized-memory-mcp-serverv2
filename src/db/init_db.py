@@ -21,17 +21,17 @@ def create_db_engine():
     if is_test or DATABASE_URL.startswith("sqlite"):
         # SQLite configuration (including tests)
         engine = create_engine(
-            DATABASE_URL,
-            echo=False,
-            connect_args={"check_same_thread": False}
+            DATABASE_URL, echo=False, connect_args={"check_same_thread": False}
         )
         # Enable foreign keys at runtime
         from sqlalchemy import event
+
         @event.listens_for(engine, "connect")
         def set_sqlite_pragma(dbapi_connection, connection_record):
             cursor = dbapi_connection.cursor()
             cursor.execute("PRAGMA foreign_keys=ON")
             cursor.close()
+
         return engine
     else:
         # Production PostgreSQL configuration
