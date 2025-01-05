@@ -44,17 +44,71 @@ async def create_server() -> FastMCP:
     Raises:
         MCPError: If server initialization fails
     """
-    # Create FastMCP instance with capabilities
-    mcp = FastMCP(
-        "Infrastructure Memory Server",
-        dependencies=["sqlalchemy", "alembic", "redis", "asyncio", "aiohttp"],
-        capabilities={
-            "resources": {"subscribe": True, "listChanged": True},
-            "tools": {"listChanged": True},
-            "logging": True,
-            "completion": True,
-        },
-    )
+    try:
+        # Create FastMCP instance with capabilities
+        mcp = FastMCP(
+            "Infrastructure Memory Server",
+            dependencies=["sqlalchemy", "alembic", "redis", "asyncio", "aiohttp"],
+            capabilities={
+                "resources": {"subscribe": True, "listChanged": True},
+                "tools": {"listChanged": True},
+                "logging": True,
+                "completion": True,
+            },
+        )
+
+        # Register all resources
+        from .resources import (
+            entities,
+            relationships,
+            observations,
+            providers,
+            ansible,
+            versions,
+        )
+
+        resource_modules = [
+            entities,
+            relationships,
+            observations,
+            providers,
+            ansible,
+            versions,
+        ]
+
+        for module in resource_modules:
+            module.register_resources(mcp)
+
+        # Register all tools
+        from .tools import (
+            entities as entity_tools,
+            relationships as relationship_tools,
+            observations as observation_tools,
+            providers as provider_tools,
+            ansible as ansible_tools,
+            analysis as analysis_tools,
+        )
+
+        tool_modules = [
+            entity_tools,
+            relationship_tools,
+            observation_tools,
+            provider_tools,
+            ansible_tools,
+            analysis_tools,
+        ]
+
+        for module in tool_modules:
+            await module.register_tools(mcp)
+
+        # Initialize the server
+        init_options = mcp.get_initialization_options()
+        await mcp.initialize(init_options)
+        setattr(mcp, "_initialized", True)
+
+        return mcp
+    except Exception as e:
+        raise MCPError(f"Failed to create server: {str(e)}")
     # Register all resources
     from .resources import (
         entities,

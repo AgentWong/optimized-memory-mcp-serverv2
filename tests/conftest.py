@@ -329,22 +329,10 @@ async def mcp_server():
         if not getattr(server, "_initialized", False):
             init_options = server.get_initialization_options()
             await server.initialize(init_options)
+            setattr(server, "_initialized", True)
 
-        yield server
+        return server
 
-        # Cleanup
-        if server:
-            try:
-                await server.cleanup()
-            except Exception as e:
-                print(f"Error during server cleanup: {e}")
-    except Exception as e:
-        if server:
-            try:
-                await server.cleanup()
-            except Exception as cleanup_error:
-                print(f"Error during cleanup after error: {cleanup_error}")
-        raise
     except Exception as e:
         if server:
             try:
