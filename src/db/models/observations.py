@@ -43,10 +43,10 @@ class Observation(Base, BaseModel, TimestampMixin):
         if "entity_id" not in kwargs or not kwargs["entity_id"]:
             raise ValueError("entity_id is required")
 
-        # Initialize base class first to get session
+        # Initialize base class
         super().__init__(**kwargs)
 
-        # Validate entity exists after initialization
+        # Validate entity exists
         from sqlalchemy import inspect
         if inspect(self).session:
             session = inspect(self).session

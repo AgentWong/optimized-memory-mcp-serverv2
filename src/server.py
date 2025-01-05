@@ -113,6 +113,36 @@ async def configure_server(server: Server) -> Server:
             """Handle resource reading requests."""
             if not resource_path:
                 raise MCPError("Resource path required", code="INVALID_RESOURCE")
+            handler = server._resources.get(resource_path)
+            if not handler:
+                raise MCPError(f"Resource {resource_path} not found", code="RESOURCE_NOT_FOUND")
+            ctx = Context()
+            result = await handler(ctx, **(params or {}))
+            return types.ReadResourceResult(data=result, resource_path=resource_path)
+
+        async def handle_call_tool(tool_name: str, arguments: dict = None) -> types.CallToolResult:
+            """Handle tool execution requests."""
+            tool = server._tools.get(tool_name)
+            if not tool:
+                raise MCPError(f"Tool {tool_name} not found", code="TOOL_NOT_FOUND")
+            ctx = Context()
+            result = await tool(ctx, **(arguments or {}))
+            return types.CallToolResult(result=result)
+
+        async def handle_start_async_operation(tool_name: str, arguments: dict = None) -> dict:
+            """Handle async operation requests."""
+            tool = server._tools.get(tool_name)
+            if not tool:
+                raise MCPError(f"Tool {tool_name} not found", code="TOOL_NOT_FOUND")
+            ctx = Context()
+            result = await tool(ctx, **(arguments or {}))
+            return {"status": "completed", "result": result}
+
+        # Register protocol handlers
+        async def handle_read_resource(resource_path: str, params: dict = None) -> types.ReadResourceResult:
+            """Handle resource reading requests."""
+            if not resource_path:
+                raise MCPError("Resource path required", code="INVALID_RESOURCE")
                 
             try:
                 handler = server._resources.get(resource_path)
@@ -179,9 +209,9 @@ async def configure_server(server: Server) -> Server:
                 }
                 raise MCPError(f"Tool execution failed: {str(e)}", code="TOOL_ERROR")
 
-        # Register protocol handlers
+        # Attach handlers directly to server instance
         server.read_resource = handle_read_resource
-        server.call_tool = handle_call_tool 
+        server.call_tool = handle_call_tool
         server.start_async_operation = handle_start_async_operation
 
         # Attach protocol methods to server instance

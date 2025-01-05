@@ -36,11 +36,9 @@ class Relationship(Base, BaseModel, TimestampMixin):
         if "type" not in kwargs:
             kwargs["type"] = "depends_on"  # Default type
         if "entity_id" not in kwargs and "source_id" in kwargs:
-            kwargs["entity_id"] = kwargs[
-                "source_id"
-            ]  # Set entity_id to source_id by default
+            kwargs["entity_id"] = kwargs["source_id"]
 
-        # Initialize base class first
+        # Initialize base class
         super().__init__(**kwargs)
 
         # Validate relationship type
@@ -51,13 +49,13 @@ class Relationship(Base, BaseModel, TimestampMixin):
         if self.source_id == self.target_id:
             raise ValueError("Source and target cannot be the same entity")
 
-        # Validate entity references after initialization
+        # Validate entity references
         from sqlalchemy import inspect
         if inspect(self).session:
             session = inspect(self).session
             from .entities import Entity
-            for field, value in [('entity_id', self.entity_id), 
-                               ('source_id', self.source_id), 
+            for field, value in [('entity_id', self.entity_id),
+                               ('source_id', self.source_id),
                                ('target_id', self.target_id)]:
                 if not session.query(Entity).filter_by(id=value).first():
                     from sqlalchemy.exc import IntegrityError
