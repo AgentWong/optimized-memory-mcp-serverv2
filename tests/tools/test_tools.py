@@ -214,11 +214,12 @@ async def test_tool_error_handling(mcp_server):
 @pytest.mark.asyncio
 async def test_tool_operation_status(mcp_server):
     """Test async operation status handling"""
-    # Execute tool with async tracking
+    # Execute tool with async tracking and timeout
     result = await mcp_server.call_tool(
         "create_entity",
         {"name": "status_test", "entity_type": "test"},
-        track_status=True
+        track_status=True,
+        timeout=5.0  # 5 second timeout
     )
     
     # Verify result structure

@@ -184,6 +184,7 @@ def test_observation_creation(db_session: Session):
 
 import pytest
 from sqlalchemy.exc import IntegrityError
+from src.utils.errors import ValidationError
 
 from src.db.models.entities import Entity
 from src.db.connection import get_db

@@ -118,6 +118,11 @@ async def test_resource_error_handling(mcp_server):
     with pytest.raises(MCPError) as exc:
         await mcp_server.read_resource("invalid://resource")
     error = exc.value
+    
+    # Additional validation of error structure
+    assert hasattr(error, 'code'), "Error should have code attribute"
+    assert hasattr(error, 'details'), "Error should have details attribute"
+    assert isinstance(error.details, dict), "Error details should be dictionary"
     # Validate error code and message
     assert error.code in ["RESOURCE_NOT_FOUND", "INVALID_RESOURCE"], "Incorrect error code"
     assert "not found" in str(error).lower(), "Wrong error message"

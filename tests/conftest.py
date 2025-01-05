@@ -220,7 +220,15 @@ class TestClient:
             operation = status
             retry_count += 1
             if retry_count >= max_retries:
-                raise MCPError("Operation timed out", code="OPERATION_TIMEOUT")
+                raise MCPError(
+                    "Operation timed out",
+                    code="OPERATION_TIMEOUT",
+                    details={
+                        "operation_id": operation['id'],
+                        "max_retries": max_retries,
+                        "elapsed_time": retry_count * 0.1
+                    }
+                )
         
         if operation['status'] == 'failed':
             raise MCPError(operation.get('error', 'Tool execution failed'), code="TOOL_ERROR")
