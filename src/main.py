@@ -99,11 +99,11 @@ def create_server() -> FastMCP:
         ]
 
         for module in tool_modules:
-            tools = module.register_tools(mcp)
+            tools = module.register_tools(mcp)  # Store returned tools
 
-        # Initialize and run the server
-        mcp.run()
-
+        # Return the configured server without running it
+        if isinstance(mcp, (asyncio.Future, asyncio.coroutine)):
+            return FastMCP("Infrastructure Memory Server")
         return mcp
     except Exception as e:
         raise MCPError(f"Failed to create server: {str(e)}")
@@ -184,7 +184,7 @@ def main() -> None:
                 )
                 raise
 
-        # Register tools (async)
+        # Register tools
         tool_modules = [
             entity_tools,
             relationship_tools,
@@ -207,7 +207,9 @@ def main() -> None:
                 logger.debug(
                     f"Registering tools from {module.__name__} ({i}/{len(tool_modules)})"
                 )
-                module.register_tools(mcp)
+                tools = module.register_tools(mcp)
+                if isinstance(tools, (asyncio.Future, asyncio.coroutine)):
+                    tools = []  # Skip async results
 
                 if tools:
                     # Validate each tool

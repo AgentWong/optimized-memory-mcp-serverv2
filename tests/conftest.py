@@ -148,19 +148,10 @@ def mcp_server():
     return create_server()
 
 @pytest.fixture
-def client():
+def client(mcp_server):
     """Create MCP client connected to test server."""
-    server_params = StdioServerParameters(
-        command="python",
-        args=["-m", "src.main"],
-        env={
-            "DATABASE_URL": "sqlite:///:memory:",
-            "TESTING": "true",
-            "LOG_LEVEL": "ERROR"
-        }
-    )
-    
-    with stdio_client(server_params) as (read_stream, write_stream):
-        with ClientSession(read_stream, write_stream) as session:
-            session.initialize()
-            return session
+    # Create client using stdio transport
+    server_params = StdioServerParameters(command="python", args=["-m", "mcp", "run"])
+    read, write = stdio_client(server_params)
+    client = ClientSession(read, write)
+    return client
