@@ -314,14 +314,63 @@ async def mcp_server():
         # Create and configure server
         server = await create_server()
         if not isinstance(server, FastMCP):
-            raise TypeError("Server must be a FastMCP instance")
-        return server
+            raise TypeError("create_server() must return a FastMCP instance")
+
+        # Initialize the server
+        init_options = server.get_initialization_options()
+        await server.initialize(init_options)
+
+        # Register resources and tools
+        from src.resources import (
+            entities, relationships, observations,
+            providers, ansible, versions
+        )
+        
+        resource_modules = [
+            entities, relationships, observations,
+            providers, ansible, versions
+        ]
+        
+        for module in resource_modules:
+            module.register_resources(server)
+
+        # Register tools
+        from src.tools import (
+            entities as entity_tools,
+            relationships as relationship_tools,
+            observations as observation_tools,
+            providers as provider_tools,
+            ansible as ansible_tools,
+            analysis as analysis_tools
+        )
+        
+        tool_modules = [
+            entity_tools, relationship_tools,
+            observation_tools, provider_tools,
+            ansible_tools, analysis_tools
+        ]
+        
+        for module in tool_modules:
+            await module.register_tools(server)
+
+        yield server  # Use yield instead of return for proper cleanup
+
+        # Cleanup
+        if hasattr(server, 'cleanup'):
+            await server.cleanup()
+        if hasattr(server, 'close'):
+            await server.close()
+
     except Exception as e:
-        print(f"Error creating server: {e}")
+        print(f"Error in mcp_server fixture: {e}")
         raise
 
 
 @pytest.fixture
-async def client(mcp_server):
+async def client():
     """Create test client using the MCP server fixture."""
-    return TestClient(await mcp_server)
+    from src.main import create_server
+    
+    server = await create_server()
+    async with TestClient(server) as client:
+        yield client
