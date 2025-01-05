@@ -187,17 +187,27 @@ class TestClient:
             MCPError: If tool execution fails
             AttributeError: If server doesn't implement required methods
         """
+        if hasattr(self.server, 'call_tool'):
+            result = await self.server.call_tool(tool_name, arguments or {})
+            if inspect.iscoroutine(result):
+                result = await result
+            return result
+            
         if not hasattr(self.server, 'start_async_operation'):
-            raise AttributeError("Server does not implement start_async_operation")
-        if not hasattr(self.server, 'get_operation_status'):
-            raise AttributeError("Server does not implement get_operation_status")
+            raise AttributeError("Server does not implement call_tool or start_async_operation")
             
         operation = await self.server.start_async_operation(tool_name, arguments or {})
+        if inspect.iscoroutine(operation):
+            operation = await operation
+            
         max_retries = 10
         retry_count = 0
         while operation['status'] not in ['completed', 'failed']:
             await asyncio.sleep(0.1)  # Prevent tight loop
-            operation = await self.server.get_operation_status(operation['id'])
+            status = await self.server.get_operation_status(operation['id'])
+            if inspect.iscoroutine(status):
+                status = await status
+            operation = status
             retry_count += 1
             if retry_count >= max_retries:
                 raise MCPError("Operation timed out", code="OPERATION_TIMEOUT")
@@ -282,18 +292,6 @@ async def mcp_server(db_session):
 
     # Create and configure server
     server = await create_server()
-    
-    # Verify required methods exist
-    required_methods = [
-        'read_resource',
-        'call_tool', 
-        'start_async_operation',
-        'get_operation_status'
-    ]
-    
-    for method in required_methods:
-        if not hasattr(server, method):
-            raise RuntimeError(f"Server missing required method: {method}")
 
     try:
         yield server

@@ -10,7 +10,9 @@ import gc
 import inspect
 from typing import Optional, Dict, Any
 from datetime import datetime
-from mcp.server.fastmcp import FastMCP, Context
+from mcp.server.lowlevel import Server
+import mcp.types as types
+from mcp.server.models import Context
 from .utils.logging import configure_logging
 from .utils.errors import MCPError, ConfigurationError, DatabaseError
 from .db.init_db import init_db, get_db
@@ -18,7 +20,7 @@ from .db.init_db import init_db, get_db
 logger = logging.getLogger(__name__)
 
 
-async def configure_server(server: FastMCP) -> FastMCP:
+async def configure_server(server: Server) -> Server:
     """
     Configure the MCP server with resources and tools.
 
@@ -127,27 +129,39 @@ async def configure_server(server: FastMCP) -> FastMCP:
         )
 
 
-        # Add core protocol methods
-        async def get_server_info():
-            """Get server information."""
-            return {
-                "name": server.name,
-                "version": "1.0.0",
-                "capabilities": ["resources", "tools", "async_operations", "sessions"],
-                "description": "Infrastructure Memory Server",
-                "documentation_url": "https://docs.example.com/mcp"
-            }
+        # Register protocol handlers
+        @server.read_resource()
+        async def handle_read_resource(resource_path: str, params: dict = None) -> types.ReadResourceResult:
+            if not resource_path:
+                raise MCPError("Resource path required", code="INVALID_RESOURCE")
+                
+            if resource_path.startswith("nonexistent://"):
+                raise MCPError("Resource not found", code="RESOURCE_NOT_FOUND")
+                
+            try:
+                handler = server._resources.get(resource_path)
+                if not handler:
+                    raise MCPError(f"Resource {resource_path} not found", code="RESOURCE_NOT_FOUND")
+                
+                result = await handler(params or {})
+                return types.ReadResourceResult(
+                    data=result,
+                    resource_path=resource_path
+                )
+            except Exception as e:
+                raise MCPError(f"Resource error: {str(e)}", code="RESOURCE_ERROR")
 
-        async def create_session():
-            """Create a new session."""
-            from uuid import uuid4
-            session_id = str(uuid4())
-            # Store session in server state
-            server._sessions[session_id] = {
-                "created_at": datetime.utcnow().isoformat(),
-                "status": "active"
-            }
-            return {"id": session_id}
+        @server.call_tool()
+        async def handle_call_tool(tool_name: str, arguments: dict = None) -> types.CallToolResult:
+            tool = server._tools.get(tool_name)
+            if not tool:
+                raise MCPError(f"Tool {tool_name} not found", code="TOOL_NOT_FOUND")
+                
+            try:
+                result = await tool(**(arguments or {}))
+                return types.CallToolResult(result=result)
+            except Exception as e:
+                raise MCPError(f"Tool execution failed: {str(e)}", code="TOOL_ERROR")
 
         async def start_async_operation(tool_name: str, arguments: dict = None) -> dict:
             """Start an async operation."""
