@@ -13,7 +13,7 @@ class Observation(Base, BaseModel, TimestampMixin):
     about entities with timestamps and metadata.
     """
 
-    entity_id = Column(String, ForeignKey("entity.id"), nullable=False, index=True)
+    entity_id = Column(Integer, ForeignKey("entity.id"), nullable=False, index=True)
     type = Column(String, nullable=False, index=True)  # Observation type
     observation_type = Column(
         String, nullable=False, index=True

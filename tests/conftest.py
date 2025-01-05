@@ -1,6 +1,7 @@
 import os
 import inspect
 import asyncio
+from sqlalchemy.exc import IntegrityError
 import pytest
 from sqlalchemy import create_engine
 from src.utils.errors import MCPError
@@ -283,6 +284,10 @@ async def mcp_server(db_session):
     server = await create_server()
     if hasattr(server, 'initialize'):
         await server.initialize()
+    
+    # Ensure server is fully initialized
+    if inspect.iscoroutine(server):
+        server = await server
     
     # Initialize the server
     await server.initialize()
