@@ -332,7 +332,8 @@ async def mcp_server():
         ]
         
         for module in resource_modules:
-            module.register_resources(server)
+            if hasattr(module, 'register_resources'):
+                module.register_resources(server)
 
         # Register tools
         from src.tools import (
@@ -351,26 +352,27 @@ async def mcp_server():
         ]
         
         for module in tool_modules:
-            await module.register_tools(server)
+            if hasattr(module, 'register_tools'):
+                await module.register_tools(server)
 
-        yield server  # Use yield instead of return for proper cleanup
-
-        # Cleanup
-        if hasattr(server, 'cleanup'):
-            await server.cleanup()
-        if hasattr(server, 'close'):
-            await server.close()
+        return server
 
     except Exception as e:
         print(f"Error in mcp_server fixture: {e}")
         raise
 
+    finally:
+        # Cleanup after tests
+        if 'server' in locals():
+            if hasattr(server, 'cleanup'):
+                await server.cleanup()
+            if hasattr(server, 'close'):
+                await server.close()
+
 
 @pytest.fixture
-async def client():
+async def client(mcp_server):
     """Create test client using the MCP server fixture."""
-    from src.main import create_server
-    
-    server = await create_server()
+    server = await mcp_server
     async with TestClient(server) as client:
         yield client
