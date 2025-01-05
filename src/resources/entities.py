@@ -28,7 +28,7 @@ def register_resources(mcp: FastMCP) -> None:
     @mcp.resource(
         "entities://list?page={page}&per_page={per_page}&type={type}&created_after={created_after}&ctx={ctx}"
     )
-    async def list_entities(
+    def list_entities(
         ctx: Context,
         page: str = "null",
         per_page: str = "null",
@@ -157,7 +157,7 @@ def register_resources(mcp: FastMCP) -> None:
             )
 
     @mcp.resource("entities://{id}?include={include}&ctx={ctx}")
-    async def get_entity(
+    def get_entity(
         ctx: Context, id: str, include: str = "null"
     ) -> Dict[str, Any]:
         """Get details for a specific entity with optional related data.

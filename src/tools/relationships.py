@@ -25,7 +25,7 @@ from ..db.models.entities import Entity
 from ..utils.errors import DatabaseError, ValidationError
 
 
-async def register_tools(mcp: FastMCP) -> list:
+def register_tools(mcp: FastMCP) -> list:
     """Register relationship management tools with the MCP server.
 
     This function registers all relationship-related tools with the MCP server instance.
@@ -39,7 +39,7 @@ async def register_tools(mcp: FastMCP) -> list:
     """
 
     @mcp.tool()
-    async def create_relationship(
+    def create_relationship(
         source_id: int,
         target_id: int,
         relationship_type: str,
@@ -105,7 +105,7 @@ async def register_tools(mcp: FastMCP) -> list:
             raise DatabaseError(f"Failed to create relationship: {str(e)}")
 
     @mcp.tool()
-    async def update_relationship(
+    def update_relationship(
         relationship_id: int,
         relationship_type: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
@@ -175,7 +175,7 @@ async def register_tools(mcp: FastMCP) -> list:
             )
 
     @mcp.tool()
-    async def delete_relationship(relationship_id: int) -> Dict[str, str]:
+    def delete_relationship(relationship_id: int) -> Dict[str, str]:
         """Delete a relationship between entities.
 
         Args:

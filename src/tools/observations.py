@@ -25,7 +25,7 @@ from ..db.models.entities import Entity
 from ..utils.errors import DatabaseError, ValidationError
 
 
-async def register_tools(mcp: FastMCP) -> list:
+def register_tools(mcp: FastMCP) -> list:
     """Register observation management tools with the MCP server.
 
     This function registers all observation-related tools with the MCP server instance.
@@ -53,7 +53,7 @@ async def register_tools(mcp: FastMCP) -> list:
     """
 
     @mcp.tool()
-    async def create_observation(
+    def create_observation(
         entity_id: int,
         observation_type: str,
         value: Dict[str, Any],
@@ -120,7 +120,7 @@ async def register_tools(mcp: FastMCP) -> list:
             raise DatabaseError(f"Failed to create observation: {str(e)}")
 
     @mcp.tool()
-    async def update_observation(
+    def update_observation(
         observation_id: int,
         value: Optional[Dict[str, Any]] = None,
         metadata: Optional[Dict[str, Any]] = None,
@@ -191,7 +191,7 @@ async def register_tools(mcp: FastMCP) -> list:
             )
 
     @mcp.tool()
-    async def delete_observation(observation_id: int) -> Dict[str, str]:
+    def delete_observation(observation_id: int) -> Dict[str, str]:
         """Delete an observation.
 
         Args:

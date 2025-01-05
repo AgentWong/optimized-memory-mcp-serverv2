@@ -23,7 +23,7 @@ from ..db.models.ansible import AnsibleCollection
 from ..utils.errors import DatabaseError, ValidationError
 
 
-async def register_tools(mcp: FastMCP) -> list:
+def register_tools(mcp: FastMCP) -> list:
     """Register Ansible management tools with the MCP server.
 
     This function registers all Ansible-related tools with the MCP server instance.

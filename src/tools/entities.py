@@ -24,7 +24,7 @@ from ..db.models.observations import Observation
 from ..utils.errors import DatabaseError, ValidationError
 
 
-async def register_tools(mcp: FastMCP) -> list:
+def register_tools(mcp: FastMCP) -> list:
     """Register entity management tools with the MCP server.
 
     This function registers all entity-related tools with the MCP server instance.
@@ -54,7 +54,7 @@ async def register_tools(mcp: FastMCP) -> list:
     tools = []
 
     @mcp.tool()
-    async def create_entity(
+    def create_entity(
         name: str,
         entity_type: str,
         metadata: Optional[Dict[str, Any]] = None,
@@ -160,7 +160,7 @@ async def register_tools(mcp: FastMCP) -> list:
             db.close()
 
     @mcp.tool()
-    async def update_entity(
+    def update_entity(
         entity_id: int,
         name: str = None,
         metadata: Dict[str, Any] = None,
@@ -228,7 +228,7 @@ async def register_tools(mcp: FastMCP) -> list:
             db.close()
 
     @mcp.tool()
-    async def delete_entity(entity_id: int) -> Dict[str, str]:
+    def delete_entity(entity_id: int) -> Dict[str, str]:
         """Delete an entity from the system.
 
         Args:
