@@ -37,7 +37,7 @@ def register_resources(mcp: FastMCP) -> None:
     @mcp.resource(
         "relationships://list?source_id={source_id}&target_id={target_id}&relationship_type={relationship_type}&ctx={ctx}"
     )
-    async def list_relationships(
+    def list_relationships(
         ctx: Context,
         source_id: str = "null",
         target_id: str = "null",

@@ -29,15 +29,15 @@ def db_session():
 def test_create_entity_tool(mcp_server):
     """Test create_entity tool"""
     
-    result = mcp_server.call_tool(
+    result = mcp_server._tool_manager.call_tool(
         "create_entity",
         {
             "name": "test_entity",
             "entity_type": "test",
             "observations": ["Initial observation"],
-        },
+        }
     )
-
+    
     assert isinstance(result, dict), "Result should be a dictionary"
     assert result["name"] == "test_entity", "Entity name mismatch"
     assert isinstance(result["id"], str), "Entity ID should be string"

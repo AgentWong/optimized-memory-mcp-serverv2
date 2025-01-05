@@ -38,7 +38,7 @@ def register_tools(mcp: FastMCP) -> list:
     Tools follow MCP protocol patterns for consistent behavior and error reporting.
     """
 
-    @mcp.tool()
+    @mcp.tool() 
     def analyze_provider(
         provider_id: int, from_version: str, to_version: str
     ) -> Dict[str, Any]:

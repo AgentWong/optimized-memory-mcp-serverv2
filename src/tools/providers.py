@@ -24,7 +24,7 @@ from ..db.models.providers import Provider
 from ..utils.errors import DatabaseError, ValidationError
 
 
-async def register_tools(mcp: FastMCP) -> list:
+def register_tools(mcp: FastMCP) -> list:
     """Register provider management tools with the MCP server.
 
     This function registers all provider-related tools with the MCP server instance.

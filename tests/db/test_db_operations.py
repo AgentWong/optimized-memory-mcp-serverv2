@@ -195,13 +195,12 @@ from src.db.models.entities import Entity
 from src.db.connection import get_db
 
 
-@pytest.mark.asyncio
-async def test_entity_creation(db_session, mcp_server):
+def test_entity_creation(db_session, mcp_server):
     """Test basic entity creation and validation."""
     # Create entity through MCP tool
     result = mcp_server.call_tool(
         "create_entity",
-        {"name": "test_entity", "entity_type": "test_type", "meta_data": {}},
+        {"name": "test_entity", "entity_type": "test_type", "meta_data": {}}
     )
 
     # Verify result
@@ -228,8 +227,7 @@ def test_entity_required_fields():
         assert entity.tags == []
 
 
-@pytest.mark.asyncio
-async def test_entity_timestamps(db_session, mcp_server):
+def test_entity_timestamps(db_session, mcp_server):
     """Test that timestamps are automatically set."""
     # Create entity
     result = mcp_server.call_tool(
