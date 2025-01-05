@@ -2,90 +2,151 @@
 """
 Main entry point for the MCP Server.
 
-Initializes and runs the MCP server with configured resources and tools
+Initializes and runs the FastMCP server with configured resources and tools
 for infrastructure management.
 """
-import os
-import asyncio
-import inspect
 import logging
-from mcp.server.lowlevel import Server, NotificationOptions
-from mcp.server.models import InitializationOptions
-import mcp.server.stdio
-import mcp.types as types
-from .server import configure_server
-from .utils.errors import ConfigurationError
+import signal
+import asyncio
+from typing import Optional
+from mcp.server.fastmcp import FastMCP
 from .utils.logging import configure_logging
 from .db.init_db import init_db
+from .utils.errors import MCPError
 
 logger = logging.getLogger(__name__)
 
+# Track server status
+is_shutting_down = False
 
-async def create_server() -> Server:
-    """Create and configure the MCP server instance."""
+def signal_handler(signum, frame):
+    """Handle shutdown signals gracefully."""
+    global is_shutting_down
+    if is_shutting_down:
+        logger.warning("Forced shutdown requested, terminating immediately")
+        raise SystemExit(1)
+    logger.info(f"Received signal {signum}, initiating graceful shutdown")
+    is_shutting_down = True
+
+# Register signal handlers
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
+
+# Create FastMCP instance with capabilities
+mcp = FastMCP(
+    "Infrastructure Memory Server",
+    dependencies=[
+        "sqlalchemy",
+        "alembic",
+        "redis",
+        "asyncio",
+        "aiohttp"
+    ],
+    capabilities={
+        "resources": {
+            "subscribe": True,
+            "listChanged": True
+        },
+        "tools": {
+            "listChanged": True
+        },
+        "logging": True,
+        "completion": True
+    }
+)
+
+async def shutdown() -> None:
+    """Perform graceful shutdown."""
+    global is_shutting_down
+    if not is_shutting_down:
+        is_shutting_down = True
+        logger.info("Initiating graceful shutdown")
     try:
-        # Configure logging first
-        configure_logging()
-
-        # Initialize database
-        init_db()
-
-        # Create base server
-        server = Server("Infrastructure Memory Server")
-
-        # Configure server with all components
-        configured_server = await configure_server(server)
-        if inspect.iscoroutine(configured_server):
-            configured_server = await configured_server
-
-        # Initialize the server
-        init_options = InitializationOptions(
-            server_name="Infrastructure Memory Server",
-            server_version="1.0.0",
-            capabilities=configured_server.get_capabilities(
-                notification_options=NotificationOptions(),
-                experimental_capabilities={}
-            )
-        )
-
-        await configured_server.initialize(init_options)
-        
-        # Verify server has required methods and they are callable
-        required_methods = ['read_resource', 'call_tool', 'start_async_operation']
-        for method in required_methods:
-            if not hasattr(configured_server, method):
-                raise ConfigurationError(f"Server missing {method} method")
-            if not callable(getattr(configured_server, method)):
-                raise ConfigurationError(f"Server {method} is not callable")
-                
-        return configured_server
-
+        await mcp.shutdown()
     except Exception as e:
-        logger.error(f"Failed to create server: {str(e)}")
-        raise ConfigurationError(f"Server initialization failed: {str(e)}")
+        logger.error(f"Error during shutdown: {str(e)}")
 
-
-async def run_server(server: Server):
-    """Run the MCP server."""
-    async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
-        await server.run(read_stream, write_stream)
-
-def main() -> None:
+async def main() -> None:
     """Main entry point."""
     try:
-        server = asyncio.run(create_server())
+        # Configure logging
+        configure_logging()
+        
+        # Initialize database with retries
+        max_retries = 3
+        retry_delay = 1
+        
+        for attempt in range(max_retries):
+            try:
+                init_db()
+                break
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    logger.error(f"Database initialization failed after {max_retries} attempts: {str(e)}")
+                    raise
+                logger.warning(f"Database initialization attempt {attempt + 1} failed: {str(e)}")
+                await asyncio.sleep(retry_delay)
+                retry_delay *= 2
+        
+        # Import and register resources/tools
+        from .resources import (
+            entities, relationships, observations,
+            providers, ansible, versions
+        )
+        from .tools import (
+            entities as entity_tools,
+            relationships as relationship_tools,
+            observations as observation_tools,
+            providers as provider_tools,
+            ansible as ansible_tools,
+            analysis as analysis_tools
+        )
+
+        # Register resources
+        resource_modules = [
+            entities, relationships, observations,
+            providers, ansible, versions
+        ]
+        
+        for module in resource_modules:
+            try:
+                module.register_resources(mcp)
+            except Exception as e:
+                logger.error(f"Failed to register resources from {module.__name__}: {str(e)}")
+                raise
+
+        # Register tools (async)
+        tool_modules = [
+            entity_tools, relationship_tools,
+            observation_tools, provider_tools,
+            ansible_tools, analysis_tools
+        ]
+        
+        for module in tool_modules:
+            try:
+                await module.register_tools(mcp)
+            except Exception as e:
+                logger.error(f"Failed to register tools from {module.__name__}: {str(e)}")
+                raise
+
         logger.info("Starting MCP server")
         try:
-            asyncio.run(run_server(server))
-        except KeyboardInterrupt:
-            logger.info("Server shutdown requested")
+            await mcp.run_async()
         except Exception as e:
-            logger.error(f"Server error: {str(e)}")
+            logger.error(f"Server runtime error: {str(e)}")
             raise
+
+    except KeyboardInterrupt:
+        await shutdown()
+    except MCPError as e:
+        logger.error(f"MCP server error: {str(e)}")
+        await shutdown()
+        raise
     except Exception as e:
-        logger.error(f"Server failed to start: {str(e)}")
+        logger.error(f"Unexpected error: {str(e)}", exc_info=True)
+        await shutdown()
         raise
 
-
 if __name__ == "__main__":
-    main()
+    import asyncio
+    asyncio.run(main())
