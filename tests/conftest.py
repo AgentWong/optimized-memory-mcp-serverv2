@@ -145,7 +145,6 @@ def test_observation(db_session, test_entity):
 def mcp_server():
     """Create MCP server instance for testing."""
     server = create_server()
-    server.run()  # Initialize without dev mode
     return server
 
 @pytest.fixture
@@ -155,4 +154,5 @@ def client(mcp_server):
     server_params = StdioServerParameters(command="python", args=["-m", "mcp", "run"])
     with stdio_client(server_params) as (read, write):
         client = ClientSession(read, write)
+        client.initialize()  # Initialize synchronously
         return client

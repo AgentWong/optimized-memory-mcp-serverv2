@@ -23,9 +23,9 @@ from src.db.models.observations import Observation
 
 
 @pytest.fixture
-async def mcp_server():
+def mcp_server():
     """Create MCP server instance"""
-    server = await create_server()
+    server = create_server()
     return server
 
 
@@ -43,8 +43,8 @@ def test_full_entity_workflow(mcp_server, db_session: Session):
     """Test complete entity lifecycle including relationships and observations"""
     # Create initial entity
     entity1_result = mcp_server.call_tool(
-        "create_entity", arguments={"name": "test_entity_1", "entity_type": "test_type"}
-    )
+        "create_entity", {"name": "test_entity_1", "entity_type": "test_type"}
+    ).result()
     assert entity1_result is not None
     entity1_id = entity1_result["id"]
 
@@ -90,8 +90,8 @@ def test_search_and_analysis_workflow(mcp_server, db_session: Session):
     # Create test entity
     entity_result = mcp_server.call_tool(
         "create_entity",
-        arguments={"name": "searchable_entity", "entity_type": "test_type"},
-    )
+        {"name": "searchable_entity", "entity_type": "test_type"},
+    ).result()
     assert entity_result is not None
 
     # Search for entity
