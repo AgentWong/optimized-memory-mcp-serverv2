@@ -66,6 +66,9 @@ def test_model_validation(db_session: Session):
 
     # Test field length limits with comprehensive validation
     with pytest.raises(ValidationError) as exc:
+        entity = Entity(name="x" * 256, entity_type="test_type")  # Name too long
+        db_session.add(entity)
+        db_session.commit()
         entity = Entity(name="x" * 256, entity_type="test_type")  # Exceeds max length
         db_session.add(entity)
         db_session.commit()

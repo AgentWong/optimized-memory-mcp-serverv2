@@ -20,9 +20,9 @@ from src.db.models.base import Base
 
 
 @pytest.fixture
-def client():
+async def client():
     """Create test client"""
-    server = create_server()
+    server = await create_server()
     return server
 
 

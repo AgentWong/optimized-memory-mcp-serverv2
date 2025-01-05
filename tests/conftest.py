@@ -304,6 +304,7 @@ class TestClient:
 async def mcp_server():
     """Create MCP server instance for testing."""
     from src.main import create_server
+    from mcp.server.fastmcp import FastMCP
 
     # Use in-memory database for tests
     os.environ["DATABASE_URL"] = "sqlite:///:memory:"
@@ -312,19 +313,8 @@ async def mcp_server():
     try:
         # Create and configure server
         server = await create_server()
-        if inspect.iscoroutine(server):
-            server = await server
-            
-        # Verify server is FastMCP instance
-        from mcp.server.fastmcp import FastMCP
         if not isinstance(server, FastMCP):
             raise TypeError("Server must be a FastMCP instance")
-            
-        init_options = server.get_initialization_options()
-        if inspect.iscoroutine(init_options):
-            init_options = await init_options
-            
-        await server.initialize(init_options)
         return server
     except Exception as e:
         print(f"Error creating server: {e}")
@@ -332,6 +322,6 @@ async def mcp_server():
 
 
 @pytest.fixture
-def client(mcp_server):
+async def client(mcp_server):
     """Create test client using the MCP server fixture."""
-    return TestClient(mcp_server)
+    return TestClient(await mcp_server)

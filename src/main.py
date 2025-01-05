@@ -32,8 +32,10 @@ def signal_handler(signum, frame):
 signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
-# Create FastMCP instance with capabilities
-mcp = FastMCP(
+async def create_server():
+    """Create and configure the MCP server instance."""
+    # Create FastMCP instance with capabilities
+    mcp = FastMCP(
     "Infrastructure Memory Server",
     dependencies=[
         "sqlalchemy",
@@ -54,6 +56,44 @@ mcp = FastMCP(
         "completion": True
     }
 )
+    # Register all resources
+    from .resources import (
+        entities, relationships, observations,
+        providers, ansible, versions
+    )
+    
+    resource_modules = [
+        entities, relationships, observations,
+        providers, ansible, versions
+    ]
+    
+    for module in resource_modules:
+        module.register_resources(mcp)
+
+    # Register all tools
+    from .tools import (
+        entities as entity_tools,
+        relationships as relationship_tools,
+        observations as observation_tools,
+        providers as provider_tools,
+        ansible as ansible_tools,
+        analysis as analysis_tools
+    )
+    
+    tool_modules = [
+        entity_tools, relationship_tools,
+        observation_tools, provider_tools,
+        ansible_tools, analysis_tools
+    ]
+    
+    for module in tool_modules:
+        await module.register_tools(mcp)
+
+    # Initialize the server
+    init_options = mcp.get_initialization_options()
+    await mcp.initialize(init_options)
+    
+    return mcp
 
 async def shutdown() -> None:
     """Perform graceful shutdown."""

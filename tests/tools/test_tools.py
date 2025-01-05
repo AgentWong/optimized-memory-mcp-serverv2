@@ -17,7 +17,7 @@ from src.utils.errors import MCPError
 
 
 @pytest.fixture
-def db_session():
+async def db_session():
     """Provide a database session for testing"""
     session = next(get_db())
     try:

@@ -23,9 +23,10 @@ from src.db.models.observations import Observation
 
 
 @pytest.fixture
-def mcp_server():
+async def mcp_server():
     """Create MCP server instance"""
-    return create_server()
+    server = await create_server()
+    return server
 
 
 @pytest.fixture
