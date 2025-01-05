@@ -1,11 +1,14 @@
 =========================== short test summary info ============================
-ERROR tests/claude/test_claude_compatibility.py
-ERROR tests/db/test_db_operations.py - TypeError: Connection() got an unexpected keyword argument 'foreign_keys'
-ERROR tests/db_integration/test_db_integration.py - TypeError: Connection() got an unexpected keyword argument 'foreign_keys'
-ERROR tests/error_scenarios/test_error_scenarios.py
-ERROR tests/integration/test_mcp_integration.py
-ERROR tests/models/test_validation.py
-ERROR tests/resources/test_resources.py
-ERROR tests/tools/test_tools.py
-!!!!!!!!!!!!!!!!!!! Interrupted: 8 errors during collection !!!!!!!!!!!!!!!!!!!!
-============================== 8 errors in 1.07s ===============================
+FAILED tests/claude/test_claude_compatibility.py::test_resource_protocol - AttributeError: Server does not implement read_resource
+FAILED tests/claude/test_claude_compatibility.py::test_tool_execution - AttributeError: Server does not implement start_async_operation
+FAILED tests/db_integration/test_db_integration.py::test_observation_entity_integrity - Failed: DID NOT RAISE <class 'sqlalchemy.exc.IntegrityError'>
+FAILED tests/error_scenarios/test_error_scenarios.py::test_database_constraint_violations - AttributeError: 'coroutine' object has no attribute 'call_tool'
+FAILED tests/error_scenarios/test_error_scenarios.py::test_invalid_relationship_creation - AttributeError: 'coroutine' object has no attribute 'call_tool'
+FAILED tests/error_scenarios/test_error_scenarios.py::test_invalid_observation_data - AttributeError: 'coroutine' object has no attribute 'call_tool'
+FAILED tests/error_scenarios/test_error_scenarios.py::test_concurrent_modification_conflicts - AttributeError: 'coroutine' object has no attribute 'call_tool'
+FAILED tests/integration/test_mcp_integration.py::test_full_entity_workflow - AttributeError: 'coroutine' object has no attribute 'call_tool'
+FAILED tests/integration/test_mcp_integration.py::test_search_and_analysis_workflow - AttributeError: 'coroutine' object has no attribute 'call_tool'
+FAILED tests/models/test_validation.py::test_observation_required_fields - ValueError: entity_id is required
+FAILED tests/models/test_validation.py::test_relationship_foreign_keys - Failed: DID NOT RAISE <class 'sqlalchemy.exc.IntegrityError'>
+FAILED tests/models/test_validation.py::test_observation_foreign_keys - Failed: DID NOT RAISE <class 'sqlalchemy.exc.IntegrityError'>
+================== 12 failed, 20 passed, 21 skipped in 1.68s ===================
