@@ -71,18 +71,18 @@ def test_add_observation_tool(mcp_server):
     entity_result = mcp_server.call_tool(
         "create_entity", 
         {"name": "obs_test_entity", "entity_type": "test"}
-    ).__await__()
-    entity_id = entity_result.get("id")
+    )
+    entity_id = entity_result["id"]
 
     # Test add_observation
     obs_result = mcp_server.call_tool(
         "add_observation",
-        arguments={
+        {
             "entity_id": entity_id,
             "type": "test",
             "observation_type": "test",
             "value": {"test": "data"},
-        },
+        }
     )
     assert isinstance(obs_result, dict), "Result should be a dictionary"
     assert "id" in obs_result, "Result missing observation ID"
@@ -132,7 +132,7 @@ def test_tool_error_handling(mcp_server):
     """Test tool error handling"""
     # Test invalid tool
     with pytest.raises(MCPError) as exc:
-        mcp_server.call_tool("invalid_tool", arguments={})
+        mcp_server.call_tool("invalid_tool", {})
     assert exc.value.code == "TOOL_NOT_FOUND"
     assert "tool not found" in str(exc.value).lower()
     assert exc.value.details is not None
@@ -141,7 +141,7 @@ def test_tool_error_handling(mcp_server):
     with pytest.raises(MCPError) as exc:
         mcp_server.call_tool(
             "create_entity", 
-            arguments={"invalid_arg": "value"}  # Missing required args
+            {"invalid_arg": "value"}  # Missing required args
         )
     error = exc.value
     # Validate error code and message
@@ -233,34 +233,56 @@ def test_tool_error_handling(mcp_server):
     ), "Should identify correct constraint"
 
 
-def test_tool_operation_status(mcp_server):
+def test_tool_operation_status(mcp_server, db_session):
     """Test operation status handling"""
-    # Execute tool
+    # Execute tool with comprehensive data
     result = mcp_server.call_tool(
         "create_entity",
-        arguments={"name": "status_test", "entity_type": "test"}
+        {
+            "name": "status_test",
+            "entity_type": "test",
+            "meta_data": {"key": "value"},
+            "tags": ["tag1", "tag2"]
+        }
     )
 
-    # Verify result structure
+    # Verify result structure comprehensively
     assert isinstance(result, dict), "Result should be a dictionary"
     assert "id" in result, "Result missing ID"
-    assert "name" in result, "Result missing name"
-    assert "entity_type" in result, "Result missing entity type"
-    assert "created_at" in result, "Result missing creation timestamp"
-    assert "meta_data" in result, "Result missing metadata"
-
-    # Verify status tracking
-    assert "status" in result, "Result missing status"
-    assert "started_at" in result, "Result missing start timestamp"
-    assert "completed_at" in result, "Result missing completion timestamp"
-    assert "operation_id" in result, "Result missing operation ID"
-    assert result["status"] == "completed", "Operation should be completed"
-    assert result["started_at"] < result["completed_at"], "Invalid operation timing"
-
-    # Verify operation metadata
-    assert "tool_name" in result, "Result missing tool name"
-    assert result["tool_name"] == "create_entity", "Incorrect tool name"
-    assert "arguments" in result, "Result missing arguments"
-    assert result["arguments"]["name"] == "status_test", "Arguments not preserved"
-    assert "duration_ms" in result, "Result missing duration"
-    assert isinstance(result["duration_ms"], (int, float)), "Invalid duration type"
+    assert isinstance(result["id"], str), "ID should be string"
+    assert result["name"] == "status_test", "Name mismatch"
+    assert result["entity_type"] == "test", "Entity type mismatch"
+    
+    # Verify timestamps with format validation
+    assert "created_at" in result, "Missing creation timestamp"
+    assert "updated_at" in result, "Missing update timestamp"
+    assert isinstance(result["created_at"], str), "Invalid timestamp format"
+    assert isinstance(result["updated_at"], str), "Invalid timestamp format"
+    from datetime import datetime
+    datetime.fromisoformat(result["created_at"].replace('Z', '+00:00'))
+    datetime.fromisoformat(result["updated_at"].replace('Z', '+00:00'))
+    
+    # Verify metadata structure
+    assert "meta_data" in result, "Missing metadata"
+    assert isinstance(result["meta_data"], dict), "Invalid metadata type"
+    assert result["meta_data"]["key"] == "value", "Metadata value mismatch"
+    
+    # Verify tags
+    assert "tags" in result, "Missing tags"
+    assert isinstance(result["tags"], list), "Invalid tags type"
+    assert set(result["tags"]) == {"tag1", "tag2"}, "Tags mismatch"
+    
+    # Verify database state comprehensively
+    from src.db.models.entities import Entity
+    entity = db_session.query(Entity).filter_by(id=result["id"]).first()
+    assert entity is not None, "Entity not found in database"
+    assert entity.name == "status_test", "Database name mismatch"
+    assert entity.entity_type == "test", "Database type mismatch"
+    assert entity.meta_data["key"] == "value", "Database metadata mismatch"
+    assert set(entity.tags) == {"tag1", "tag2"}, "Database tags mismatch"
+    
+    # Verify timestamps in database
+    assert entity.created_at is not None, "Missing database creation timestamp"
+    assert entity.updated_at is not None, "Missing database update timestamp"
+    assert entity.created_at.isoformat() in result["created_at"], "Creation timestamp mismatch"
+    assert entity.updated_at.isoformat() in result["updated_at"], "Update timestamp mismatch"

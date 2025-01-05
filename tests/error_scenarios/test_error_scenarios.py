@@ -49,22 +49,42 @@ def db_session():
 
 def test_database_constraint_violations(mcp_server, db_session: Session):
     """Test database constraint violation handling"""
-    # Test duplicate entity name
+    # Test unique constraint on entity name
     result = mcp_server.call_tool(
         "create_entity", {"name": "unique_entity", "entity_type": "test"}
     )
-    assert result is not None
-    assert "id" in result, "Result missing entity ID"
-    assert result["name"] == "unique_entity"
+    assert result["id"] is not None, "Result missing entity ID"
+    assert result["name"] == "unique_entity", "Entity name mismatch"
+    assert result["entity_type"] == "test", "Entity type mismatch"
 
-    # Attempt duplicate
+    # Attempt duplicate - should fail
     with pytest.raises(ValidationError) as exc:
         mcp_server.call_tool(
-            "create_entity", arguments={"name": "unique_entity", "entity_type": "test"}
+            "create_entity", {"name": "unique_entity", "entity_type": "test"}
         )
-    assert exc.value.code == "VALIDATION_ERROR"
-    assert "already exists" in str(exc.value).lower()
-    assert "name" in exc.value.details, "Error details should specify field"
+    error = exc.value
+    
+    # Validate error structure
+    assert error.code == "VALIDATION_ERROR", "Wrong error code"
+    assert "already exists" in str(error).lower(), "Wrong error message"
+    assert error.details is not None, "Error missing details"
+    
+    # Validate error details
+    assert "field" in error.details, "Missing field info"
+    assert error.details["field"] == "name", "Wrong field identified"
+    assert "constraint" in error.details, "Missing constraint info"
+    assert error.details["constraint"] == "unique", "Wrong constraint type"
+    
+    # Validate error context
+    assert "context" in error.details, "Missing error context"
+    assert "timestamp" in error.details["context"], "Missing timestamp"
+    assert "table" in error.details["context"], "Missing table info"
+    assert error.details["context"]["table"] == "entities", "Wrong table"
+    
+    # Verify database state
+    from src.db.models.entities import Entity
+    entities = db_session.query(Entity).filter_by(name="unique_entity").all()
+    assert len(entities) == 1, "Should only be one entity with this name"
 
 
 def test_invalid_relationship_creation(mcp_server, db_session: Session):
