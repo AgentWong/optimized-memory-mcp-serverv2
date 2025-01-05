@@ -143,76 +143,43 @@ async def configure_server(server: Server) -> Server:
             """Handle resource reading requests."""
             if not resource_path:
                 raise MCPError("Resource path required", code="INVALID_RESOURCE")
-                
-            try:
-                handler = server._resources.get(resource_path)
-                if not handler:
-                    raise MCPError(f"Resource {resource_path} not found", code="RESOURCE_NOT_FOUND")
-                
-                ctx = Context()
-                result = await handler(ctx, **(params or {}))
-                return types.ReadResourceResult(
-                    data=result,
-                    resource_path=resource_path
-                )
-            except Exception as e:
-                raise MCPError(f"Resource error: {str(e)}", code="RESOURCE_ERROR")
+            handler = server._resources.get(resource_path)
+            if not handler:
+                raise MCPError(f"Resource {resource_path} not found", code="RESOURCE_NOT_FOUND")
+            ctx = Context()
+            result = await handler(ctx, **(params or {}))
+            return types.ReadResourceResult(data=result, resource_path=resource_path)
 
         async def handle_call_tool(tool_name: str, arguments: dict = None) -> types.CallToolResult:
             """Handle tool execution requests."""
             tool = server._tools.get(tool_name)
             if not tool:
                 raise MCPError(f"Tool {tool_name} not found", code="TOOL_NOT_FOUND")
-                
-            try:
-                ctx = Context()
-                result = await tool(ctx, **(arguments or {}))
-                return types.CallToolResult(result=result)
-            except Exception as e:
-                raise MCPError(f"Tool execution failed: {str(e)}", code="TOOL_ERROR")
+            ctx = Context()
+            result = await tool(ctx, **(arguments or {}))
+            return types.CallToolResult(result=result)
 
         async def handle_start_async_operation(tool_name: str, arguments: dict = None) -> dict:
             """Handle async operation requests."""
-            from uuid import uuid4
-            
             tool = server._tools.get(tool_name)
             if not tool:
                 raise MCPError(f"Tool {tool_name} not found", code="TOOL_NOT_FOUND")
-                
-            op_id = str(uuid4())
             ctx = Context()
-            
-            try:
-                if inspect.iscoroutinefunction(tool):
-                    result = await tool(ctx, **(arguments or {}))
-                else:
-                    result = tool(ctx, **(arguments or {}))
-                
-                server._operations[op_id] = {
-                    "id": op_id,
-                    "status": "completed", 
-                    "tool": tool_name,
-                    "arguments": arguments or {},
-                    "created_at": datetime.utcnow().isoformat(),
-                    "completed_at": datetime.utcnow().isoformat(),
-                    "result": result
-                }
-                return server._operations[op_id]
-            except Exception as e:
-                server._operations[op_id] = {
-                    "id": op_id,
-                    "status": "failed",
-                    "tool": tool_name,
-                    "arguments": arguments or {},
-                    "created_at": datetime.utcnow().isoformat(),
-                    "error": str(e)
-                }
-                raise MCPError(f"Tool execution failed: {str(e)}", code="TOOL_ERROR")
+            result = await tool(ctx, **(arguments or {}))
+            return {"status": "completed", "result": result}
 
         # Attach handlers directly to server instance
         server.read_resource = handle_read_resource
         server.call_tool = handle_call_tool
         server.start_async_operation = handle_start_async_operation
+
+        # Ensure handlers are properly bound
+        if not hasattr(server, 'read_resource'):
+            raise ConfigurationError("Failed to attach read_resource handler")
+        if not hasattr(server, 'call_tool'):
+            raise ConfigurationError("Failed to attach call_tool handler")
+        if not hasattr(server, 'start_async_operation'):
+            raise ConfigurationError("Failed to attach start_async_operation handler")
 
         # Attach protocol methods to server instance
         server.get_server_info = get_server_info

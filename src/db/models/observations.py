@@ -53,9 +53,11 @@ class Observation(Base, BaseModel, TimestampMixin):
             from .entities import Entity
             if not session.query(Entity).filter_by(id=self.entity_id).first():
                 from sqlalchemy.exc import IntegrityError
-                raise IntegrityError("Referenced entity does not exist", 
-                                   params={"entity_id": self.entity_id}, 
-                                   orig=None)
+                raise IntegrityError(
+                    "Referenced entity does not exist",
+                    params={"entity_id": self.entity_id},
+                    orig=None
+                )
         
         if self.type not in self.VALID_TYPES:
             raise ValueError(f"Invalid observation type: {self.type}")

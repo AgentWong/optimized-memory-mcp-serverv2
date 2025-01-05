@@ -59,9 +59,11 @@ class Relationship(Base, BaseModel, TimestampMixin):
                                ('target_id', self.target_id)]:
                 if not session.query(Entity).filter_by(id=value).first():
                     from sqlalchemy.exc import IntegrityError
-                    raise IntegrityError(f"Referenced entity {field} does not exist",
-                                       params={field: value},
-                                       orig=None)
+                    raise IntegrityError(
+                        f"Referenced entity {field} does not exist",
+                        params={field: value},
+                        orig=None
+                    )
 
     # Composite indexes for common lookups and traversals
     __table_args__ = (
