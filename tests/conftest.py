@@ -291,7 +291,7 @@ async def mcp_server(db_session):
     os.environ["TESTING"] = "true"
 
     # Create and configure server
-    server = await create_server()
+    server = await create_server()  # This returns a coroutine that needs to be awaited
 
     try:
         yield server

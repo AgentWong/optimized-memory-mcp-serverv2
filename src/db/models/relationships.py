@@ -40,25 +40,30 @@ class Relationship(Base, BaseModel, TimestampMixin):
                 "source_id"
             ]  # Set entity_id to source_id by default
 
-        # Validate entity references before calling super()
-        from sqlalchemy import inspect
-        if inspect(self).session:
-            session = inspect(self).session
-            from .entities import Entity
-            for field in ['entity_id', 'source_id', 'target_id']:
-                if field in kwargs and not session.query(Entity).filter_by(id=kwargs[field]).first():
-                    from sqlalchemy.exc import IntegrityError
-                    raise IntegrityError(f"Referenced entity {field} does not exist", 
-                                       params={field: kwargs[field]}, 
-                                       orig=None)
-
+        # Initialize base class first
         super().__init__(**kwargs)
+
+        # Validate relationship type
         if self.type not in self.VALID_TYPES:
             raise ValueError(f"Invalid relationship type: {self.type}")
         if not self.relationship_type or not self.relationship_type.strip():
             raise ValueError("Relationship type cannot be empty")
         if self.source_id == self.target_id:
             raise ValueError("Source and target cannot be the same entity")
+
+        # Validate entity references after initialization
+        from sqlalchemy import inspect
+        if inspect(self).session:
+            session = inspect(self).session
+            from .entities import Entity
+            for field, value in [('entity_id', self.entity_id), 
+                               ('source_id', self.source_id), 
+                               ('target_id', self.target_id)]:
+                if not session.query(Entity).filter_by(id=value).first():
+                    from sqlalchemy.exc import IntegrityError
+                    raise IntegrityError(f"Referenced entity {field} does not exist",
+                                       params={field: value},
+                                       orig=None)
 
     # Composite indexes for common lookups and traversals
     __table_args__ = (

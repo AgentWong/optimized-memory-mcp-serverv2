@@ -109,7 +109,6 @@ async def configure_server(server: Server) -> Server:
 
 
         # Register protocol handlers
-        @server.read_resource()
         async def handle_read_resource(resource_path: str, params: dict = None) -> types.ReadResourceResult:
             """Handle resource reading requests."""
             if not resource_path:
@@ -129,7 +128,6 @@ async def configure_server(server: Server) -> Server:
             except Exception as e:
                 raise MCPError(f"Resource error: {str(e)}", code="RESOURCE_ERROR")
 
-        @server.call_tool()
         async def handle_call_tool(tool_name: str, arguments: dict = None) -> types.CallToolResult:
             """Handle tool execution requests."""
             tool = server._tools.get(tool_name)
@@ -143,7 +141,6 @@ async def configure_server(server: Server) -> Server:
             except Exception as e:
                 raise MCPError(f"Tool execution failed: {str(e)}", code="TOOL_ERROR")
 
-        @server.start_async_operation()
         async def handle_start_async_operation(tool_name: str, arguments: dict = None) -> dict:
             """Handle async operation requests."""
             from uuid import uuid4
@@ -181,6 +178,11 @@ async def configure_server(server: Server) -> Server:
                     "error": str(e)
                 }
                 raise MCPError(f"Tool execution failed: {str(e)}", code="TOOL_ERROR")
+
+        # Register protocol handlers
+        server.read_resource = handle_read_resource
+        server.call_tool = handle_call_tool 
+        server.start_async_operation = handle_start_async_operation
 
         # Attach protocol methods to server instance
         server.get_server_info = get_server_info

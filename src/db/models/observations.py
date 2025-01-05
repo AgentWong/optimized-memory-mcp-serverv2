@@ -43,16 +43,19 @@ class Observation(Base, BaseModel, TimestampMixin):
         if "entity_id" not in kwargs or not kwargs["entity_id"]:
             raise ValueError("entity_id is required")
 
-        # Validate entity exists
+        # Initialize base class first to get session
+        super().__init__(**kwargs)
+
+        # Validate entity exists after initialization
         from sqlalchemy import inspect
         if inspect(self).session:
             session = inspect(self).session
             from .entities import Entity
-            if not session.query(Entity).filter_by(id=kwargs["entity_id"]).first():
+            if not session.query(Entity).filter_by(id=self.entity_id).first():
                 from sqlalchemy.exc import IntegrityError
-                raise IntegrityError("Referenced entity does not exist", params={"entity_id": kwargs["entity_id"]}, orig=None)
-
-        super().__init__(**kwargs)
+                raise IntegrityError("Referenced entity does not exist", 
+                                   params={"entity_id": self.entity_id}, 
+                                   orig=None)
         
         if self.type not in self.VALID_TYPES:
             raise ValueError(f"Invalid observation type: {self.type}")
