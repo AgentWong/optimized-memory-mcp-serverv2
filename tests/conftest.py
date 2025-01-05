@@ -148,7 +148,7 @@ def mcp_server():
     return create_server()
 
 @pytest.fixture
-def client():
+async def client():
     """Create MCP client connected to test server."""
     server_params = StdioServerParameters(
         command="python",
@@ -160,7 +160,7 @@ def client():
         }
     )
     
-    with stdio_client(server_params) as (read_stream, write_stream):
-        with ClientSession(read_stream, write_stream) as session:
-            session.initialize()
+    async with stdio_client(server_params) as (read_stream, write_stream):
+        async with ClientSession(read_stream, write_stream) as session:
+            await session.initialize()
             return session

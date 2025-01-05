@@ -7,7 +7,7 @@ for infrastructure management.
 """
 import logging
 import signal
-import asyncio
+import time
 from typing import Optional
 from mcp.server.fastmcp import FastMCP
 from .utils.logging import configure_logging
@@ -102,28 +102,27 @@ def create_server() -> FastMCP:
             tools = module.register_tools(mcp)
 
         # Initialize the server
-        init_options = mcp.get_initialization_options()
-        mcp.initialize(init_options)
-        setattr(mcp, "_initialized", True)
+        init_options = mcp.create_initialization_options()
+        mcp.run()
 
         return mcp
     except Exception as e:
         raise MCPError(f"Failed to create server: {str(e)}")
 
 
-async def shutdown() -> None:
+def shutdown() -> None:
     """Perform graceful shutdown."""
     global is_shutting_down
     if not is_shutting_down:
         is_shutting_down = True
         logger.info("Initiating graceful shutdown")
     try:
-        await mcp.shutdown()
+        mcp.shutdown()
     except Exception as e:
         logger.error(f"Error during shutdown: {str(e)}")
 
 
-async def main() -> None:
+def main() -> None:
     """Main entry point."""
     try:
         # Configure logging
@@ -146,7 +145,7 @@ async def main() -> None:
                 logger.warning(
                     f"Database initialization attempt {attempt + 1} failed: {str(e)}"
                 )
-                await asyncio.sleep(retry_delay)
+                time.sleep(retry_delay)
                 retry_delay *= 2
 
         # Import and register resources/tools
@@ -209,7 +208,7 @@ async def main() -> None:
                 logger.debug(
                     f"Registering tools from {module.__name__} ({i}/{len(tool_modules)})"
                 )
-                tools = await module.register_tools(mcp)
+                tools = module.register_tools(mcp)
 
                 if tools:
                     # Validate each tool
@@ -260,13 +259,13 @@ async def main() -> None:
 
         logger.info("Starting MCP server")
         try:
-            await mcp.run_async()
+            mcp.run()
         except Exception as e:
             logger.error(f"Server runtime error: {str(e)}")
             raise
 
     except KeyboardInterrupt:
-        await shutdown()
+        shutdown()
     except MCPError as e:
         logger.error(f"MCP server error: {str(e)}")
         await shutdown()
@@ -278,6 +277,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    import asyncio
-
-    asyncio.run(main())
+    main()

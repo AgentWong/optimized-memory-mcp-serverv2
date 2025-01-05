@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<noAsyncRules>
+    <overview>
+        <description>Rules preventing async/await usage with MCP server/client code</description>
+        <version>1.0</version>
+    </overview>
+
+    <prohibitedPatterns>
+        <pattern>
+            <name>AsyncServerCreation</name>
+            <rule>Do not use async/await with mcp.server.FastMCP instantiation or methods</rule>
+            <examples>
+                <incorrect>await mcp.run_async()</incorrect>
+                <correct>mcp.run()</correct>
+            </examples>
+        </pattern>
+
+        <pattern>
+            <name>AsyncClientCreation</name>
+            <rule>Do not use async/await with mcp.client.ClientSession methods</rule>
+            <examples>
+                <incorrect>await client.initialize()</incorrect>
+                <correct>client.initialize()</correct>
+            </examples>
+        </pattern>
+
+        <pattern>
+            <name>AsyncContextManagers</name>
+            <rule>Do not use async with for MCP context managers</rule>
+            <examples>
+                <incorrect>async with stdio_client() as client:</incorrect>
+                <correct>with stdio_client() as client:</correct>
+            </examples>
+        </pattern>
+    </prohibitedPatterns>
+
+    <allowedPatterns>
+        <pattern>
+            <name>AsyncToolImplementations</name>
+            <description>Tools themselves may be async, but their registration and calling should not be</description>
+            <example>
+                @mcp.tool()
+                async def my_tool():
+                    pass
+            </example>
+        </pattern>
+    </allowedPatterns>
+
+    <enforcement>
+        <rule>All MCP server/client interaction must be synchronous</rule>
+        <rule>Do not convert synchronous MCP code to async</rule>
+        <rule>Do not add async/await to MCP method calls</rule>
+        <rule>Follow the patterns shown in the MCP SDK examples</rule>
+    </enforcement>
+</noAsyncRules>
