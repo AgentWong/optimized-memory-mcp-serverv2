@@ -1,5 +1,6 @@
 """
 Integration tests for database operations.
+"""
 
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError, InvalidRequestError
 

@@ -6,6 +6,7 @@ Initializes and runs the MCP server with configured resources and tools
 for infrastructure management.
 """
 import os
+import inspect
 import logging
 from mcp.server.fastmcp import FastMCP
 from .server import configure_server
@@ -42,21 +43,21 @@ async def create_server() -> FastMCP:
         server = await configure_server(server)
         
         # Handle different server types and ensure initialization
-        if asyncio.iscoroutine(server):
+        if inspect.iscoroutine(server):
             server = await server
         elif hasattr(server, "__anext__"):
             server = await server.__anext__()
-        elif asyncio.isasyncgen(server):
-            async for s in server:
-                server = s
-                break
         elif inspect.isasyncgen(server):
             async for s in server:
                 server = s
                 break
 
-        # Initialize server
-        if hasattr(server, "initialize"):
+        # Ensure server is properly initialized
+        if inspect.iscoroutine(server):
+            server = await server
+
+        # Initialize server if needed
+        if hasattr(server, "initialize") and not hasattr(server, "read_resource"):
             await server.initialize()
         
         # Verify required methods exist

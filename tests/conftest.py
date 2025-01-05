@@ -289,8 +289,9 @@ async def mcp_server(db_session):
     if inspect.iscoroutine(server):
         server = await server
     
-    # Initialize the server
-    await server.initialize()
+    # Server should already be initialized by create_server()
+    if not hasattr(server, 'read_resource'):
+        raise RuntimeError("Server not properly initialized - missing core methods")
     
     try:
         yield server

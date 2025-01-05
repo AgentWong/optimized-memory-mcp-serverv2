@@ -7,6 +7,7 @@ and error handling for the MCP server.
 
 import logging
 import gc
+import inspect
 from typing import Optional, Dict, Any
 from datetime import datetime
 from mcp.server.fastmcp import FastMCP, Context
@@ -226,6 +227,7 @@ async def configure_server(server: FastMCP) -> FastMCP:
         server.read_resource = read_resource
         server.get_operation_status = get_operation_status
         server.end_session = end_session
+        server.call_tool = start_async_operation  # Alias for compatibility
         
         # Configure cleanup and shutdown
         async def do_cleanup():
