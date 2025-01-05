@@ -216,7 +216,7 @@ async def register_tools(mcp: FastMCP) -> list:
             db.close()
 
     @mcp.tool()
-    async def delete_entity(entity_id: int, ctx: Context = None) -> Dict[str, str]:
+    async def delete_entity(entity_id: int) -> Dict[str, str]:
         """Delete an entity from the system.
 
         Args:

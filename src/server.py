@@ -227,7 +227,14 @@ async def configure_server(server: FastMCP) -> FastMCP:
         server.read_resource = read_resource
         server.get_operation_status = get_operation_status
         server.end_session = end_session
-        server.call_tool = start_async_operation  # Alias for compatibility
+        async def call_tool(tool_name: str, arguments: dict = None) -> dict:
+            """Synchronous interface for tool execution."""
+            operation = await start_async_operation(tool_name, arguments or {})
+            if operation['status'] == 'failed':
+                raise MCPError(operation.get('error', 'Tool execution failed'), code="TOOL_ERROR")
+            return operation.get('result', {})
+
+        server.call_tool = call_tool
         
         # Configure cleanup and shutdown
         async def do_cleanup():

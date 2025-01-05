@@ -53,7 +53,7 @@ async def register_tools(mcp: FastMCP) -> list:
     """
 
     @mcp.tool()
-    def create_observation(
+    async def create_observation(
         entity_id: int,
         observation_type: str,
         value: Dict[str, Any],
@@ -120,7 +120,7 @@ async def register_tools(mcp: FastMCP) -> list:
             raise DatabaseError(f"Failed to create observation: {str(e)}")
 
     @mcp.tool()
-    def update_observation(
+    async def update_observation(
         observation_id: int,
         value: Optional[Dict[str, Any]] = None,
         metadata: Optional[Dict[str, Any]] = None,
@@ -191,7 +191,7 @@ async def register_tools(mcp: FastMCP) -> list:
             )
 
     @mcp.tool()
-    def delete_observation(observation_id: int) -> Dict[str, str]:
+    async def delete_observation(observation_id: int) -> Dict[str, str]:
         """Delete an observation.
 
         Args:

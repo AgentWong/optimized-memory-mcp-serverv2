@@ -39,7 +39,7 @@ async def register_tools(mcp: FastMCP) -> list:
     """
 
     @mcp.tool()
-    def create_relationship(
+    async def create_relationship(
         source_id: int,
         target_id: int,
         relationship_type: str,
@@ -105,7 +105,7 @@ async def register_tools(mcp: FastMCP) -> list:
             raise DatabaseError(f"Failed to create relationship: {str(e)}")
 
     @mcp.tool()
-    def update_relationship(
+    async def update_relationship(
         relationship_id: int,
         relationship_type: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
@@ -175,7 +175,7 @@ async def register_tools(mcp: FastMCP) -> list:
             )
 
     @mcp.tool()
-    def delete_relationship(relationship_id: int) -> Dict[str, str]:
+    async def delete_relationship(relationship_id: int) -> Dict[str, str]:
         """Delete a relationship between entities.
 
         Args:
