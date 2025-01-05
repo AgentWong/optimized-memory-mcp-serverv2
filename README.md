@@ -11,6 +11,8 @@ This MCP server implementation focuses on:
 - SQLite-based persistent storage with connection pooling
 - Robust error handling and resource cleanup
 
+<a href="https://glama.ai/mcp/servers/e9fy8seqww"><img width="380" height="200" src="https://glama.ai/mcp/servers/e9fy8seqww/badge" alt="Optimized Memory Server V2 MCP server" /></a>
+
 ## Features
 
 - **MCP Resources**
