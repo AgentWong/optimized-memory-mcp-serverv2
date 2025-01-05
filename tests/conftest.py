@@ -321,26 +321,11 @@ async def mcp_server():
     server = None
     try:
         # Create and initialize server
-        server = await create_server()  # Directly await the coroutine
-        
+        server = await create_server()  # This already handles initialization
         if not isinstance(server, FastMCP):
             raise TypeError(f"Expected FastMCP instance, got {type(server)}")
 
-        # Initialize if needed
-        if not getattr(server, "_initialized", False):
-            init_options = server.get_initialization_options()
-            await server.initialize(init_options)
-            setattr(server, "_initialized", True)
-
-        return server  # Return instead of yield for async fixture
-
-    except Exception as e:
-        if server:
-            try:
-                await server.cleanup()
-            except Exception as cleanup_error:
-                print(f"Error during cleanup after error: {cleanup_error}")
-        raise
+        yield server  # Use yield to ensure cleanup runs
 
     finally:
         if server:
