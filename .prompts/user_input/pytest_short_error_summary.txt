@@ -1,200 +1,31 @@
-2025-01-04 13:55:50,968 INFO sqlalchemy.engine.Engine 
-CREATE TABLE resourceargument (
-        provider_id INTEGER NOT NULL, 
-        name VARCHAR NOT NULL, 
-        resource_type VARCHAR NOT NULL, 
-        schema JSON NOT NULL, 
-        resource_metadata JSON NOT NULL, 
-        id INTEGER NOT NULL, 
-        created_at DATETIME NOT NULL, 
-        updated_at DATETIME NOT NULL, 
-        CONSTRAINT pk_resourceargument PRIMARY KEY (id), 
-        CONSTRAINT fk_resourceargument_provider_id_provider FOREIGN KEY(provider_id) REFERENCES provider (id)
-)
-
-
-2025-01-04 13:55:50,968 INFO sqlalchemy.engine.Engine [no key 0.00004s] ()
-2025-01-04 13:55:50,968 INFO sqlalchemy.engine.Engine CREATE INDEX ix_resourceargument_resource_type ON resourceargument (resource_type)
-2025-01-04 13:55:50,968 INFO sqlalchemy.engine.Engine [no key 0.00003s] ()
-2025-01-04 13:55:50,969 INFO sqlalchemy.engine.Engine CREATE INDEX ix_resourceargument_name ON resourceargument (name)
-2025-01-04 13:55:50,969 INFO sqlalchemy.engine.Engine [no key 0.00003s] ()
-2025-01-04 13:55:50,969 INFO sqlalchemy.engine.Engine 
-CREATE TABLE moduleparameter (
-        collection_id INTEGER NOT NULL, 
-        module_name VARCHAR NOT NULL, 
-        name VARCHAR NOT NULL, 
-        schema JSON NOT NULL, 
-        module_metadata JSON NOT NULL, 
-        id INTEGER NOT NULL, 
-        created_at DATETIME NOT NULL, 
-        updated_at DATETIME NOT NULL, 
-        CONSTRAINT pk_moduleparameter PRIMARY KEY (id), 
-        CONSTRAINT fk_moduleparameter_collection_id_ansiblecollection FOREIGN KEY(collection_id) REFERENCES ansiblecollection (id)
-)
-
-
-2025-01-04 13:55:50,969 INFO sqlalchemy.engine.Engine [no key 0.00004s] ()
-2025-01-04 13:55:50,969 INFO sqlalchemy.engine.Engine CREATE INDEX ix_moduleparameter_name ON moduleparameter (name)
-2025-01-04 13:55:50,969 INFO sqlalchemy.engine.Engine [no key 0.00004s] ()
-2025-01-04 13:55:50,969 INFO sqlalchemy.engine.Engine CREATE INDEX ix_moduleparameter_module_name ON moduleparameter (module_name)
-2025-01-04 13:55:50,969 INFO sqlalchemy.engine.Engine [no key 0.00003s] ()
-2025-01-04 13:55:50,969 INFO sqlalchemy.engine.Engine COMMIT
-___________________________________________________ ERROR at setup of test_entities_list_resource ___________________________________________________
-file /home/herman/Documents/vscode/optimized-memory-mcp-serverv2/tests/resources/test_resources.py, line 39
-  def test_entities_list_resource(mcp_server):
-E       fixture 'mcp_server' not found
->       available fixtures: _session_event_loop, anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, client, cov, db_session, doctest_namespace, event_loop, event_loop_policy, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, setup_test_env, test_entity, test_observation, test_provider, test_relationship, tests/resources/test_resources.py::<event_loop>, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, unused_tcp_port, unused_tcp_port_factory, unused_udp_port, unused_udp_port_factory
->       use 'pytest --fixtures [testpath]' for help on them.
-
-/home/herman/Documents/vscode/optimized-memory-mcp-serverv2/tests/resources/test_resources.py:39
-___________________________________________________ ERROR at setup of test_entity_detail_resource ___________________________________________________
-file /home/herman/Documents/vscode/optimized-memory-mcp-serverv2/tests/resources/test_resources.py, line 45
-  def test_entity_detail_resource(mcp_server, db_session):
-E       fixture 'mcp_server' not found
->       available fixtures: _session_event_loop, anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, client, cov, db_session, doctest_namespace, event_loop, event_loop_policy, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, setup_test_env, test_entity, test_observation, test_provider, test_relationship, tests/resources/test_resources.py::<event_loop>, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, unused_tcp_port, unused_tcp_port_factory, unused_udp_port, unused_udp_port_factory
->       use 'pytest --fixtures [testpath]' for help on them.
-
-/home/herman/Documents/vscode/optimized-memory-mcp-serverv2/tests/resources/test_resources.py:45
-_____________________________________________________ ERROR at setup of test_providers_resource _____________________________________________________
-file /home/herman/Documents/vscode/optimized-memory-mcp-serverv2/tests/resources/test_resources.py, line 59
-  def test_providers_resource(mcp_server):
-E       fixture 'mcp_server' not found
->       available fixtures: _session_event_loop, anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, client, cov, db_session, doctest_namespace, event_loop, event_loop_policy, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, setup_test_env, test_entity, test_observation, test_provider, test_relationship, tests/resources/test_resources.py::<event_loop>, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, unused_tcp_port, unused_tcp_port_factory, unused_udp_port, unused_udp_port_factory
->       use 'pytest --fixtures [testpath]' for help on them.
-
-/home/herman/Documents/vscode/optimized-memory-mcp-serverv2/tests/resources/test_resources.py:59
-________________________________________________ ERROR at setup of test_ansible_collections_resource ________________________________________________
-file /home/herman/Documents/vscode/optimized-memory-mcp-serverv2/tests/resources/test_resources.py, line 65
-  def test_ansible_collections_resource(mcp_server):
-E       fixture 'mcp_server' not found
->       available fixtures: _session_event_loop, anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, client, cov, db_session, doctest_namespace, event_loop, event_loop_policy, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, setup_test_env, test_entity, test_observation, test_provider, test_relationship, tests/resources/test_resources.py::<event_loop>, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, unused_tcp_port, unused_tcp_port_factory, unused_udp_port, unused_udp_port_factory
->       use 'pytest --fixtures [testpath]' for help on them.
-
-/home/herman/Documents/vscode/optimized-memory-mcp-serverv2/tests/resources/test_resources.py:65
-_____________________________________________________ ERROR at setup of test_create_entity_tool _____________________________________________________
-file /home/herman/Documents/vscode/optimized-memory-mcp-serverv2/tests/tools/test_tools.py, line 36
-  def test_create_entity_tool(mcp_server):
-E       fixture 'mcp_server' not found
->       available fixtures: _session_event_loop, anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, client, cov, db_session, doctest_namespace, event_loop, event_loop_policy, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, setup_test_env, test_entity, test_observation, test_provider, test_relationship, tests/tools/test_tools.py::<event_loop>, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, unused_tcp_port, unused_tcp_port_factory, unused_udp_port, unused_udp_port_factory
->       use 'pytest --fixtures [testpath]' for help on them.
-
-/home/herman/Documents/vscode/optimized-memory-mcp-serverv2/tests/tools/test_tools.py:36
-____________________________________________________ ERROR at setup of test_add_observation_tool ____________________________________________________
-file /home/herman/Documents/vscode/optimized-memory-mcp-serverv2/tests/tools/test_tools.py, line 50
-  def test_add_observation_tool(mcp_server):
-E       fixture 'mcp_server' not found
->       available fixtures: _session_event_loop, anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, client, cov, db_session, doctest_namespace, event_loop, event_loop_policy, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, setup_test_env, test_entity, test_observation, test_provider, test_relationship, tests/tools/test_tools.py::<event_loop>, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, unused_tcp_port, unused_tcp_port_factory, unused_udp_port, unused_udp_port_factory
->       use 'pytest --fixtures [testpath]' for help on them.
-
-/home/herman/Documents/vscode/optimized-memory-mcp-serverv2/tests/tools/test_tools.py:50
-___________________________________________________ ERROR at setup of test_register_provider_tool ___________________________________________________
-file /home/herman/Documents/vscode/optimized-memory-mcp-serverv2/tests/tools/test_tools.py, line 67
-  def test_register_provider_tool(mcp_server):
-E       fixture 'mcp_server' not found
->       available fixtures: _session_event_loop, anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, client, cov, db_session, doctest_namespace, event_loop, event_loop_policy, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, setup_test_env, test_entity, test_observation, test_provider, test_relationship, tests/tools/test_tools.py::<event_loop>, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, unused_tcp_port, unused_tcp_port_factory, unused_udp_port, unused_udp_port_factory
->       use 'pytest --fixtures [testpath]' for help on them.
-
-/home/herman/Documents/vscode/optimized-memory-mcp-serverv2/tests/tools/test_tools.py:67
-________________________________________________ ERROR at setup of test_register_ansible_module_tool ________________________________________________
-file /home/herman/Documents/vscode/optimized-memory-mcp-serverv2/tests/tools/test_tools.py, line 81
-  def test_register_ansible_module_tool(mcp_server):
-E       fixture 'mcp_server' not found
->       available fixtures: _session_event_loop, anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, client, cov, db_session, doctest_namespace, event_loop, event_loop_policy, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, setup_test_env, test_entity, test_observation, test_provider, test_relationship, tests/tools/test_tools.py::<event_loop>, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, unused_tcp_port, unused_tcp_port_factory, unused_udp_port, unused_udp_port_factory
->       use 'pytest --fixtures [testpath]' for help on them.
-
-/home/herman/Documents/vscode/optimized-memory-mcp-serverv2/tests/tools/test_tools.py:81
-===================================================================== FAILURES ======================================================================
-___________________________________________________________ test_concurrent_transactions ____________________________________________________________
-
-db_session = <sqlalchemy.orm.session.Session object at 0x79fee138e7b0>
-
-    def test_concurrent_transactions(db_session: Session):
-        """Test concurrent database operations"""
-        # Create initial entity
-        entity = Entity(name="concurrent_test", entity_type="test")
-        db_session.add(entity)
-        db_session.commit()
-    
-        # Start another session
-        session2 = next(get_db())
-        try:
-            # Modify in first session
-            entity.name = "modified_in_session1"
-    
-            # Try to modify in second session
-            entity2 = session2.query(Entity).filter_by(id=entity.id).first()
-            entity2.name = "modified_in_session2"
-    
-            # Commit first session
-            db_session.commit()
-    
-            # Second session should fail
->           with pytest.raises(Exception):
-E           Failed: DID NOT RAISE <class 'Exception'>
-
-tests/db_integration/test_db_integration.py:163: Failed
-_______________________________________________________________ test_database_cleanup _______________________________________________________________
-
-db_session = <sqlalchemy.orm.session.Session object at 0x79fee138f110>
-
-    def test_database_cleanup(db_session: Session):
-        """Verify database cleanup between tests"""
-        # Create test data
-        entity = Entity(name="cleanup_test", entity_type="test")
-        db_session.add(entity)
-        db_session.commit()
-    
-        # Get entity ID
-        entity_id = entity.id
-    
-        # Close session
-        db_session.close()
-    
-        # Create new session
-        new_session = next(get_db())
-        try:
-            # Verify entity doesn't exist in new session
->           assert new_session.query(Entity).filter_by(id=entity_id).first() is None
-E           assert <src.db.models.entities.Entity object at 0x79fee12134d0> is None
-E            +  where <src.db.models.entities.Entity object at 0x79fee12134d0> = first()
-E            +    where first = <sqlalchemy.orm.query.Query object at 0x79fee14ddd50>.first
-E            +      where <sqlalchemy.orm.query.Query object at 0x79fee14ddd50> = filter_by(id=214)
-E            +        where filter_by = <sqlalchemy.orm.query.Query object at 0x79fee13cf750>.filter_by
-E            +          where <sqlalchemy.orm.query.Query object at 0x79fee13cf750> = query(Entity)
-E            +            where query = <sqlalchemy.orm.session.Session object at 0x79fee138d7c0>.query
-
-tests/db_integration/test_db_integration.py:187: AssertionError
-============================================================== short test summary info ==============================================================
+=========================== short test summary info ============================
+FAILED tests/claude/test_claude_compatibility.py::test_server_info_endpoint - AttributeError: 'coroutine' object has no attribute 'get_server_info'
+FAILED tests/claude/test_claude_compatibility.py::test_resource_protocol - AttributeError: 'coroutine' object has no attribute 'read_resource'
+FAILED tests/claude/test_claude_compatibility.py::test_tool_execution - AttributeError: 'coroutine' object has no attribute 'start_async_operation'
+FAILED tests/claude/test_claude_compatibility.py::test_error_response_format - assert False
+FAILED tests/claude/test_claude_compatibility.py::test_async_operation_handling - AttributeError: 'coroutine' object has no attribute 'start_async_operation'
+FAILED tests/claude/test_claude_compatibility.py::test_session_management - AttributeError: 'coroutine' object has no attribute 'create_session'
 FAILED tests/db_integration/test_db_integration.py::test_concurrent_transactions - Failed: DID NOT RAISE <class 'Exception'>
-FAILED tests/db_integration/test_db_integration.py::test_database_cleanup - assert <src.db.models.entities.Entity object at 0x79fee12134d0> is None
-ERROR tests/claude/test_claude_compatibility.py::test_server_info_endpoint - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and functio...
-ERROR tests/claude/test_claude_compatibility.py::test_resource_protocol - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and functio...
-ERROR tests/claude/test_claude_compatibility.py::test_tool_execution - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and functio...
-ERROR tests/claude/test_claude_compatibility.py::test_error_response_format - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and functio...
-ERROR tests/claude/test_claude_compatibility.py::test_async_operation_handling - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and functio...
-ERROR tests/claude/test_claude_compatibility.py::test_session_management - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and functio...
-ERROR tests/error_scenarios/test_error_scenarios.py::test_database_constraint_violations - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and functio...
-ERROR tests/error_scenarios/test_error_scenarios.py::test_invalid_relationship_creation - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and functio...
-ERROR tests/error_scenarios/test_error_scenarios.py::test_invalid_observation_data - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and functio...
-ERROR tests/error_scenarios/test_error_scenarios.py::test_concurrent_modification_conflicts - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and functio...
-ERROR tests/error_scenarios/test_error_scenarios.py::test_invalid_api_requests - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and functio...
-ERROR tests/error_scenarios/test_error_scenarios.py::test_resource_not_found_handling - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and functio...
-ERROR tests/error_scenarios/test_error_scenarios.py::test_validation_error_handling - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and functio...
-ERROR tests/error_scenarios/test_error_scenarios.py::test_transaction_rollback - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and functio...
-ERROR tests/integration/test_mcp_integration.py::test_full_entity_workflow - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and functio...
-ERROR tests/integration/test_mcp_integration.py::test_search_and_analysis_workflow - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and functio...
-ERROR tests/integration/test_mcp_integration.py::test_error_handling - src.utils.errors.ConfigurationError: Server initialization failed: Failed to configure server: Mismatch between URI parameters set() and functio...
-ERROR tests/models/test_validation.py::test_entity_required_fields
-ERROR tests/models/test_validation.py::test_relationship_required_fields
-ERROR tests/models/test_validation.py::test_observation_required_fields
-ERROR tests/models/test_validation.py::test_relationship_foreign_keys
-ERROR tests/models/test_validation.py::test_observation_foreign_keys
-ERROR tests/resources/test_resources.py::test_entities_list_resource
-ERROR tests/resources/test_resources.py::test_entity_detail_resource
-ERROR tests/resources/test_resources.py::test_providers_resource
-ERROR tests/resources/test_resources.py::test_ansible_collections_resource
-ERROR tests/tools/test_tools.py::test_create_entity_tool
-ERROR tests/tools/test_tools.py::test_add_observation_tool
-ERROR tests/tools/test_tools.py::test_register_provider_tool
-ERROR tests/tools/test_tools.py::test_register_ansible_module_tool
-====================================================== 2 failed, 18 passed, 30 errors in 1.18s ======================================================
+FAILED tests/db_integration/test_db_integration.py::test_database_cleanup - assert <src.db.models.entities.Entity object at 0x74f3064dc690> is None
+FAILED tests/error_scenarios/test_error_scenarios.py::test_database_constraint_violations - AttributeError: 'coroutine' object has no attribute 'call_tool'
+FAILED tests/error_scenarios/test_error_scenarios.py::test_invalid_relationship_creation - AttributeError: 'coroutine' object has no attribute 'call_tool'
+FAILED tests/error_scenarios/test_error_scenarios.py::test_invalid_observation_data - AttributeError: 'coroutine' object has no attribute 'call_tool'
+FAILED tests/error_scenarios/test_error_scenarios.py::test_concurrent_modification_conflicts - AttributeError: 'coroutine' object has no attribute 'call_tool'
+FAILED tests/error_scenarios/test_error_scenarios.py::test_invalid_tool_requests - AttributeError: 'coroutine' object has no attribute 'call_tool'
+FAILED tests/error_scenarios/test_error_scenarios.py::test_resource_not_found_handling - AttributeError: 'TestClient' object has no attribute 'get'
+FAILED tests/error_scenarios/test_error_scenarios.py::test_validation_error_handling - AttributeError: 'TestClient' object has no attribute 'post'
+FAILED tests/error_scenarios/test_error_scenarios.py::test_transaction_rollback - AttributeError: 'TestClient' object has no attribute 'post'
+FAILED tests/integration/test_mcp_integration.py::test_full_entity_workflow - AttributeError: 'coroutine' object has no attribute 'call_tool'
+FAILED tests/integration/test_mcp_integration.py::test_search_and_analysis_workflow - AttributeError: 'coroutine' object has no attribute 'call_tool'
+FAILED tests/models/test_validation.py::test_observation_required_fields - ValueError: Observation type cannot be empty
+FAILED tests/models/test_validation.py::test_relationship_foreign_keys - Failed: DID NOT RAISE <class 'sqlalchemy.exc.IntegrityError'>
+FAILED tests/models/test_validation.py::test_observation_foreign_keys - Failed: DID NOT RAISE <class 'sqlalchemy.exc.IntegrityError'>
+FAILED tests/resources/test_resources.py::test_entities_list_resource - AttributeError: 'async_generator' object has no attribute 'read_resource'
+FAILED tests/resources/test_resources.py::test_entity_detail_resource - AttributeError: 'async_generator' object has no attribute 'call_tool'
+FAILED tests/resources/test_resources.py::test_providers_resource - AttributeError: 'async_generator' object has no attribute 'read_resource'
+FAILED tests/resources/test_resources.py::test_ansible_collections_resource - AttributeError: 'async_generator' object has no attribute 'read_resource'
+FAILED tests/tools/test_tools.py::test_create_entity_tool - AttributeError: 'async_generator' object has no attribute 'start_async_oper...
+FAILED tests/tools/test_tools.py::test_add_observation_tool - AttributeError: 'async_generator' object has no attribute 'start_async_oper...
+FAILED tests/tools/test_tools.py::test_register_provider_tool - AttributeError: 'async_generator' object has no attribute 'start_async_oper...
+FAILED tests/tools/test_tools.py::test_register_ansible_module_tool - AttributeError: 'async_generator' object has no attribute 'start_async_oper...
+======================== 29 failed, 21 passed in 1.57s =========================
