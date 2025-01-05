@@ -1,31 +1,14 @@
-=========================== short test summary info ============================
-FAILED tests/claude/test_claude_compatibility.py::test_server_info_endpoint - AttributeError: 'coroutine' object has no attribute 'get_server_info'
-FAILED tests/claude/test_claude_compatibility.py::test_resource_protocol - AttributeError: 'coroutine' object has no attribute 'read_resource'
-FAILED tests/claude/test_claude_compatibility.py::test_tool_execution - AttributeError: 'coroutine' object has no attribute 'start_async_operation'
-FAILED tests/claude/test_claude_compatibility.py::test_error_response_format - assert False
-FAILED tests/claude/test_claude_compatibility.py::test_async_operation_handling - AttributeError: 'coroutine' object has no attribute 'start_async_operation'
-FAILED tests/claude/test_claude_compatibility.py::test_session_management - AttributeError: 'coroutine' object has no attribute 'create_session'
-FAILED tests/db_integration/test_db_integration.py::test_concurrent_transactions - Failed: DID NOT RAISE <class 'Exception'>
-FAILED tests/db_integration/test_db_integration.py::test_database_cleanup - assert <src.db.models.entities.Entity object at 0x74f3064dc690> is None
+============================================================== short test summary info ==============================================================
+FAILED tests/claude/test_claude_compatibility.py::test_resource_protocol - AttributeError: Server does not implement read_resource
+FAILED tests/claude/test_claude_compatibility.py::test_tool_execution - AttributeError: Server does not implement start_async_operation
+FAILED tests/db_integration/test_db_integration.py::test_observation_entity_integrity - Failed: DID NOT RAISE <class 'sqlalchemy.exc.IntegrityError'>
 FAILED tests/error_scenarios/test_error_scenarios.py::test_database_constraint_violations - AttributeError: 'coroutine' object has no attribute 'call_tool'
 FAILED tests/error_scenarios/test_error_scenarios.py::test_invalid_relationship_creation - AttributeError: 'coroutine' object has no attribute 'call_tool'
 FAILED tests/error_scenarios/test_error_scenarios.py::test_invalid_observation_data - AttributeError: 'coroutine' object has no attribute 'call_tool'
 FAILED tests/error_scenarios/test_error_scenarios.py::test_concurrent_modification_conflicts - AttributeError: 'coroutine' object has no attribute 'call_tool'
-FAILED tests/error_scenarios/test_error_scenarios.py::test_invalid_tool_requests - AttributeError: 'coroutine' object has no attribute 'call_tool'
-FAILED tests/error_scenarios/test_error_scenarios.py::test_resource_not_found_handling - AttributeError: 'TestClient' object has no attribute 'get'
-FAILED tests/error_scenarios/test_error_scenarios.py::test_validation_error_handling - AttributeError: 'TestClient' object has no attribute 'post'
-FAILED tests/error_scenarios/test_error_scenarios.py::test_transaction_rollback - AttributeError: 'TestClient' object has no attribute 'post'
 FAILED tests/integration/test_mcp_integration.py::test_full_entity_workflow - AttributeError: 'coroutine' object has no attribute 'call_tool'
 FAILED tests/integration/test_mcp_integration.py::test_search_and_analysis_workflow - AttributeError: 'coroutine' object has no attribute 'call_tool'
-FAILED tests/models/test_validation.py::test_observation_required_fields - ValueError: Observation type cannot be empty
+FAILED tests/models/test_validation.py::test_observation_required_fields - ValueError: entity_id is required
 FAILED tests/models/test_validation.py::test_relationship_foreign_keys - Failed: DID NOT RAISE <class 'sqlalchemy.exc.IntegrityError'>
 FAILED tests/models/test_validation.py::test_observation_foreign_keys - Failed: DID NOT RAISE <class 'sqlalchemy.exc.IntegrityError'>
-FAILED tests/resources/test_resources.py::test_entities_list_resource - AttributeError: 'async_generator' object has no attribute 'read_resource'
-FAILED tests/resources/test_resources.py::test_entity_detail_resource - AttributeError: 'async_generator' object has no attribute 'call_tool'
-FAILED tests/resources/test_resources.py::test_providers_resource - AttributeError: 'async_generator' object has no attribute 'read_resource'
-FAILED tests/resources/test_resources.py::test_ansible_collections_resource - AttributeError: 'async_generator' object has no attribute 'read_resource'
-FAILED tests/tools/test_tools.py::test_create_entity_tool - AttributeError: 'async_generator' object has no attribute 'start_async_oper...
-FAILED tests/tools/test_tools.py::test_add_observation_tool - AttributeError: 'async_generator' object has no attribute 'start_async_oper...
-FAILED tests/tools/test_tools.py::test_register_provider_tool - AttributeError: 'async_generator' object has no attribute 'start_async_oper...
-FAILED tests/tools/test_tools.py::test_register_ansible_module_tool - AttributeError: 'async_generator' object has no attribute 'start_async_oper...
-======================== 29 failed, 21 passed in 1.57s =========================
+===================================================== 12 failed, 20 passed, 21 skipped in 1.56s =====================================================
