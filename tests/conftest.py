@@ -162,7 +162,10 @@ class TestClient:
             
         Raises:
             MCPError: If resource cannot be read
+            AttributeError: If server doesn't implement read_resource
         """
+        if not hasattr(self.server, 'read_resource'):
+            raise AttributeError("Server does not implement read_resource")
         result = await self.server.read_resource(resource_path, params)
         if result is None:
             raise MCPError("Resource not found", code="RESOURCE_NOT_FOUND")
@@ -180,8 +183,14 @@ class TestClient:
             
         Raises:
             MCPError: If tool execution fails
+            AttributeError: If server doesn't implement required methods
         """
-        operation = await self.server.start_async_operation(tool_name, arguments)
+        if not hasattr(self.server, 'start_async_operation'):
+            raise AttributeError("Server does not implement start_async_operation")
+        if not hasattr(self.server, 'get_operation_status'):
+            raise AttributeError("Server does not implement get_operation_status")
+            
+        operation = await self.server.start_async_operation(tool_name, arguments or {})
         while operation['status'] not in ['completed', 'failed']:
             operation = await self.server.get_operation_status(operation['id'])
         

@@ -59,9 +59,19 @@ async def create_server() -> FastMCP:
         if hasattr(server, "initialize"):
             await server.initialize()
         
-        # Verify we have a valid server
-        if not server or not hasattr(server, "read_resource"):
-            raise ConfigurationError("Failed to create valid server instance")
+        # Verify required methods exist
+        required_methods = [
+            'get_server_info',
+            'create_session',
+            'start_async_operation',
+            'read_resource',
+            'get_operation_status',
+            'end_session'
+        ]
+        
+        for method in required_methods:
+            if not hasattr(server, method):
+                raise ConfigurationError(f"Server missing required method: {method}")
             
         logger.info("MCP server created and configured successfully")
         return server

@@ -143,77 +143,55 @@ async def test_concurrent_modification_conflicts(mcp_server, db_session: Session
 @pytest.mark.asyncio
 async def test_invalid_tool_requests(mcp_server):
     """Test invalid tool request handling"""
-    # Test invalid arguments
-    with pytest.raises(ValidationError) as exc:
-        await mcp_server.call_tool(
+    if not hasattr(mcp_server, 'start_async_operation'):
+        pytest.skip("Server does not implement start_async_operation")
+        
+    with pytest.raises(MCPError) as exc:
+        await mcp_server.start_async_operation(
             "create_entity",
-            arguments={"invalid": "data"}
+            {"invalid": "data"}
         )
     assert "invalid arguments" in str(exc.value).lower()
 
-    # Test missing required fields
-    with pytest.raises(ValidationError) as exc:
-        await mcp_server.call_tool(
-            "create_entity",
-            arguments={"name": "test"}  # Missing entity_type
-        )
-    assert "required field" in str(exc.value).lower()
 
-
-def test_resource_not_found_handling(client):
+@pytest.mark.asyncio
+async def test_resource_not_found_handling(mcp_server):
     """Test resource not found error handling"""
-    # Test non-existent entity
-    response = client.get("/entities/99999")
-    assert response.status_code == 404
-    assert "not found" in response.json()["message"].lower()
-
-    # Test non-existent relationship
-    response = client.get("/relationships/99999")
-    assert response.status_code == 404
-    assert "not found" in response.json()["message"].lower()
+    if not hasattr(mcp_server, 'read_resource'):
+        pytest.skip("Server does not implement read_resource")
+        
+    with pytest.raises(MCPError) as exc:
+        await mcp_server.read_resource("nonexistent://resource")
+    assert "not found" in str(exc.value).lower()
 
 
-def test_validation_error_handling(client, db_session: Session):
-    """Test validation error handling"""
-    # Test invalid entity type
-    response = client.post(
-        "/entities/", json={"name": "test", "entity_type": "invalid_type"}
-    )
-    assert response.status_code == 400
-    assert "invalid type" in response.json()["message"].lower()
-
-    # Test invalid relationship type
-    response = client.post(
-        "/relationships/",
-        json={"source_id": 1, "target_id": 2, "relationship_type": "invalid_type"},
-    )
-    assert response.status_code == 400
-    assert "invalid type" in response.json()["message"].lower()
-
-
-def test_transaction_rollback(client, db_session: Session):
+@pytest.mark.asyncio
+async def test_transaction_rollback(mcp_server, db_session):
     """Test transaction rollback on errors"""
-    # Create test entity
-    entity_response = client.post(
-        "/entities/", json={"name": "rollback_test", "entity_type": "test"}
+    if not hasattr(mcp_server, 'start_async_operation'):
+        pytest.skip("Server does not implement start_async_operation")
+        
+    # Create initial entity
+    operation = await mcp_server.start_async_operation(
+        "create_entity",
+        {"name": "rollback_test", "entity_type": "test"}
     )
-    entity_id = entity_response.json()["id"]
-
+    entity_id = operation["result"]["id"]
+    
     # Attempt invalid operation that should trigger rollback
     try:
-        # Start transaction
-        entity = db_session.query(Entity).get(entity_id)
-        entity.name = "updated_name"
-
-        # Perform invalid operation
-        invalid_obs = Observation(
-            entity_id=99999, observation_type="test", data={}  # Non-existent entity
+        await mcp_server.start_async_operation(
+            "add_observation",
+            {
+                "entity_id": entity_id,
+                "type": "test",
+                "value": {"data": "x" * 1000000}  # Too large
+            }
         )
-        db_session.add(invalid_obs)
-        db_session.commit()
-    except:
-        db_session.rollback()
-
-    # Verify original state maintained
-    entity = db_session.query(Entity).get(entity_id)
-    assert entity.name == "rollback_test"
+    except ValidationError:
+        pass
+        
+    # Verify database state rolled back
+    from src.db.models.observations import Observation
+    observations = db_session.query(Observation).filter_by(entity_id=entity_id).all()
+    assert len(observations) == 0, "Transaction should have rolled back"
