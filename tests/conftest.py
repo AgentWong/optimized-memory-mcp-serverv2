@@ -144,9 +144,11 @@ class TestClient:
         """Initialize test client with FastMCP server instance."""
         from mcp.server.fastmcp import FastMCP
         
-        # Handle coroutine or async generator
-        if inspect.iscoroutine(server) or inspect.isasyncgen(server):
-            raise TypeError("Server must be an initialized FastMCP instance, not a coroutine or generator")
+        # If we got a coroutine, we need to await it
+        if inspect.iscoroutine(server):
+            raise TypeError("Server must be an initialized FastMCP instance, not a coroutine")
+        if inspect.isasyncgen(server):
+            raise TypeError("Server must be an initialized FastMCP instance, not an async generator")
             
         if not isinstance(server, FastMCP):
             raise TypeError(f"Server must be a FastMCP instance, got {type(server)}")
@@ -318,34 +320,22 @@ async def mcp_server():
 
     server = None
     try:
-        # Create and initialize the server
+        # Create and initialize server
         server = await create_server()
         
-        # Verify server type
-        if not isinstance(server, FastMCP):
-            raise TypeError("create_server() must return a FastMCP instance")
+        # Initialize with options if needed
+        if not getattr(server, '_initialized', False):
+            init_options = server.get_initialization_options()
+            await server.initialize(init_options)
             
-        # Initialize the server
-        init_options = server.get_initialization_options()
-        await server.initialize(init_options)
-        
-        return server  # Return the initialized server directly
-            
-    except Exception as e:
-        print(f"Error in mcp_server fixture: {e}")
+        return server
+    finally:
         if server:
             await server.cleanup()
-        raise
-
-    # Register cleanup
-    yield server
-    
-    if server:
-        await server.cleanup()
 
 
 @pytest.fixture
 async def client(mcp_server):
     """Create test client using the MCP server fixture."""
-    async with TestClient(await mcp_server) as client:
+    async with TestClient(mcp_server) as client:
         yield client
