@@ -308,7 +308,7 @@ class TestClient:
         return await self.server.end_session(session_id)
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 async def mcp_server():
     """Create MCP server instance for testing."""
     from src.main import create_server
@@ -320,19 +320,25 @@ async def mcp_server():
 
     server = None
     try:
-        # Create and initialize server
-        server = await create_server()  # This already handles initialization
+        # Create server instance
+        server = await create_server()
         if not isinstance(server, FastMCP):
             raise TypeError(f"Expected FastMCP instance, got {type(server)}")
 
-        yield server  # Use yield to ensure cleanup runs
+        # Initialize server
+        init_options = server.get_initialization_options()
+        await server.initialize(init_options)
+
+        # Return initialized server
+        yield server
 
     finally:
+        # Cleanup
         if server:
             try:
                 await server.cleanup()
             except Exception as cleanup_error:
-                print(f"Error during cleanup in finally: {cleanup_error}")
+                print(f"Error during cleanup: {cleanup_error}")
 
 
 @pytest.fixture
