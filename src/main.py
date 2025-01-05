@@ -101,8 +101,7 @@ def create_server() -> FastMCP:
         for module in tool_modules:
             tools = module.register_tools(mcp)
 
-        # Initialize the server
-        init_options = mcp.create_initialization_options()
+        # Initialize and run the server
         mcp.run()
 
         return mcp
@@ -208,7 +207,7 @@ def main() -> None:
                 logger.debug(
                     f"Registering tools from {module.__name__} ({i}/{len(tool_modules)})"
                 )
-                tools = module.register_tools(mcp)
+                module.register_tools(mcp)
 
                 if tools:
                     # Validate each tool
@@ -268,11 +267,11 @@ def main() -> None:
         shutdown()
     except MCPError as e:
         logger.error(f"MCP server error: {str(e)}")
-        await shutdown()
+        shutdown()
         raise
     except Exception as e:
         logger.error(f"Unexpected error: {str(e)}", exc_info=True)
-        await shutdown()
+        shutdown()
         raise
 
 
