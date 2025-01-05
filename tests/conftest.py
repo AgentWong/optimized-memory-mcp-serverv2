@@ -308,8 +308,8 @@ class TestClient:
         return await self.server.end_session(session_id)
 
 
-@pytest.fixture(scope="function")
-async def mcp_server():
+@pytest.fixture
+def mcp_server(event_loop):
     """Create MCP server instance for testing."""
     from src.main import create_server
     from mcp.server.fastmcp import FastMCP
@@ -318,35 +318,31 @@ async def mcp_server():
     os.environ["DATABASE_URL"] = "sqlite:///:memory:"
     os.environ["TESTING"] = "true"
 
-    server = None
-    try:
-        # Create and initialize server
-        server = await create_server()
-        if not isinstance(server, FastMCP):
-            raise TypeError(f"Expected FastMCP instance, got {type(server)}")
+    async def _create_server():
+        server = None
+        try:
+            # Create and initialize server
+            server = await create_server()
+            if not isinstance(server, FastMCP):
+                raise TypeError(f"Expected FastMCP instance, got {type(server)}")
 
-        # Initialize if needed
-        if not getattr(server, "_initialized", False):
+            # Initialize if needed
             init_options = server.get_initialization_options()
             await server.initialize(init_options)
             setattr(server, "_initialized", True)
 
-        yield server
+            return server
 
-        # Cleanup after yield
-        if server:
-            try:
-                await server.cleanup()
-            except Exception as e:
-                print(f"Error during cleanup: {e}")
+        except Exception as e:
+            if server:
+                try:
+                    await server.cleanup()
+                except Exception as cleanup_error:
+                    print(f"Error during cleanup after error: {cleanup_error}")
+            raise
 
-    except Exception as e:
-        if server:
-            try:
-                await server.cleanup()
-            except Exception as cleanup_error:
-                print(f"Error during cleanup after error: {cleanup_error}")
-        raise
+    # Run the async creation in the event loop and return the actual server instance
+    return event_loop.run_until_complete(_create_server())
 
 
 @pytest.fixture
