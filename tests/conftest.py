@@ -7,9 +7,11 @@ from sqlalchemy import create_engine
 from src.utils.errors import MCPError
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
-
+from src.main import create_server
 from src.db.models.base import Base
 from src.config import Config
+from mcp.client.session import ClientSession
+from mcp.client.stdio import stdio_client, StdioServerParameters
 
 
 @pytest.fixture(autouse=True)
@@ -141,23 +143,24 @@ def test_observation(db_session, test_entity):
 
 
 @pytest.fixture
-async def client():
-    """Create MCP client connected to test server."""
-    from mcp.client.session import ClientSession
-    from mcp.client.stdio import stdio_client, StdioServerParameters
+def mcp_server():
+    """Create MCP server instance for testing."""
+    return create_server()
 
+@pytest.fixture
+def client():
+    """Create MCP client connected to test server."""
     server_params = StdioServerParameters(
         command="python",
-        args=["-m", "src.main"],  # Assuming this is how we run the server
+        args=["-m", "src.main"],
         env={
             "DATABASE_URL": "sqlite:///:memory:",
             "TESTING": "true",
             "LOG_LEVEL": "ERROR"
         }
     )
-
-    async with stdio_client(server_params) as (read_stream, write_stream):
-        async with ClientSession(read_stream, write_stream) as session:
-            # Initialize the connection
-            await session.initialize()
-            yield session
+    
+    with stdio_client(server_params) as (read_stream, write_stream):
+        with ClientSession(read_stream, write_stream) as session:
+            session.initialize()
+            return session

@@ -35,7 +35,7 @@ signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
 
-async def create_server() -> FastMCP:
+def create_server() -> FastMCP:
     """Create and configure the MCP server instance.
     
     Returns:
@@ -99,11 +99,11 @@ async def create_server() -> FastMCP:
         ]
 
         for module in tool_modules:
-            await module.register_tools(mcp)
+            tools = module.register_tools(mcp)
 
         # Initialize the server
         init_options = mcp.get_initialization_options()
-        await mcp.initialize(init_options)
+        mcp.initialize(init_options)
         setattr(mcp, "_initialized", True)
 
         return mcp
