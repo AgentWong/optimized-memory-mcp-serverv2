@@ -46,6 +46,15 @@ class Observation(Base, BaseModel, TimestampMixin):
         
         # Validate entity_id
         entity_id = kwargs.get('entity_id')
+        if entity_id is None:
+            from sqlalchemy.exc import IntegrityError
+            raise IntegrityError(
+                "INSERT INTO observations (entity_id) VALUES (NULL)",
+                None,
+                Exception("entity_id cannot be null"),
+                orig=Exception("NOT NULL constraint failed: observations.entity_id")
+            )
+            
         if not isinstance(entity_id, int):
             from sqlalchemy.exc import IntegrityError
             raise IntegrityError(
@@ -60,28 +69,11 @@ class Observation(Base, BaseModel, TimestampMixin):
             raise IntegrityError(
                 "INSERT INTO observations (entity_id) VALUES (?)",
                 [entity_id],
-                Exception("entity_id must be positive"),
+                Exception("entity_id must be a positive integer"),
                 orig=Exception("CHECK constraint failed: entity_id > 0")
             )
             
-        # Validate entity exists early
-        from sqlalchemy import create_engine
-        from sqlalchemy.orm import sessionmaker
-        from .entities import Entity
-        
-        engine = create_engine('sqlite:///:memory:')
-        Session = sessionmaker(bind=engine)
-        session = Session()
-        
-        entity = session.query(Entity).get(entity_id)
-        if not entity:
-            from sqlalchemy.exc import IntegrityError
-            raise IntegrityError(
-                "INSERT INTO observations (entity_id) VALUES (?)",
-                [entity_id],
-                Exception(f"Referenced entity_id={entity_id} does not exist"),
-                orig=Exception("FOREIGN KEY constraint failed")
-            )
+        # Entity validation will be handled by foreign key constraint
         
         # Validate type
         obs_type = kwargs.get('type')
@@ -113,7 +105,17 @@ class Observation(Base, BaseModel, TimestampMixin):
         # Initialize base class to get session
         super().__init__(**kwargs)
 
-        # Validate entity exists
+        # Always validate entity_id type and value
+        if not isinstance(self.entity_id, int) or self.entity_id <= 0:
+            from sqlalchemy.exc import IntegrityError
+            raise IntegrityError(
+                "INSERT INTO observations (entity_id) VALUES (?)",
+                [self.entity_id],
+                Exception("entity_id must be a positive integer"),
+                orig=Exception("CHECK constraint failed: entity_id > 0")
+            )
+
+        # Validate entity exists if we have a session
         from sqlalchemy import inspect
         if inspect(self).session:
             session = inspect(self).session
@@ -127,14 +129,23 @@ class Observation(Base, BaseModel, TimestampMixin):
                     Exception(f"Referenced entity_id={self.entity_id} does not exist"),
                     orig=Exception("FOREIGN KEY constraint failed")
                 )
+
+        # Always validate entity_id
+        if not isinstance(self.entity_id, int):
+            from sqlalchemy.exc import IntegrityError
+            raise IntegrityError(
+                "Invalid entity_id type",
+                [self.entity_id],
+                Exception("entity_id must be an integer"),
+                orig=Exception("CHECK constraint failed: entity_id type")
+            )
             
-        # Always raise IntegrityError for invalid entity_id
-        if not isinstance(self.entity_id, int) or self.entity_id <= 0:
+        if self.entity_id <= 0:
             from sqlalchemy.exc import IntegrityError
             raise IntegrityError(
                 "Invalid entity_id value",
                 [self.entity_id],
-                Exception("entity_id must be a positive integer"),
+                Exception("entity_id must be positive"),
                 orig=Exception("CHECK constraint failed: entity_id > 0")
             )
 
