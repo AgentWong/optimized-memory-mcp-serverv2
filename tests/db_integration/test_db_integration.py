@@ -1,8 +1,5 @@
 """
 Integration tests for database operations.
-"""
-
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError, InvalidRequestError
 
 Tests the core database integration patterns required by MCP:
 - Entity relationship cascade behavior
@@ -14,6 +11,8 @@ Tests the core database integration patterns required by MCP:
 Each test verifies proper database integration and data integrity
 across the MCP server implementation.
 """
+
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError, InvalidRequestError
 
 import pytest
 from sqlalchemy.orm import Session

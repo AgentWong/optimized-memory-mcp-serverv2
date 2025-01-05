@@ -38,7 +38,13 @@ class Observation(Base, BaseModel, TimestampMixin):
             kwargs["type"] = "state"  # Default type
         if "observation_type" not in kwargs:
             kwargs["observation_type"] = "default"  # Default observation type
+            
+        # Validate entity_id before calling super()
+        if "entity_id" not in kwargs or not kwargs["entity_id"]:
+            raise ValueError("entity_id is required")
+            
         super().__init__(**kwargs)
+        
         if self.type not in self.VALID_TYPES:
             raise ValueError(f"Invalid observation type: {self.type}")
         if not self.observation_type or not self.observation_type.strip():

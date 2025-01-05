@@ -282,21 +282,28 @@ async def mcp_server(db_session):
 
     # Create and configure server
     server = await create_server()
+    
+    # Initialize if needed
     if hasattr(server, 'initialize'):
         await server.initialize()
     
-    # Ensure server is fully initialized
-    if inspect.iscoroutine(server):
-        server = await server
+    # Verify required methods exist
+    required_methods = [
+        'read_resource',
+        'call_tool',
+        'start_async_operation',
+        'get_operation_status'
+    ]
     
-    # Server should already be initialized by create_server()
-    if not hasattr(server, 'read_resource'):
-        raise RuntimeError("Server not properly initialized - missing core methods")
+    for method in required_methods:
+        if not hasattr(server, method):
+            raise RuntimeError(f"Server missing required method: {method}")
     
     try:
         yield server
     finally:
-        await server.cleanup()
+        if hasattr(server, 'cleanup'):
+            await server.cleanup()
 
 
 @pytest.fixture

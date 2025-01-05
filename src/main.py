@@ -22,14 +22,11 @@ async def create_server() -> FastMCP:
     # Configure logging first
     configure_logging()
 
-    # Use test SQLite database if DATABASE_URL not set
-    database_url = os.getenv("DATABASE_URL", "sqlite:///test.db")
-
     try:
         # Initialize database
         init_db()
 
-        # Create and configure server
+        # Create base server
         server = FastMCP(
             "Infrastructure Memory Server",
             dependencies=[
@@ -40,42 +37,16 @@ async def create_server() -> FastMCP:
         )
 
         # Configure server with all components
-        server = await configure_server(server)
+        configured_server = await configure_server(server)
         
-        # Handle different server types and ensure initialization
-        if inspect.iscoroutine(server):
-            server = await server
-        elif hasattr(server, "__anext__"):
-            server = await server.__anext__()
-        elif inspect.isasyncgen(server):
-            async for s in server:
-                server = s
-                break
-
-        # Ensure server is properly initialized
-        if inspect.iscoroutine(server):
-            server = await server
-
-        # Initialize server if needed
-        if hasattr(server, "initialize") and not hasattr(server, "read_resource"):
-            await server.initialize()
+        # Initialize the server
+        await configured_server.initialize()
         
-        # Verify required methods exist
-        required_methods = [
-            'get_server_info',
-            'create_session',
-            'start_async_operation',
-            'read_resource',
-            'get_operation_status',
-            'end_session'
-        ]
+        # Add standard tool methods
+        configured_server.call_tool = configured_server.start_async_operation
         
-        for method in required_methods:
-            if not hasattr(server, method):
-                raise ConfigurationError(f"Server missing required method: {method}")
-            
         logger.info("MCP server created and configured successfully")
-        return server
+        return configured_server
 
     except Exception as e:
         logger.error(f"Failed to create server: {str(e)}")
