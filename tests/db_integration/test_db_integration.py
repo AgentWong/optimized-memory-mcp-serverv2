@@ -172,7 +172,7 @@ def test_concurrent_transactions(mcp_server):
     operations = []
     for i in range(3):  # Try multiple concurrent updates
         operations.append(
-            await mcp_server.start_async_operation(
+            mcp_server.start_async_operation(
                 "update_entity", {"id": entity_id, "name": f"modified_concurrent_{i}"}
             )
         )

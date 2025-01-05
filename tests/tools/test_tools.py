@@ -17,7 +17,7 @@ from src.utils.errors import MCPError
 
 
 @pytest.fixture
-async def db_session():
+def db_session():
     """Provide a database session for testing"""
     session = next(get_db())
     try:
@@ -29,11 +29,10 @@ async def db_session():
 def test_create_entity_tool(mcp_server):
     """Test create_entity tool"""
     # Ensure server is initialized
-    if not getattr(mcp_server, "_initialized", False):
-        init_options = mcp_server.get_initialization_options()
-        await mcp_server.initialize(init_options)
+    if not hasattr(mcp_server, "_initialized") or not mcp_server._initialized:
+        mcp_server.initialize()
     
-    result = await mcp_server.call_tool(
+    result = mcp_server.call_tool(
         "create_entity",
         {
             "name": "test_entity",
@@ -49,17 +48,16 @@ def test_create_entity_tool(mcp_server):
     assert "meta_data" in result, "Missing metadata"
 
 
-@pytest.mark.asyncio
-async def test_add_observation_tool(mcp_server):
+def test_add_observation_tool(mcp_server):
     """Test add_observation tool"""
     # Create entity first
-    entity_result = await mcp_server.call_tool(
+    entity_result = mcp_server.call_tool(
         "create_entity", {"name": "obs_test_entity", "entity_type": "test"}
     )
     entity_id = entity_result["id"]
 
     # Test add_observation
-    obs_result = await mcp_server.call_tool(
+    obs_result = mcp_server.call_tool(
         "add_observation",
         {
             "entity_id": entity_id,
@@ -74,10 +72,9 @@ async def test_add_observation_tool(mcp_server):
     assert "created_at" in obs_result, "Missing creation timestamp"
 
 
-@pytest.mark.asyncio
-async def test_register_provider_tool(mcp_server):
+def test_register_provider_tool(mcp_server):
     """Test register_provider_resource tool"""
-    result = await mcp_server.call_tool(
+    result = mcp_server.call_tool(
         "register_provider_resource",
         {
             "provider": "test_provider",
@@ -94,10 +91,9 @@ async def test_register_provider_tool(mcp_server):
     assert "schema_version" in result, "Result missing schema version"
 
 
-@pytest.mark.asyncio
-async def test_register_ansible_module_tool(mcp_server):
+def test_register_ansible_module_tool(mcp_server):
     """Test register_ansible_module tool"""
-    result = await mcp_server.call_tool(
+    result = mcp_server.call_tool(
         "register_ansible_module",
         {
             "collection": "test.collection",
@@ -114,19 +110,18 @@ async def test_register_ansible_module_tool(mcp_server):
     assert "version" in result, "Result missing version"
 
 
-@pytest.mark.asyncio
-async def test_tool_error_handling(mcp_server):
+def test_tool_error_handling(mcp_server):
     """Test tool error handling"""
     # Test invalid tool
     with pytest.raises(MCPError) as exc:
-        await mcp_server.call_tool("invalid_tool", {})
+        mcp_server.call_tool("invalid_tool", {})
     assert exc.value.code == "TOOL_NOT_FOUND"
     assert "tool not found" in str(exc.value).lower()
     assert exc.value.details is not None
 
     # Test missing required arguments - comprehensive validation
     with pytest.raises(MCPError) as exc:
-        await mcp_server.call_tool(
+        mcp_server.call_tool(
             "create_entity", {"invalid_arg": "value"}  # Missing required args
         )
     error = exc.value
@@ -181,7 +176,7 @@ async def test_tool_error_handling(mcp_server):
 
     # Test validation error - comprehensive field validation
     with pytest.raises(MCPError) as exc:
-        await mcp_server.call_tool(
+        mcp_server.call_tool(
             "create_entity", {"name": "a" * 256, "entity_type": "test"}  # Name too long
         )
     error = exc.value
@@ -218,15 +213,14 @@ async def test_tool_error_handling(mcp_server):
     ), "Should identify correct constraint"
 
 
-@pytest.mark.asyncio
-async def test_tool_operation_status(mcp_server):
+def test_tool_operation_status(mcp_server):
     """Test async operation status handling"""
-    # Execute tool with async tracking and timeout
-    result = await mcp_server.call_tool(
+    # Execute tool with tracking and timeout
+    result = mcp_server.call_tool(
         "create_entity",
-        {"name": "status_test", "entity_type": "test"},
+        arguments={"name": "status_test", "entity_type": "test"},
         track_status=True,
-        timeout=5.0,  # 5 second timeout
+        timeout=5.0  # 5 second timeout
     )
 
     # Verify result structure

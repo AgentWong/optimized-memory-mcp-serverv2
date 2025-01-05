@@ -20,9 +20,9 @@ from src.db.models.base import Base
 
 
 @pytest.fixture
-async def client():
+def client():
     """Create test client"""
-    server = await create_server()
+    server = create_server()
     return server
 
 
@@ -52,8 +52,7 @@ def test_entities_list_resource(mcp_server):
     assert "timestamp" in result, "Result missing 'timestamp'"
 
 
-@pytest.mark.asyncio
-async def test_entity_detail_resource(mcp_server, db_session):
+def test_entity_detail_resource(mcp_server, db_session):
     """Test entities://{id} resource"""
     if not hasattr(mcp_server, "start_async_operation"):
         pytest.skip("Server does not implement start_async_operation")
@@ -61,7 +60,7 @@ async def test_entity_detail_resource(mcp_server, db_session):
         pytest.skip("Server does not implement read_resource")
 
     # Create test entity first
-    operation = await mcp_server.start_async_operation(
+    operation = mcp_server.start_async_operation(
         "create_entity", {"name": "test_entity", "entity_type": "test"}
     )
     assert operation["status"] == "completed", "Entity creation failed"
@@ -69,20 +68,19 @@ async def test_entity_detail_resource(mcp_server, db_session):
     assert entity_id, "No entity ID returned"
 
     # Test resource
-    result = await mcp_server.read_resource(f"entities://{entity_id}")
+    result = mcp_server.read_resource(f"entities://{entity_id}")
     assert isinstance(result, dict), "Result should be a dictionary"
     assert "data" in result, "Result missing 'data' field"
     assert result["data"]["name"] == "test_entity", "Entity name mismatch"
     assert result["data"]["id"] == entity_id, "Entity ID mismatch"
 
 
-@pytest.mark.asyncio
-async def test_providers_resource(mcp_server):
+def test_providers_resource(mcp_server):
     """Test providers://{provider}/resources resource"""
     if not hasattr(mcp_server, "read_resource"):
         pytest.skip("Server does not implement read_resource")
 
-    result = await mcp_server.read_resource(
+    result = mcp_server.read_resource(
         "providers://test/resources", {"version": "latest"}
     )
     assert isinstance(result, dict), "Result should be a dictionary"
@@ -90,13 +88,12 @@ async def test_providers_resource(mcp_server):
     assert isinstance(result["data"], list), "Provider resources should be a list"
 
 
-@pytest.mark.asyncio
-async def test_ansible_collections_resource(mcp_server):
+def test_ansible_collections_resource(mcp_server):
     """Test ansible://collections resource"""
     if not hasattr(mcp_server, "read_resource"):
         pytest.skip("Server does not implement read_resource")
 
-    result = await mcp_server.read_resource("ansible://collections")
+    result = mcp_server.read_resource("ansible://collections")
     assert isinstance(result, dict), "Result should be a dictionary"
     assert "data" in result, "Result missing 'data' field"
     assert isinstance(result["data"], list), "Collections should be a list"
@@ -109,7 +106,7 @@ def test_resource_error_handling(mcp_server):
 
     # Test invalid resource path - comprehensive validation
     with pytest.raises(MCPError) as exc:
-        await mcp_server.read_resource("invalid://resource")
+        mcp_server.read_resource("invalid://resource")
     error = exc.value
 
     # Additional validation of error structure
@@ -135,7 +132,7 @@ def test_resource_error_handling(mcp_server):
 
     # Test invalid parameters - comprehensive validation
     with pytest.raises(MCPError) as exc:
-        await mcp_server.read_resource("entities://list", {"invalid_param": "value"})
+        mcp_server.read_resource("entities://list", {"invalid_param": "value"})
     error = exc.value
     # Validate error code and message
     assert error.code == "INVALID_PARAMETERS", "Incorrect error code"
@@ -174,12 +171,12 @@ def test_resource_pagination(mcp_server):
     # Create multiple test entities
     if hasattr(mcp_server, "start_async_operation"):
         for i in range(5):
-            await mcp_server.start_async_operation(
+            mcp_server.start_async_operation(
                 "create_entity", {"name": f"test_entity_{i}", "entity_type": "test"}
             )
 
     # Test first page
-    result = await mcp_server.read_resource(
+    result = mcp_server.read_resource(
         "entities://list", {"page": 1, "per_page": 2}
     )
     assert isinstance(result["data"], list)
@@ -189,7 +186,7 @@ def test_resource_pagination(mcp_server):
 
     # Verify next page
     if len(result["data"]) == 2:
-        next_page = await mcp_server.read_resource(
+        next_page = mcp_server.read_resource(
             "entities://list", {"page": 2, "per_page": 2}
         )
         assert isinstance(next_page["data"], list)
