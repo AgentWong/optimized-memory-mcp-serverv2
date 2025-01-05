@@ -144,7 +144,7 @@ class TestClient:
         """Initialize test client with FastMCP server instance."""
         from mcp.server.fastmcp import FastMCP
         if not isinstance(server, FastMCP):
-            raise TypeError("Server must be a FastMCP instance")
+            raise TypeError(f"Server must be a FastMCP instance, got {type(server)}")
         self.server = server
 
     async def __aenter__(self):
@@ -310,69 +310,23 @@ async def mcp_server():
     os.environ["DATABASE_URL"] = "sqlite:///:memory:"
     os.environ["TESTING"] = "true"
 
+    server = None
     try:
-        # Create and configure server
         server = await create_server()
         if not isinstance(server, FastMCP):
             raise TypeError("create_server() must return a FastMCP instance")
-
-        # Initialize the server
-        init_options = server.get_initialization_options()
-        await server.initialize(init_options)
-
-        # Register resources and tools
-        from src.resources import (
-            entities, relationships, observations,
-            providers, ansible, versions
-        )
-        
-        resource_modules = [
-            entities, relationships, observations,
-            providers, ansible, versions
-        ]
-        
-        for module in resource_modules:
-            if hasattr(module, 'register_resources'):
-                module.register_resources(server)
-
-        # Register tools
-        from src.tools import (
-            entities as entity_tools,
-            relationships as relationship_tools,
-            observations as observation_tools,
-            providers as provider_tools,
-            ansible as ansible_tools,
-            analysis as analysis_tools
-        )
-        
-        tool_modules = [
-            entity_tools, relationship_tools,
-            observation_tools, provider_tools,
-            ansible_tools, analysis_tools
-        ]
-        
-        for module in tool_modules:
-            if hasattr(module, 'register_tools'):
-                await module.register_tools(server)
-
+            
         return server
 
     except Exception as e:
         print(f"Error in mcp_server fixture: {e}")
+        if server and hasattr(server, 'cleanup'):
+            await server.cleanup()
         raise
-
-    finally:
-        # Cleanup after tests
-        if 'server' in locals():
-            if hasattr(server, 'cleanup'):
-                await server.cleanup()
-            if hasattr(server, 'close'):
-                await server.close()
 
 
 @pytest.fixture
 async def client(mcp_server):
     """Create test client using the MCP server fixture."""
-    server = await mcp_server
-    async with TestClient(server) as client:
+    async with TestClient(await mcp_server) as client:
         yield client
