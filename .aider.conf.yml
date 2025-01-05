@@ -125,7 +125,7 @@ upgrade: false
 read:
   - .prompts/docs
   - .prompts/rules
-  - .prompts/user_input # pytest_short_error_summary.txt
+  #- .prompts/user_input # pytest_short_error_summary.txt
   #- .prompts/rules/bug-fix-template.xml
   #- .prompts/rules/task-generation.xml
   #- .prompts/rules/repo-exploration.xml
