@@ -26,8 +26,7 @@ async def db_session():
         session.close()
 
 
-@pytest.mark.asyncio
-async def test_create_entity_tool(mcp_server):
+def test_create_entity_tool(mcp_server):
     """Test create_entity tool"""
     # Ensure server is initialized
     if not getattr(mcp_server, "_initialized", False):

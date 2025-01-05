@@ -199,7 +199,7 @@ from src.db.connection import get_db
 async def test_entity_creation(db_session, mcp_server):
     """Test basic entity creation and validation."""
     # Create entity through MCP tool
-    result = await mcp_server.call_tool(
+    result = mcp_server.call_tool(
         "create_entity",
         {"name": "test_entity", "entity_type": "test_type", "meta_data": {}},
     )

@@ -39,10 +39,9 @@ def db_session():
         Base.metadata.create_all(bind=session.bind)
 
 
-@pytest.mark.asyncio
-async def test_entities_list_resource(mcp_server):
+def test_entities_list_resource(mcp_server):
     """Test entities://list resource using FastMCP"""
-    result = await mcp_server.read_resource(
+    result = mcp_server.read_resource(
         "entities://list",
         {"page": 1, "per_page": 10, "type": None, "created_after": None},
     )
@@ -103,8 +102,7 @@ async def test_ansible_collections_resource(mcp_server):
     assert isinstance(result["data"], list), "Collections should be a list"
 
 
-@pytest.mark.asyncio
-async def test_resource_error_handling(mcp_server):
+def test_resource_error_handling(mcp_server):
     """Test resource error handling"""
     if not hasattr(mcp_server, "read_resource"):
         pytest.skip("Server does not implement read_resource")
@@ -168,8 +166,7 @@ async def test_resource_error_handling(mcp_server):
     ), "Should list provided parameters"
 
 
-@pytest.mark.asyncio
-async def test_resource_pagination(mcp_server):
+def test_resource_pagination(mcp_server):
     """Test resource pagination"""
     if not hasattr(mcp_server, "read_resource"):
         pytest.skip("Server does not implement read_resource")

@@ -47,11 +47,10 @@ def db_session():
         session.close()
 
 
-@pytest.mark.asyncio
-async def test_database_constraint_violations(mcp_server, db_session: Session):
+def test_database_constraint_violations(mcp_server, db_session: Session):
     """Test database constraint violation handling"""
     # Test duplicate entity name
-    result = await mcp_server.call_tool(
+    result = mcp_server.call_tool(
         "create_entity", arguments={"name": "unique_entity", "entity_type": "test"}
     )
     assert result is not None
@@ -60,7 +59,7 @@ async def test_database_constraint_violations(mcp_server, db_session: Session):
 
     # Attempt duplicate
     with pytest.raises(ValidationError) as exc:
-        await mcp_server.call_tool(
+        mcp_server.call_tool(
             "create_entity", arguments={"name": "unique_entity", "entity_type": "test"}
         )
     assert exc.value.code == "VALIDATION_ERROR"
@@ -68,11 +67,10 @@ async def test_database_constraint_violations(mcp_server, db_session: Session):
     assert "name" in exc.value.details, "Error details should specify field"
 
 
-@pytest.mark.asyncio
-async def test_invalid_relationship_creation(mcp_server, db_session: Session):
+def test_invalid_relationship_creation(mcp_server, db_session: Session):
     """Test invalid relationship handling"""
     # Create test entity
-    result = await mcp_server.call_tool(
+    result = mcp_server.call_tool(
         "create_entity", arguments={"name": "test_entity", "entity_type": "test"}
     )
     entity_id = result["id"]
@@ -90,11 +88,10 @@ async def test_invalid_relationship_creation(mcp_server, db_session: Session):
     assert "self-referential" in str(exc.value).lower()
 
 
-@pytest.mark.asyncio
-async def test_invalid_observation_data(mcp_server, db_session: Session):
+def test_invalid_observation_data(mcp_server, db_session: Session):
     """Test invalid observation data handling"""
     # Create test entity
-    result = await mcp_server.call_tool(
+    result = mcp_server.call_tool(
         "create_entity", arguments={"name": "obs_test_entity", "entity_type": "test"}
     )
     entity_id = result["id"]
@@ -112,8 +109,7 @@ async def test_invalid_observation_data(mcp_server, db_session: Session):
     assert "invalid data" in str(exc.value).lower()
 
 
-@pytest.mark.asyncio
-async def test_concurrent_modification_conflicts(mcp_server, db_session: Session):
+def test_concurrent_modification_conflicts(mcp_server, db_session: Session):
     """Test concurrent modification handling"""
     # Create test entity
     result = await mcp_server.call_tool(
@@ -144,8 +140,7 @@ async def test_concurrent_modification_conflicts(mcp_server, db_session: Session
         session2.close()
 
 
-@pytest.mark.asyncio
-async def test_invalid_tool_requests(mcp_server):
+def test_invalid_tool_requests(mcp_server):
     """Test invalid tool request handling"""
     # Test invalid tool name
     with pytest.raises(MCPError) as exc:

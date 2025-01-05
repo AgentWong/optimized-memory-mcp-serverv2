@@ -19,8 +19,8 @@ from src.utils.errors import MCPError
 
 def test_server_info_endpoint(client):
     """Test server info matches Claude Desktop requirements"""
-    # Initialize will have already been called in the fixture
-    result = client.initialize()
+    # Get server info directly since initialize was called in fixture
+    result = client.get_server_info()
 
     # Verify required fields from initialize result
     assert result.serverInfo.name, "Server info missing 'name' field"

@@ -154,4 +154,5 @@ def client(mcp_server):
     server_params = StdioServerParameters(command="python", args=["-m", "mcp", "run"])
     read, write = stdio_client(server_params)
     client = ClientSession(read, write)
+    client.initialize()  # Initialize synchronously
     return client
