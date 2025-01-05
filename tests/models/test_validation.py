@@ -62,20 +62,31 @@ def test_relationship_required_fields(db_session, mcp_server):
 
 def test_observation_required_fields(db_session, mcp_server):
     """Test that observation required fields are enforced"""
+    # Create test entity first
     entity = Entity(name="test_entity", entity_type="test_type")
     db_session.add(entity)
     db_session.commit()
 
-    # Missing entity_id
+    # Test missing entity_id - should raise IntegrityError
     with pytest.raises(IntegrityError):
-        obs = Observation(observation_type="test_obs", data={"test": "data"})
+        obs = Observation(
+            type="test",
+            observation_type="test_obs",
+            value={"test": "data"},
+            meta_data={}
+        )
         db_session.add(obs)
-        db_session.commit()
+        db_session.commit()  # This should raise IntegrityError
     db_session.rollback()
 
-    # Missing observation_type
+    # Test missing observation_type
     with pytest.raises(IntegrityError):
-        obs = Observation(entity_id=entity.id, data={"test": "data"})
+        obs = Observation(
+            entity_id=entity.id,
+            type="test",
+            value={"test": "data"},
+            meta_data={}
+        )
         db_session.add(obs)
         db_session.commit()
     db_session.rollback()
@@ -87,27 +98,32 @@ def test_relationship_foreign_keys(db_session, mcp_server):
     db_session.add(entity)
     db_session.commit()
 
-    # Invalid target_id
+    # Invalid target_id - should raise IntegrityError
     with pytest.raises(IntegrityError):
         rel = Relationship(
+            entity_id=entity.id,
             source_id=entity.id,
             target_id=99999,  # Non-existent ID
+            type="depends_on",
             relationship_type="test_rel",
+            meta_data={}
         )
         db_session.add(rel)
-        db_session.commit()
+        db_session.commit()  # This should raise IntegrityError
     db_session.rollback()
 
 
 def test_observation_foreign_keys(db_session, mcp_server):
     """Test that observation foreign keys are enforced"""
-    # Invalid entity_id
+    # Invalid entity_id - should raise IntegrityError
     with pytest.raises(IntegrityError):
         obs = Observation(
             entity_id=99999,  # Non-existent ID
+            type="test",
             observation_type="test_obs",
-            data={"test": "data"},
+            value={"test": "data"},
+            meta_data={}
         )
         db_session.add(obs)
-        db_session.commit()
+        db_session.commit()  # This should raise IntegrityError
     db_session.rollback()

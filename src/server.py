@@ -70,32 +70,49 @@ async def configure_server(server: FastMCP) -> FastMCP:
         register_ansible_resources(server)
         register_version_resources(server)
 
-        # Register all tools with error handling
-        try:
-            # Register tools and store results with error handling
-            tool_registrations = [
-                ("entity", register_entity_tools),
-                ("relationship", register_relationship_tools), 
-                ("observation", register_observation_tools),
-                ("provider", register_provider_tools),
-                ("ansible", register_ansible_tools),
-                ("analysis", register_analysis_tools)
-            ]
-            
-            tools = []
-            for tool_type, register_fn in tool_registrations:
-                try:
-                    new_tools = await register_fn(server)
-                    tools.extend(new_tools)
-                    logger.info(f"Registered {len(new_tools)} {tool_type} tools")
-                except Exception as e:
-                    logger.error(f"Failed to register {tool_type} tools: {str(e)}")
-                    raise ConfigurationError(f"Failed to register {tool_type} tools: {str(e)}")
-            
-            # Store registered tools
-            for tool in tools:
-                server._tools[tool.name] = tool
-                logger.debug(f"Stored tool: {tool.name}")
+        # Import registration functions
+        from .resources import (
+            entities, relationships, observations, 
+            providers, ansible, versions
+        )
+        from .tools import (
+            entities as entity_tools,
+            relationships as relationship_tools,
+            observations as observation_tools,
+            providers as provider_tools,
+            ansible as ansible_tools,
+            analysis as analysis_tools
+        )
+
+        # Register all resources
+        resources = [
+            entities.register_resources(server),
+            relationships.register_resources(server),
+            observations.register_resources(server),
+            providers.register_resources(server),
+            ansible.register_resources(server),
+            versions.register_resources(server)
+        ]
+        
+        # Register all tools
+        tool_modules = [
+            entity_tools,
+            relationship_tools,
+            observation_tools,
+            provider_tools,
+            ansible_tools,
+            analysis_tools
+        ]
+        
+        for module in tool_modules:
+            try:
+                tools = await module.register_tools(server)
+                for tool in tools:
+                    server._tools[tool.__name__] = tool
+                logger.info(f"Registered tools from {module.__name__}")
+            except Exception as e:
+                logger.error(f"Failed to register tools from {module.__name__}: {str(e)}")
+                raise ConfigurationError(f"Tool registration failed: {str(e)}")
         except Exception as e:
             logger.error(f"Failed to register tools: {str(e)}")
             raise ConfigurationError(f"Tool registration failed: {str(e)}")

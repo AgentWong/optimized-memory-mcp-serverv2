@@ -42,10 +42,16 @@ async def create_server() -> FastMCP:
         # Initialize the server
         await server.initialize()
 
-        # Add required methods
-        server.read_resource = server.get_resource
-        server.call_tool = server.start_async_operation
-        
+        # Add required methods if not already present
+        if not hasattr(server, 'read_resource'):
+            server.read_resource = server.get_resource
+        if not hasattr(server, 'call_tool'):
+            server.call_tool = server.start_async_operation
+        if not hasattr(server, 'start_async_operation'):
+            async def start_async_operation(tool_name: str, arguments: dict = None):
+                return await server.call_tool(tool_name, arguments or {})
+            server.start_async_operation = start_async_operation
+            
         logger.info("MCP server created and configured successfully")
         return server
 
